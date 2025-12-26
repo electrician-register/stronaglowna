@@ -202,7 +202,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const plikiString = plikUrls.join(',');
 
   const { error } = await supabase
-    .from('permissions')
+    .from('Tabela elektrykow')
     .insert([{
       imie,
       nazwisko,
