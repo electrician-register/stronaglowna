@@ -7,7 +7,6 @@ https://twoja-domena.pl-->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logowanie Google i Email</title>
@@ -16,12 +15,16 @@ https://twoja-domena.pl-->
     body {
       font-family: Arial, sans-serif;
     }
+
+    /* Ikona logowania */
     .login-button {
       position: fixed;
       top: 20px;
       right: 20px;
       cursor: pointer;
     }
+
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -31,6 +34,7 @@ https://twoja-domena.pl-->
       align-items: center;
       z-index: 999;
     }
+
     .modal-content {
       background: #fff;
       padding: 30px;
@@ -38,6 +42,7 @@ https://twoja-domena.pl-->
       text-align: center;
       width: 300px;
     }
+
     .modal-content input,
     .modal-content button {
       width: 100%;
@@ -46,8 +51,15 @@ https://twoja-domena.pl-->
       font-size: 16px;
       cursor: pointer;
     }
+
     .google-button {
       background: #4285F4;
+      color: #fff;
+      border: none;
+    }
+
+    .email-button {
+      background: #555;
       color: #fff;
       border: none;
     }
@@ -77,7 +89,7 @@ https://twoja-domena.pl-->
       Kontynuuj z Google
     </button>
 
-    <button class="google-button" onclick="loginWithEmail()">
+    <button class="email-button" onclick="loginWithEmail()">
       Zaloguj się e-mailem
     </button>
   </div>
@@ -85,13 +97,19 @@ https://twoja-domena.pl-->
 
 <script>
 /* ================= SUPABASE ================= */
-const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co";
+const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
-const supabase = supabaseJs.createClient(supabaseUrl, supabaseKey);
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 /* ================= MODAL ================= */
 function openModal() {
-  document.getElementById('loginModal').style.display = 'flex';
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) {
+      alert('Jesteś już zalogowany');
+      return;
+    }
+    document.getElementById('loginModal').style.display = 'flex';
+  });
 }
 
 window.onclick = e => {
@@ -141,6 +159,7 @@ function updateUserIcon(email) {
 
 /* ================= SESJA ================= */
 supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth event:', event, session);
   if (session?.user?.email) updateUserIcon(session.user.email);
 });
 
