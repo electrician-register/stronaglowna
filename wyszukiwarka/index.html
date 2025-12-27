@@ -177,6 +177,44 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 })();
 </script>
+*/___________________/*
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+
+<script>
+const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
+const supabaseKey = 'TU_WKLEJ_SWÓJ_SUPABASE_ANON_KEY';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+// Email login
+document.getElementById('emailLoginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('email').value;
+  if (!email) return alert('Podaj email');
+
+  const { data, error } = await supabaseClient.auth.signInWithOtp({ email });
+
+  if (error) alert('Błąd logowania e-mailem: ' + error.message);
+  else alert('Email OK (sprawdź inbox, jeśli Confirm Email ON)');
+});
+
+// Google login
+document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+
+  if (error) alert('Błąd logowania Google: ' + error.message);
+  else alert('Google login rozpoczęty, powinno otworzyć okno logowania');
+});
+
+// Autorefresh – alert przy zmianie stanu
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if(session?.user?.email) {
+    alert('Zalogowano jako: ' + session.user.email);
+  }
+});
+</script>
+*/---------------- /*
 </body>
 </html>
