@@ -6,7 +6,6 @@ Redirect URLs:
 https://twoja-domena.pl
 supabase-Project-Authentication-Url configuration-site url-->
 
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -101,18 +100,17 @@ supabase-Project-Authentication-Url configuration-site url-->
 <script>
 /* ================= SUPABASE ================= */
 const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'; // podmień na swój klucz anon
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 /* ================= MODAL ================= */
-function openModal() {
-  supabase.auth.getSession().then(({ data }) => {
-    if (data.session) {
-      alert('Jesteś już zalogowany');
-      return;
-    }
-    document.getElementById('loginModal').style.display = 'flex';
-  });
+async function openModal() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    alert('Jesteś już zalogowany');
+    return;
+  }
+  document.getElementById('loginModal').style.display = 'flex';
 }
 
 window.onclick = e => {
@@ -122,10 +120,11 @@ window.onclick = e => {
 
 /* ================= LOGIN ================= */
 async function loginGoogle() {
-  await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin }
   });
+  if (error) alert('Błąd logowania Google: ' + error.message);
 }
 
 async function loginWithEmail() {
@@ -133,7 +132,7 @@ async function loginWithEmail() {
   if (!email) return alert('Podaj e-mail');
 
   const { error } = await supabase.auth.signInWithOtp({ email });
-  if (error) alert('Błąd logowania');
+  if (error) alert('Błąd logowania: ' + error.message);
   else {
     alert('Sprawdź e-mail i kliknij link logowania');
     document.getElementById('loginModal').style.display = 'none';
@@ -167,10 +166,12 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 (async () => {
-  const { data } = await supabase.auth.getSession();
-  if (data.session?.user?.email) updateUserIcon(data.session.user.email);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user?.email) updateUserIcon(session.user.email);
 })();
 </script>
 
 </body>
 </html>
+
+     
