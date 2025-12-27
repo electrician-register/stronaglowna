@@ -9,24 +9,29 @@ supabase-Project-Authentication-Url configuration-site url-->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logowanie Google i Email</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logowanie – Supabase</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
     }
 
-    /* Ikona logowania */
     .login-button {
       position: fixed;
       top: 20px;
       right: 20px;
       cursor: pointer;
+      z-index: 1000;
     }
 
-    /* Modal */
+    .login-button svg {
+      width: 32px;
+      height: 32px;
+      fill: #000;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -67,25 +72,25 @@ supabase-Project-Authentication-Url configuration-site url-->
     }
   </style>
 
-  <!-- Supabase -->
+  <!-- SUPABASE CDN (PEWNY) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 
 <body>
 
-<!-- Ikona logowania -->
+<!-- IKONA LOGOWANIA -->
 <div class="login-button" id="loginIcon" onclick="openModal()">
-  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V22h19.2v-2.8c0-3.2-6.4-4.8-9.6-4.8z"/>
   </svg>
 </div>
 
-<!-- Modal logowania -->
+<!-- MODAL -->
 <div class="modal" id="loginModal">
   <div class="modal-content">
     <h2>Zaloguj się</h2>
 
-    <input type="email" id="email" placeholder="Email" />
+    <input type="email" id="email" placeholder="Email">
 
     <button class="google-button" onclick="loginGoogle()">
       Kontynuuj z Google
@@ -100,78 +105,78 @@ supabase-Project-Authentication-Url configuration-site url-->
 <script>
 /* ================= SUPABASE ================= */
 const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'; // podmień na swój klucz anon
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 /* ================= MODAL ================= */
-async function openModal() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    alert('Jesteś już zalogowany');
-    return;
-  }
+function openModal() {
   document.getElementById('loginModal').style.display = 'flex';
 }
 
-window.onclick = e => {
+window.onclick = (e) => {
   const modal = document.getElementById('loginModal');
   if (e.target === modal) modal.style.display = 'none';
 };
 
-/* ================= LOGIN ================= */
+/* ================= LOGOWANIE ================= */
 async function loginGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
+  const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin }
+    options: {
+      redirectTo: window.location.origin
+    }
   });
-  if (error) alert('Błąd logowania Google: ' + error.message);
+
+  if (error) alert(error.message);
 }
 
 async function loginWithEmail() {
   const email = document.getElementById('email').value;
-  if (!email) return alert('Podaj e-mail');
+  if (!email) return alert('Podaj email');
 
-  const { error } = await supabase.auth.signInWithOtp({ email });
-  if (error) alert('Błąd logowania: ' + error.message);
+  const { error } = await supabaseClient.auth.signInWithOtp({ email });
+
+  if (error) alert(error.message);
   else {
-    alert('Sprawdź e-mail i kliknij link logowania');
+    alert('Sprawdź email i kliknij link logowania');
     document.getElementById('loginModal').style.display = 'none';
   }
 }
 
-/* ================= IKONA ================= */
+/* ================= IKONA UŻYTKOWNIKA ================= */
 function updateUserIcon(email) {
   const letter = email.charAt(0).toUpperCase();
   document.getElementById('loginIcon').innerHTML = `
-    <div onclick="openModal()"
-      style="
-        width:32px;
-        height:32px;
-        border-radius:50%;
-        background:#4285F4;
-        color:#fff;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-weight:bold;
-        cursor:pointer;">
+    <div style="
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      background:#4285F4;
+      color:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:bold;">
       ${letter}
     </div>`;
 }
 
 /* ================= SESJA ================= */
-supabase.auth.onAuthStateChange((event, session) => {
-  console.log('Auth event:', event, session);
-  if (session?.user?.email) updateUserIcon(session.user.email);
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.email) {
+    updateUserIcon(session.user.email);
+    document.getElementById('loginModal').style.display = 'none';
+  }
 });
 
 (async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user?.email) updateUserIcon(session.user.email);
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user?.email) {
+    updateUserIcon(session.user.email);
+  }
 })();
 </script>
 
 </body>
 </html>
-
-     
