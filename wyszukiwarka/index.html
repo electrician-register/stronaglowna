@@ -9,23 +9,24 @@ supabase-Project-Authentication-Url configuration-site url-->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logowanie – Supabase</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logowanie – Supabase</title>
 
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js" defer></script>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .login-btn { margin: 40px; padding: 12px 20px; font-size: 16px; cursor: pointer; }
+  #loginModal { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+  .modal { background:white; padding:20px; border-radius:8px; width:300px; text-align:center; }
+  .modal input, .modal button { width:100%; margin-top:10px; padding:10px; font-size:15px; }
+  .google { background:#4285F4; color:white; border:none; }
+  .email { background:#555; color:white; border:none; }
+</style>
 
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .login-btn { margin: 40px; padding: 12px 20px; font-size: 16px; cursor: pointer; }
-    #loginModal { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; }
-    .modal { background:white; padding:20px; border-radius:8px; width:300px; text-align:center; }
-    .modal input, .modal button { width:100%; margin-top:10px; padding:10px; font-size:15px; }
-    .google { background:#4285F4; color:white; border:none; }
-    .email { background:#555; color:white; border:none; }
-  </style>
+<!-- Supabase SDK z defer, żeby upewnić się, że dokument się załadował -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js" defer></script>
 </head>
+
 <body>
 
 <button class="login-btn" onclick="openModal()">Zaloguj się</button>
@@ -41,17 +42,18 @@ supabase-Project-Authentication-Url configuration-site url-->
 </div>
 
 <script defer>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
+
+  // 🔹 Supabase config
   const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // MODAL
+  // 🔹 Modal
   window.openModal = () => document.getElementById("loginModal").style.display = "flex";
   window.closeModal = () => document.getElementById("loginModal").style.display = "none";
 
-  // EMAIL MAGIC LINK
+  // 🔹 Email Magic Link
   document.getElementById("emailLoginBtn").addEventListener("click", async () => {
     const email = document.getElementById("email").value;
     if (!email) return alert("Podaj email");
@@ -65,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
     else { alert("Sprawdź swoją skrzynkę i kliknij w link logowania"); closeModal(); }
   });
 
-  // GOOGLE LOGIN
+  // 🔹 Google Login
   document.getElementById("googleLoginBtn").addEventListener("click", async () => {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
@@ -75,13 +77,14 @@ document.addEventListener("DOMContentLoaded", function() {
     if (error) alert("Błąd Google: " + error.message);
   });
 
-  // OBSŁUGA SESJI
+  // 🔹 Obsługa sesji
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if(session?.user?.email) {
       alert("Zalogowano jako: " + session.user.email);
       closeModal();
     }
   });
+
 });
 </script>
 </body>
