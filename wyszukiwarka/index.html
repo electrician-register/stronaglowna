@@ -1,10 +1,19 @@
+<!—
+Supabase URL Configuration i rURL (logowanie)
+https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/auth/url-configuration
 
-<!--Należy ustawić Auth 》URL supabase (na localhost: http://localhost:5500)
-Site URL: 
-https://twoja-domena.pl
-Redirect URLs: 
-https://twoja-domena.pl
-supabase-Project-Authentication-Url configuration-site url-->
+  Supabase Auth Providers wł/Google i e mail logowanie(logowanie)
+ https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/auth/providers
+
+ Supabase_URL (połaczenie strony z baza danych)
+https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/settings/api
+
+Supabase _KEY(połaczenie strony z baza danych)
+ https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/settings/api-keys/legacy
+
+Oto dokładny link, który musisz otworzyć, żeby ustawić dane OAuth w Google dla logowania Google (to jest strona, gdzie dodajesz redirect URI i Client ID):
+ https://console.cloud.google.com/auth/clients/798508427098-8fe57nmc7igek6nv24cchjhtunm0hb5n.apps.googleusercontent.com?project=exemplary-tide-459310-k2
+—>
 
 <!DOCTYPE html>
 <html lang="pl">
@@ -51,7 +60,9 @@ supabase-Project-Authentication-Url configuration-site url-->
   async function loginGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href } // dopasuj do swojej strony
+  
+      options: { redirectTo: "https://orep.pl/wyszukiwarka/" }//strona na ktorej jest zastosowane logowanie
+
     });
     if(error) alert('Błąd Google: ' + error.message);
   }
