@@ -47,10 +47,10 @@ Oto dokładny link, który musisz otworzyć, żeby ustawić dane OAuth w Google 
 </div>
 
 <script>
-  // 1. Inicjalizacja Supabase
+  // 1. Najpierw inicjalizacja Supabase
   const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // 2. Modal
   function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
@@ -58,27 +58,29 @@ Oto dokładny link, który musisz otworzyć, żeby ustawić dane OAuth w Google 
 
   // 3. Logowanie Google
   async function loginGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
-  
-      options: { redirectTo: "https://orep.pl/wyszukiwarka/" }//strona na ktorej jest zastosowane logowanie
-
+      options: { redirectTo: "https://orep.pl/wyszukiwarka/" } // twoja strona po zalogowaniu
     });
     if(error) alert('Błąd Google: ' + error.message);
   }
 
-  // 4. Logowanie email
+  // 4. Logowanie e-mailem
   async function loginWithEmail() {
     const email = document.getElementById('email').value;
     if(!email) return alert('Podaj email');
-    const { error } = await supabase.auth.signInWithOtp({ email });
+
+    const { error } = await supabaseClient.auth.signInWithOtp({ email });
     if(error) alert('Błąd e-mail: ' + error.message);
-    else { alert('Sprawdź e-mail'); closeModal(); }
+    else { alert('Sprawdź e-mail (link logowania)'); closeModal(); }
   }
 
   // 5. Autorefresh sesji
-  supabase.auth.onAuthStateChange((event, session) => {
-    if(session?.user?.email) alert('Zalogowano jako: ' + session.user.email);
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if(session?.user?.email) {
+      console.log('Zalogowano jako:', session.user.email);
+      // np. możesz przekierować: window.location.href = "/wyszukiwarka/";
+    }
   });
 </script>
 
