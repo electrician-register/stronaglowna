@@ -10,119 +10,81 @@ supabase-Project-Authentication-Url configuration-site url-->
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logowanie – Supabase</title>
+  <title>Logowanie Supabase</title>
+
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
     }
 
-    .login-button {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
-    .login-button svg {
-      width: 32px;
-      height: 32px;
-      fill: #000;
-    }
-
-    .modal {
+    #loginModal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       justify-content: center;
       align-items: center;
-      z-index: 999;
     }
 
-    .modal-content {
-      background: #fff;
-      padding: 30px;
+    .modal {
+      background: white;
+      padding: 20px;
       border-radius: 8px;
-      text-align: center;
       width: 300px;
     }
 
-    .modal-content input,
-    .modal-content button {
+    button {
       width: 100%;
+      margin-top: 10px;
       padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .google-button {
-      background: #4285F4;
-      color: #fff;
-      border: none;
-    }
-
-    .email-button {
-      background: #555;
-      color: #fff;
-      border: none;
     }
   </style>
-
-  <!-- SUPABASE CDN (PEWNY) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/supabase.min.js"></script>
 </head>
 
 <body>
 
-<!-- IKONA LOGOWANIA -->
-<div class="login-button" id="loginIcon" onclick="openModal()">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V22h19.2v-2.8c0-3.2-6.4-4.8-9.6-4.8z"/>
-  </svg>
-</div>
+<button onclick="openModal()">Zaloguj się</button>
 
-<!-- MODAL -->
-<div class="modal" id="loginModal">
-  <div class="modal-content">
-    <h2>Zaloguj się</h2>
+<div id="loginModal">
+  <div class="modal">
+    <h3>Logowanie</h3>
 
-    <input type="email" id="email" placeholder="Email">
+    <input id="email" type="email" placeholder="Email"><br>
+    <input id="password" type="password" placeholder="Hasło"><br>
 
-    <button class="google-button" onclick="loginGoogle()">
-      Kontynuuj z Google
-    </button>
-
-    <button class="email-button" onclick="loginWithEmail()">
-      Zaloguj się e-mailem
-    </button>
+    <button onclick="loginWithEmail()">Zaloguj e-mailem</button>
+    <button onclick="loginGoogle()">Zaloguj Google</button>
+    <button onclick="closeModal()">Zamknij</button>
   </div>
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
-const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+/* 🔹 1. NAJPIERW SUPABASE */
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-/* ================= MODAL ================= */
+/* 🔹 2. POTEM FUNKCJE */
 function openModal() {
-  document.getElementById('loginModal').style.display = 'flex';
+  document.getElementById("loginModal").style.display = "flex";
 }
 
-window.onclick = (e) => {
-  const modal = document.getElementById('loginModal');
-  if (e.target === modal) modal.style.display = 'none';
-};
+function closeModal() {
+  document.getElementById("loginModal").style.display = "none";
+}
 
-/* ================= LOGOWANIE ================= */
 async function loginGoogle() {
+  alert("Klik Google OK");
+
   const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
+    provider: "google",
     options: {
       redirectTo: window.location.origin
     }
@@ -132,50 +94,18 @@ async function loginGoogle() {
 }
 
 async function loginWithEmail() {
-  const email = document.getElementById('email').value;
-  if (!email) return alert('Podaj email');
+  alert("Klik Email OK");
 
-  const { error } = await supabaseClient.auth.signInWithOtp({ email });
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error) alert(error.message);
-  else {
-    alert('Sprawdź email i kliknij link logowania');
-    document.getElementById('loginModal').style.display = 'none';
-  }
 }
-
-/* ================= IKONA UŻYTKOWNIKA ================= */
-function updateUserIcon(email) {
-  const letter = email.charAt(0).toUpperCase();
-  document.getElementById('loginIcon').innerHTML = `
-    <div style="
-      width:32px;
-      height:32px;
-      border-radius:50%;
-      background:#4285F4;
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:bold;">
-      ${letter}
-    </div>`;
-}
-
-/* ================= SESJA ================= */
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (session?.user?.email) {
-    updateUserIcon(session.user.email);
-    document.getElementById('loginModal').style.display = 'none';
-  }
-});
-
-(async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session?.user?.email) {
-    updateUserIcon(session.user.email);
-  }
-})();
 </script>
 
 </body>
