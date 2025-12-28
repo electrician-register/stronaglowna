@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('googleBtn').onclick = async () => {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: 'https://orep.pl/wyszukiwarka/' }
+      options: { redirectTo: 'https://orep.pl/wyszukiwarka' }
     });
     if (error) alert(error.message);
   };
