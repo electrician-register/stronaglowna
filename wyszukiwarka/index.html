@@ -2,48 +2,7 @@
 ========================================================
  SUPABASE + GOOGLE OAUTH – PEŁNA KONFIGURACJA (DZIAŁAJĄCA)
 ========================================================
-
-1️⃣ Supabase URL Configuration
-https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/auth/url-configuration
-
-   Site URL:
-   https://orep.pl/wyszukiwarka/
-
-   Redirect URLs:
-   https://orep.pl/wyszukiwarka/
-   http://localhost:5500
-
-2️⃣ Supabase Auth → Providers
-https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/auth/providers
-
-   Google:
-   Client ID:
-   798508427098-8fe57nmc7igek6nv24cchjhtunm0hb5n.apps.googleusercontent.com
-
-   Callback URL (NIE ZMIENIAĆ):
-   https://tfbqqduxtsacvwfigsvt.supabase.co/auth/v1/callback
-
-3️⃣ Google Cloud Console – OAuth Client
-https://console.cloud.google.com/apis/credentials
-
-   Authorized JavaScript origins:
-   https://orep.pl
-   http://localhost:5500
-
-   Authorized redirect URI:
-   https://tfbqqduxtsacvwfigsvt.supabase.co/auth/v1/callback
-
-4️⃣ Supabase API (połączenie strony z backendem)
-https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/settings/api
-
-   Używany klucz:
-   anon public key (NIE service_role)
-
-========================================================
- PLIK GOTOWY DO UŻYCIA – NIE EDYTUJ LOGIKI
-========================================================
 -->
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -51,8 +10,8 @@ https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/settings/api
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logowanie – Supabase</title>
 
-  <!-- Supabase JS v2 (UMD – bezpieczny na hostingu) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js" defer></script>
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; }
@@ -72,41 +31,34 @@ https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt/settings/api
 <div class="modal" id="loginModal">
   <div class="box">
     <h3>Logowanie</h3>
-
     <input type="email" id="emailInput" placeholder="Email" />
-
     <button class="email" id="emailBtn">Zaloguj e-mailem</button>
     <button class="google" id="googleBtn">Zaloguj Google</button>
-
     <button id="closeLogin">Zamknij</button>
   </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-
-  /* === SUPABASE INIT === */
+  // === INIT SUPABASE ===
   const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-  const SUPABASE_KEY =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
-
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* === MODAL === */
+  // === MODAL ===
   const modal = document.getElementById('loginModal');
   document.getElementById('openLogin').onclick = () => modal.style.display = 'flex';
   document.getElementById('closeLogin').onclick = () => modal.style.display = 'none';
 
-  /* === GOOGLE LOGIN === */
+  // === GOOGLE LOGIN ===
   document.getElementById('googleBtn').onclick = async () => {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: 'https://orep.pl/wyszukiwarka' }
     });
-    if (error) alert(error.message);
+    if (error) alert('Błąd Google: ' + error.message);
   };
 
-  /* === EMAIL LOGIN === */
+  // === EMAIL LOGIN ===
   document.getElementById('emailBtn').onclick = async () => {
     const email = document.getElementById('emailInput').value.trim();
     if (!email) return alert('Podaj email');
@@ -116,11 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
       options: { emailRedirectTo: 'https://orep.pl/wyszukiwarka' }
     });
 
-    if (error) alert(error.message);
+    if (error) alert('Błąd e-mail: ' + error.message);
     else alert('Sprawdź e-mail (link logowania)');
   };
 
-});
+  // === SESSION REFRESH / REDIRECT ===
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if(session?.user?.email) {
+      console.log('Zalogowano jako:', session.user.email);
+      // automatyczne przekierowanie po zalogowaniu
+      window.location.href = '/wyszukiwarka';
+    }
+  });
 </script>
 
 </body>
