@@ -13,60 +13,19 @@ supabase-Project-Authentication-Url configuration-site url-->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Logowanie – Supabase</title>
 
-  <!-- SUPABASE SDK – STABILNY -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js" defer></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-
-    .login-btn {
-      margin: 40px;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #loginModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 300px;
-      text-align: center;
-    }
-
-    .modal input,
-    .modal button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 15px;
-    }
-
-    .google {
-      background: #4285F4;
-      color: white;
-      border: none;
-    }
-
-    .email {
-      background: #555;
-      color: white;
-      border: none;
-    }
+    body { font-family: Arial, sans-serif; }
+    .login-btn { margin: 40px; padding: 12px 20px; font-size: 16px; cursor: pointer; }
+    #loginModal { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+    .modal { background:white; padding:20px; border-radius:8px; width:300px; text-align:center; }
+    .modal input, .modal button { width:100%; margin-top:10px; padding:10px; font-size:15px; }
+    .google { background:#4285F4; color:white; border:none; }
+    .email { background:#555; color:white; border:none; }
   </style>
 </head>
-
 <body>
 
 <button class="login-btn" onclick="openModal()">Zaloguj się</button>
@@ -74,65 +33,56 @@ supabase-Project-Authentication-Url configuration-site url-->
 <div id="loginModal">
   <div class="modal">
     <h3>Logowanie</h3>
-
     <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Hasło">
-
-    <button class="email" onclick="loginWithEmail()">Zaloguj e-mailem</button>
-    <button class="google" onclick="loginGoogle()">Zaloguj Google</button>
+    <button class="email" id="emailLoginBtn">Wyślij link logowania</button>
+    <button class="google" id="googleLoginBtn">Zaloguj Google</button>
     <button onclick="closeModal()">Zamknij</button>
   </div>
 </div>
 
-<script>
-/* ========= SUPABASE ========= */
-const supabaseUrl = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+<script defer>
+document.addEventListener("DOMContentLoaded", function() {
+  const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ========= MODAL ========= */
-function openModal() {
-  document.getElementById("loginModal").style.display = "flex";
-}
+  // MODAL
+  window.openModal = () => document.getElementById("loginModal").style.display = "flex";
+  window.closeModal = () => document.getElementById("loginModal").style.display = "none";
 
-function closeModal() {
-  document.getElementById("loginModal").style.display = "none";
-}
+  // EMAIL MAGIC LINK
+  document.getElementById("emailLoginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("email").value;
+    if (!email) return alert("Podaj email");
 
-/* ========= GOOGLE ========= */
-async function loginGoogle() {
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: "https://orep.pl/wyszukiwarka/"
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: "https://orep.pl/wyszukiwarka/" }
+    });
+
+    if (error) alert("Błąd wysyłki linku: " + error.message);
+    else { alert("Sprawdź swoją skrzynkę i kliknij w link logowania"); closeModal(); }
+  });
+
+  // GOOGLE LOGIN
+  document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://orep.pl/wyszukiwarka/" }
+    });
+
+    if (error) alert("Błąd Google: " + error.message);
+  });
+
+  // OBSŁUGA SESJI
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if(session?.user?.email) {
+      alert("Zalogowano jako: " + session.user.email);
+      closeModal();
     }
   });
-
-  if (error) alert("Google error: " + error.message);
-}
-
-/* ========= EMAIL ========= */
-async function loginWithEmail() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) alert("Email error: " + error.message);
-}
-
-/* ========= SESJA ========= */
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (session?.user?.email) {
-    alert("Zalogowano jako: " + session.user.email);
-    closeModal();
-  }
 });
 </script>
-
 </body>
 </html>
