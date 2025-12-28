@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: 'https://orep.pl/wyszukiwarka/' }
+      options: { emailRedirectTo: 'https://orep.pl/wyszukiwarka' }
     });
 
     if (error) alert(error.message);
