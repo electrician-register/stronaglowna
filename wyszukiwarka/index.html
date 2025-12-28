@@ -107,6 +107,19 @@ async function loginWithEmail() {
   if (error) alert(error.message);
 }
 </script>
+<script>
+async function loginGoogle() {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
 
+  if (error) {
+    alert(error.message);
+  }
+}
+</script>
 </body>
 </html>
