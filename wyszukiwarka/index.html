@@ -60,7 +60,7 @@ Oto dokładny link, który musisz otworzyć, żeby ustawić dane OAuth w Google 
   async function loginGoogle() {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: "https://orep.pl/wyszukiwarka/" } // twoja strona po zalogowaniu
+      options: { redirectTo: "https://orep.pl/wyszukiwarka" } // twoja strona po zalogowaniu
     });
     if(error) alert('Błąd Google: ' + error.message);
   }
