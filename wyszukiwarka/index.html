@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logowanie – Supabase</title>
 
-  <!-- Supabase JS v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; }
     button { padding: 12px; width: 100%; margin: 6px 0; font-size: 16px; cursor: pointer; }
@@ -34,12 +31,25 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // === KONFIGURACJA SUPABASE ===
   const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-  // Klucz pozostawiony w tym pliku zgodnie z Twoją prośbą.
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZ[...]';
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+
+  // Try to dynamically import the ESM build from CDN so we can catch errors
+  let supabaseClient = null;
+  try {
+    const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    if (typeof mod.createClient === 'function') {
+      supabaseClient = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } else {
+      console.error('createClient not found in imported supabase module:', mod);
+      alert('Nie można załadować biblioteki Supabase (brak createClient). Sprawdź konsolę.');
+    }
+  } catch (err) {
+    console.error('Błąd podczas importu Supabase z CDN:', err);
+    alert('Błąd ładowania biblioteki Supabase. Sprawdź konsolę/Network i użyj poprawnego CDN.');
+  }
 
   // === ELEMENTY UI ===
   const modal = document.getElementById('loginModal');
@@ -51,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   openLogin.addEventListener('click', () => {
     modal.style.display = 'flex';
-    // ustaw focus na polu email dla lepszej dostępności
     emailInput.focus();
   });
 
@@ -59,12 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.style.display = 'none';
   });
 
-  // Zamknięcie po kliknięciu w tło modala
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.style.display = 'none';
   });
 
-  // Esc zamyka modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal.style.display === 'flex') {
       modal.style.display = 'none';
@@ -73,40 +80,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === GOOGLE LOGIN ===
   googleBtn.addEventListener('click', async () => {
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'https://orep.pl/wyszukiwarka' }
-    });
-    if (error) alert('Błąd Google: ' + error.message);
+    if (!supabaseClient) return alert('SDK Supabase nie jest dostępny. Sprawdź konsolę.');
+    try {
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: 'https://orep.pl/wyszukiwarka' }
+      });
+      if (error) alert('Błąd Google: ' + error.message);
+    } catch (err) {
+      console.error('Błąd wywołania signInWithOAuth:', err);
+      alert('Błąd podczas logowania Google (sprawdź konsolę).');
+    }
   });
 
   // === EMAIL LOGIN (magic link) ===
   emailBtn.addEventListener('click', async () => {
+    if (!supabaseClient) return alert('SDK Supabase nie jest dostępny. Sprawdź konsolę.');
     const email = emailInput.value.trim();
     if (!email) return alert('Podaj email');
 
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: 'https://orep.pl/wyszukiwarka' }
-    });
-
-    if (error) alert('Błąd e-mail: ' + error.message);
-    else alert('Sprawdź e-mail (link logowania)');
+    try {
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: 'https://orep.pl/wyszukiwarka' }
+      });
+      if (error) alert('Błąd e-mail: ' + error.message);
+      else alert('Sprawdź e-mail (link logowania)');
+    } catch (err) {
+      console.error('Błąd wywołania signInWithOtp:', err);
+      alert('Błąd podczas wysyłania linku (sprawdź konsolę).');
+    }
   });
 
   // === OBSERWACJA STANU AUTORYZACJI ===
-  // Supabase JS v2: onAuthStateChange zwraca obiekt, z którego można pobrać subscription do odłączenia
-  const { data } = supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (session?.user?.email) {
-      console.log('Zalogowano jako:', session.user.email);
-      // automatyczne przekierowanie po zalogowaniu
-      // Upewnij się, że to nie powoduje pętli redirectów (adres redirectTo z OAuth/magic link).
-      window.location.href = '/wyszukiwarka';
+  let subscription = null;
+  if (supabaseClient) {
+    try {
+      const { data } = supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session?.user?.email) {
+          console.log('Zalogowano jako:', session.user.email);
+          window.location.href = '/wyszukiwarka';
+        }
+      });
+      subscription = data?.subscription;
+    } catch (err) {
+      console.error('Błąd przy onAuthStateChange:', err);
     }
-  });
-  const subscription = data?.subscription;
+  }
 
-  // Odłącz subskrypcję przy unload, żeby uniknąć wycieków
   window.addEventListener('beforeunload', () => {
     if (subscription && typeof subscription.unsubscribe === 'function') {
       subscription.unsubscribe();
