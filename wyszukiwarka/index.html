@@ -112,13 +112,11 @@ async function loginGoogle() {
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.origin
+      redirectTo: "https://orep.pl/wyszukiwarka/"
     }
   });
 
-  if (error) {
-    alert(error.message);
-  }
+  if (error) alert(error.message);
 }
 </script>
 </body>
