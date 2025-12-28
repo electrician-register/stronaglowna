@@ -10,14 +10,22 @@ supabase-Project-Authentication-Url configuration-site url-->
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Logowanie Supabase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logowanie – Supabase</title>
 
-  <!-- Supabase SDK -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- SUPABASE SDK – STABILNY -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
+    }
+
+    .login-btn {
+      margin: 40px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
 
     #loginModal {
@@ -34,44 +42,56 @@ supabase-Project-Authentication-Url configuration-site url-->
       padding: 20px;
       border-radius: 8px;
       width: 300px;
+      text-align: center;
     }
 
-    button {
+    .modal input,
+    .modal button {
       width: 100%;
       margin-top: 10px;
       padding: 10px;
+      font-size: 15px;
+    }
+
+    .google {
+      background: #4285F4;
+      color: white;
+      border: none;
+    }
+
+    .email {
+      background: #555;
+      color: white;
+      border: none;
     }
   </style>
 </head>
 
 <body>
 
-<button onclick="openModal()">Zaloguj się</button>
+<button class="login-btn" onclick="openModal()">Zaloguj się</button>
 
 <div id="loginModal">
   <div class="modal">
     <h3>Logowanie</h3>
 
-    <input id="email" type="email" placeholder="Email"><br>
-    <input id="password" type="password" placeholder="Hasło"><br>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Hasło">
 
-    <button onclick="loginWithEmail()">Zaloguj e-mailem</button>
-    <button onclick="loginGoogle()">Zaloguj Google</button>
+    <button class="email" onclick="loginWithEmail()">Zaloguj e-mailem</button>
+    <button class="google" onclick="loginGoogle()">Zaloguj Google</button>
     <button onclick="closeModal()">Zamknij</button>
   </div>
 </div>
 
 <script>
-/* 🔹 1. NAJPIERW SUPABASE */
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+/* ========= SUPABASE ========= */
+const supabaseUrl = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-/* 🔹 2. POTEM FUNKCJE */
+/* ========= MODAL ========= */
 function openModal() {
   document.getElementById("loginModal").style.display = "flex";
 }
@@ -80,34 +100,7 @@ function closeModal() {
   document.getElementById("loginModal").style.display = "none";
 }
 
-async function loginGoogle() {
-  alert("Klik Google OK");
-
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin
-    }
-  });
-
-  if (error) alert(error.message);
-}
-
-async function loginWithEmail() {
-  alert("Klik Email OK");
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) alert(error.message);
-}
-</script>
-<script>
+/* ========= GOOGLE ========= */
 async function loginGoogle() {
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: "google",
@@ -116,8 +109,30 @@ async function loginGoogle() {
     }
   });
 
-  if (error) alert(error.message);
+  if (error) alert("Google error: " + error.message);
 }
+
+/* ========= EMAIL ========= */
+async function loginWithEmail() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) alert("Email error: " + error.message);
+}
+
+/* ========= SESJA ========= */
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.email) {
+    alert("Zalogowano jako: " + session.user.email);
+    closeModal();
+  }
+});
 </script>
+
 </body>
 </html>
