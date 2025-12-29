@@ -112,14 +112,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // === OBSERWACJA STANU AUTORYZACJI ===
+  // === OBSERWACJA STANU AUTORYZACJI (bez pętli przekierowań) ===
   let subscription = null;
   if (supabaseClient) {
     try {
       const { data } = supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (session?.user?.email) {
-          console.log('Zalogowano jako:', session.user.email);
-          window.location.href = '/wyszukiwarka';
+        console.log('onAuthStateChange:', event, session?.user?.email);
+        // redirect tylko przy SIGNED_IN i tylko jeśli nie jesteśmy już na docelowej ścieżce
+        if (event === 'SIGNED_IN' && session?.user?.email) {
+          const targetPath = '/wyszukiwarka';
+          const redirectedFlag = 'supabase_redirected';
+          if (location.pathname !== targetPath && !sessionStorage.getItem(redirectedFlag)) {
+            // zaznaczamy, że przekierowaliśmy, by uniknąć pętli przy odświeżeniach
+            sessionStorage.setItem(redirectedFlag, '1');
+            window.location.href = targetPath;
+          } else {
+            console.log('Przekierowanie pominięte (już na docelowej stronie lub wcześniej przekierowano).');
+          }
         }
       });
       subscription = data?.subscription;
@@ -128,7 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Odłącz subskrypcję przy unload i usuń flagę przekierowania
   window.addEventListener('beforeunload', () => {
+    try {
+      sessionStorage.removeItem('supabase_redirected');
+    } catch (e) {}
     if (subscription && typeof subscription.unsubscribe === 'function') {
       subscription.unsubscribe();
     }
