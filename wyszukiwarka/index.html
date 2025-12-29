@@ -13,12 +13,20 @@
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); justify-content: center; align-items: center; }
     .box { background: white; padding: 20px; width: 300px; border-radius: 8px; text-align: center; }
     input { width: 100%; padding: 10px; margin-bottom: 8px; font-size: 16px; }
+    /* Avatar */
+    .avatar-btn { width: 48px; height: 48px; border-radius: 50%; background: #888; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; border: none; }
+    .avatar-btn.logged-in { background: #2b6cb0; }
+    .avatar-container { display: flex; gap: 12px; align-items: center; }
+    .username-label { font-size: 14px; color: #333; }
   </style>
 </head>
 
 <body>
 
-<button id="openLogin" aria-haspopup="dialog">Zaloguj się</button>
+<div class="avatar-container">
+  <button id="avatarBtn" class="avatar-btn" aria-haspopup="dialog" title="Zaloguj się / Profil">👤</button>
+  <div id="userLabel" class="username-label" aria-live="polite"></div>
+</div>
 
 <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
   <div class="box">
@@ -26,6 +34,7 @@
     <input type="email" id="emailInput" placeholder="Email" aria-label="Email" />
     <button class="email" id="emailBtn">Zaloguj e-mailem</button>
     <button class="google" id="googleBtn">Zaloguj Google</button>
+    <button id="logoutBtn" style="display:none; background:#c53030; color:#fff;">Wyloguj</button>
     <button id="closeLogin">Zamknij</button>
   </div>
 </div>
@@ -36,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
 
-  // Try to dynamically import the ESM build from CDN so we can catch errors
+  // dynamic import ESM
   let supabaseClient = null;
   try {
     const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
@@ -51,17 +60,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     alert('Błąd ładowania biblioteki Supabase. Sprawdź konsolę/Network i użyj poprawnego CDN.');
   }
 
-  // === ELEMENTY UI ===
+  // UI elements
+  const avatarBtn = document.getElementById('avatarBtn');
+  const userLabel = document.getElementById('userLabel');
   const modal = document.getElementById('loginModal');
-  const openLogin = document.getElementById('openLogin');
   const closeLogin = document.getElementById('closeLogin');
   const googleBtn = document.getElementById('googleBtn');
   const emailBtn = document.getElementById('emailBtn');
   const emailInput = document.getElementById('emailInput');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-  openLogin.addEventListener('click', () => {
-    modal.style.display = 'flex';
-    emailInput.focus();
+  function getInitials(nameOrEmail) {
+    if (!nameOrEmail) return '';
+    const name = nameOrEmail.trim();
+    // jeśli jest spacja - użyj pierwszych liter imienia i nazwiska
+    if (name.includes(' ')) {
+      const parts = name.split(/\s+/).filter(Boolean);
+      return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+    }
+    // jeśli to email, weź pierwsze dwie litery lokalnej części
+    if (name.includes('@')) {
+      const local = name.split('@')[0];
+      return (local.slice(0,2)).toUpperCase();
+    }
+    return name.slice(0,2).toUpperCase();
+  }
+
+  function setAvatarForUser(session) {
+    if (!session || !session.user) {
+      avatarBtn.textContent = '👤';
+      avatarBtn.classList.remove('logged-in');
+      userLabel.textContent = '';
+      logoutBtn.style.display = 'none';
+      return;
+    }
+    const user = session.user;
+    // spróbuj pobrać pełne imię z metadata
+    const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email;
+    const initials = getInitials(fullName);
+    avatarBtn.textContent = initials || 'U';
+    avatarBtn.classList.add('logged-in');
+    userLabel.textContent = user.email || '';
+    logoutBtn.style.display = 'inline-block';
+  }
+
+  // Otwarcie modala przy kliknięciu avatar (jeśli nie zalogowany) lub pokazanie modala/profile jeśli zalogowany
+  avatarBtn.addEventListener('click', async () => {
+    // jeśli klient nie jest dostępny - tylko otwórz modal do logowania
+    if (!supabaseClient) {
+      modal.style.display = 'flex';
+      return;
+    }
+    // sprawdź sesję
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data?.session;
+      // jeśli nie ma sesji, otwórz modal
+      if (!session) {
+        modal.style.display = 'flex';
+        emailInput.focus();
+      } else {
+        // jeśli jest sesja - otwórz modal (tu można pokazać profil/wyloguj)
+        modal.style.display = 'flex';
+      }
+    } catch (err) {
+      console.error('Błąd przy sprawdzaniu sesji:', err);
+      modal.style.display = 'flex';
+    }
   });
 
   closeLogin.addEventListener('click', () => {
@@ -78,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // === GOOGLE LOGIN ===
+  // Google login
   googleBtn.addEventListener('click', async () => {
     if (!supabaseClient) return alert('SDK Supabase nie jest dostępny. Sprawdź konsolę.');
     try {
@@ -93,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // === EMAIL LOGIN (magic link) ===
+  // Email magic link
   emailBtn.addEventListener('click', async () => {
     if (!supabaseClient) return alert('SDK Supabase nie jest dostępny. Sprawdź konsolę.');
     const email = emailInput.value.trim();
@@ -112,18 +177,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // === OBSERWACJA STANU AUTORYZACJI (bez pętli przekierowań) ===
+  // Logout
+  logoutBtn.addEventListener('click', async () => {
+    if (!supabaseClient) return;
+    try {
+      await supabaseClient.auth.signOut();
+      sessionStorage.removeItem('supabase_redirected');
+      setAvatarForUser(null);
+      modal.style.display = 'none';
+      alert('Wylogowano');
+    } catch (err) {
+      console.error('Błąd podczas wylogowywania:', err);
+      alert('Błąd podczas wylogowywania (sprawdź konsolę).');
+    }
+  });
+
+  // Observe auth state changes and update avatar (no redirect loop)
   let subscription = null;
   if (supabaseClient) {
     try {
       const { data } = supabaseClient.auth.onAuthStateChange((event, session) => {
         console.log('onAuthStateChange:', event, session?.user?.email);
-        // redirect tylko przy SIGNED_IN i tylko jeśli nie jesteśmy już na docelowej ścieżce
+        // Aktualizuj avatar na każde zdarzenie
+        setAvatarForUser(session);
+
+        // wcześniej logika przekierowania przy SIGNED_IN
         if (event === 'SIGNED_IN' && session?.user?.email) {
           const targetPath = '/wyszukiwarka';
           const redirectedFlag = 'supabase_redirected';
           if (location.pathname !== targetPath && !sessionStorage.getItem(redirectedFlag)) {
-            // zaznaczamy, że przekierowaliśmy, by uniknąć pętli przy odświeżeniach
             sessionStorage.setItem(redirectedFlag, '1');
             window.location.href = targetPath;
           } else {
@@ -135,16 +217,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
       console.error('Błąd przy onAuthStateChange:', err);
     }
+
+    // Initialize avatar from current session
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data?.session;
+      setAvatarForUser(session);
+    } catch (err) {
+      console.error('Błąd przy pobieraniu sesji:', err);
+      setAvatarForUser(null);
+    }
+  } else {
+    setAvatarForUser(null);
   }
 
-  // Odłącz subskrypcję przy unload i usuń flagę przekierowania
+  // Cleanup
   window.addEventListener('beforeunload', () => {
-    try {
-      sessionStorage.removeItem('supabase_redirected');
-    } catch (e) {}
-    if (subscription && typeof subscription.unsubscribe === 'function') {
-      subscription.unsubscribe();
-    }
+    try { sessionStorage.removeItem('supabase_redirected'); } catch (e) {}
+    if (subscription && typeof subscription.unsubscribe === 'function') subscription.unsubscribe();
   });
 });
 </script>
