@@ -8,7 +8,6 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; }
     button { padding: 12px; width: 100%; margin: 6px 0; font-size: 16px; cursor: pointer; }
-    .google { background: #4285F4; color: white; border: none; }
     .email { background: #555; color: white; border: none; }
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); justify-content: center; align-items: center; }
     .box { background: white; padding: 20px; width: 300px; border-radius: 8px; text-align: center; }
@@ -33,7 +32,6 @@
     <h3 id="loginTitle">Logowanie</h3>
     <input type="email" id="emailInput" placeholder="Email" aria-label="Email" />
     <button class="email" id="emailBtn">Zaloguj e-mailem</button>
-    <button class="google" id="googleBtn">Zaloguj Google</button>
     <button id="logoutBtn" style="display:none; background:#c53030; color:#fff;">Wyloguj</button>
     <button id="closeLogin">Zamknij</button>
   </div>
@@ -43,7 +41,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // === KONFIGURACJA SUPABASE ===
   const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZ[...]';
 
   // dynamic import ESM
   let supabaseClient = null;
@@ -65,7 +63,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const userLabel = document.getElementById('userLabel');
   const modal = document.getElementById('loginModal');
   const closeLogin = document.getElementById('closeLogin');
-  const googleBtn = document.getElementById('googleBtn');
   const emailBtn = document.getElementById('emailBtn');
   const emailInput = document.getElementById('emailInput');
   const logoutBtn = document.getElementById('logoutBtn');
@@ -143,21 +140,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Google login
-  googleBtn.addEventListener('click', async () => {
-    if (!supabaseClient) return alert('SDK Supabase nie jest dostępny. Sprawdź konsolę.');
-    try {
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: 'https://orep.pl/wyszukiwarka' }
-      });
-      if (error) alert('Błąd Google: ' + error.message);
-    } catch (err) {
-      console.error('Błąd wywołania signInWithOAuth:', err);
-      alert('Błąd podczas logowania Google (sprawdź konsolę).');
-    }
-  });
-
   // Email magic link
   emailBtn.addEventListener('click', async () => {
     if (!supabaseClient) return alert('SDK Supabase nie jest dostępny. Sprawdź konsolę.');
@@ -201,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Aktualizuj avatar na każde zdarzenie
         setAvatarForUser(session);
 
-        // wcześniej logika przekierowania przy SIGNED_IN
+        // przekierowanie przy SIGNED_IN (jeśli potrzebne)
         if (event === 'SIGNED_IN' && session?.user?.email) {
           const targetPath = '/wyszukiwarka';
           const redirectedFlag = 'supabase_redirected';
