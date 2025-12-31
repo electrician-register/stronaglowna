@@ -44,9 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
 
   // dynamic import ESM
-  let supabaseClient = null;
-  try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     if (typeof mod.createClient === 'function') {
       supabaseClient = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
     } else {
