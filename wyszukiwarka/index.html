@@ -91,9 +91,10 @@
   console.log("✅ JS załadowany");
 
   // ===== SUPABASE CONFIG =====
-  const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
+  const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co' // w supabase wybierasz projekt np. ELEKTRYCY, po lewej na dole wybieraz USTAWIENIA i tam DATA API i tam URL 
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+ //  w supabase wybierasz projekt np. ELEKTRYCY, po lewej na dole wybieraz USTAWIENIA i tam API KEYS i tam LEGACY ANON
+  const supabase = createClient(supabaseUrl, supabaseKey)
   const supabase = createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
