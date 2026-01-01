@@ -58,6 +58,11 @@
   </div>
 
   <script>
+    // ===== SUPABASE CONFIG (PUBLIC / ANON KEY) =====
+    const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
     const btn = document.getElementById("sendBtn");
     const log = document.getElementById("log");
 
@@ -73,11 +78,15 @@
 
       try {
         const res = await fetch(
-          "https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-otp",
+          `${SUPABASE_URL}/functions/v1/send-otp`,
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+
+              // 🔑 WYMAGANE PRZEZ SUPABASE EDGE FUNCTIONS
+              "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+              "apikey": SUPABASE_ANON_KEY
             },
             body: JSON.stringify({ email })
           }
