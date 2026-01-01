@@ -4,66 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logowanie – Supabase</title>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-    }
-
-    .avatar-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #888;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .box {
-      background: #fff;
-      padding: 20px;
-      width: 320px;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .email {
-      background: #555;
-      color: white;
-      border: none;
-    }
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    .avatar-btn { width: 48px; height: 48px; border-radius: 50%; background: #888; color: #fff; font-weight: bold; border: none; cursor: pointer; font-size: 20px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); justify-content: center; align-items: center; z-index: 9999; }
+    .box { background: #fff; padding: 20px; width: 320px; border-radius: 8px; text-align: center; }
+    input { width: 100%; padding: 10px; margin-bottom: 10px; font-size: 16px; }
+    button { width: 100%; padding: 12px; margin-top: 6px; font-size: 16px; cursor: pointer; }
+    .email { background: #555; color: white; border: none; }
   </style>
 </head>
-
 <body>
 
 <button id="avatarBtn" class="avatar-btn" type="button">👤</button>
@@ -71,67 +21,46 @@
 <div class="modal" id="loginModal">
   <div class="box">
     <h3>Logowanie</h3>
-
-    <input
-      type="email"
-      id="emailInput"
-      placeholder="Email"
-      autocomplete="email"
-    />
-
+    <input type="email" id="emailInput" placeholder="Email" autocomplete="email"/>
     <button id="emailBtn" class="email">Zaloguj e-mailem</button>
     <button id="closeLogin">Zamknij</button>
   </div>
 </div>
 
-<!-- ✅ JEDYNY SCRIPT – JAKO MODULE -->
 <script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  console.log("✅ JS załadowany");
+console.log("✅ JS załadowany");
 
-  // ===== SUPABASE CONFIG =====
-  const SUPABASE_URL="https://https://tfbqqduxtsacvwfigsvt.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"; // poprawione
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-  const supabase = createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ===== ELEMENTY UI =====
-  const avatarBtn = document.getElementById("avatarBtn");
-  const modal = document.getElementById("loginModal");
-  const closeLogin = document.getElementById("closeLogin");
-  const emailBtn = document.getElementById("emailBtn");
-  const emailInput = document.getElementById("emailInput");
+// ===== ELEMENTY UI =====
+const avatarBtn = document.getElementById("avatarBtn");
+const modal = document.getElementById("loginModal");
+const closeLogin = document.getElementById("closeLogin");
+const emailBtn = document.getElementById("emailBtn");
+const emailInput = document.getElementById("emailInput");
 
-  // ===== OTWIERANIE MODALA =====
-  avatarBtn.addEventListener("click", () => {
-    modal.style.display = "flex";
-  });
+// ===== OTWIERANIE MODALA =====
+avatarBtn.addEventListener("click", () => { modal.style.display = "flex"; });
+closeLogin.addEventListener("click", () => { modal.style.display = "none"; });
+modal.addEventListener("click", e => { if(e.target === modal) modal.style.display = "none"; });
 
-  closeLogin.addEventListener("click", () => {
-    modal.style.display = "none";
-  });
+// ===== LOGOWANIE EMAIL OTP =====
+emailBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  if (!email) return alert("Podaj email");
 
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.style.display = "none";
-  });
+  console.log("➡️ Wysyłam OTP do:", email);
 
-  // ===== LOGOWANIE EMAIL OTP =====
-  emailBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-
-    if (!email) {
-      alert("Podaj email");
-      return;
-    }
-
-    console.log("➡️ Wysyłam OTP do:", email);
-
+  try {
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo:"https://orep.pl/wyszukiwarka"
-      }
+      options: { emailRedirectTo: "https://orep.pl/wyszukiwarka" }
     });
 
     if (error) {
@@ -141,7 +70,11 @@
       alert("📧 Sprawdź email (link logowania)");
       modal.style.display = "none";
     }
-  });
+  } catch(err) {
+    console.error("❌ Błąd:", err);
+    alert("Wystąpił nieoczekiwany błąd, sprawdź konsolę");
+  }
+});
 </script>
 
 </body>
