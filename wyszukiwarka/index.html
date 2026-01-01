@@ -1,148 +1,57 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logowanie – Supabase</title>
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { Resend } from "npm:@resend/node";
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
+serve(async (req) => {
+  try {
+    if (req.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
     }
 
-    .avatar-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #888;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
+    const { email, redirectTo } = await req.json();
+    if (!email || !redirectTo) {
+      return new Response("Missing email", { status: 400 });
     }
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
+    const supabaseUrl = Deno.env.get("https://tfbqqduxtsacvwfigsvt.supabase.co")!;
+    const serviceKey = Deno.env.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjY5MTg3NywiZXhwIjoyMDgyMjY3ODc3fQ.-b9qgIQNBwPy8meB07oRe4im7ACZU8NaAgydy3mSW74")!;
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
-    .box {
-      background: #fff;
-      padding: 20px;
-      width: 320px;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .email {
-      background: #555;
-      color: white;
-      border: none;
-    }
-  </style>
-</head>
-
-<body>
-
-<button id="avatarBtn" class="avatar-btn" type="button">👤</button>
-
-<div class="modal" id="loginModal">
-  <div class="box">
-    <h3>Logowanie</h3>
-
-    <input
-      type="email"
-      id="emailInput"
-      placeholder="Email"
-      autocomplete="email"
-    />
-
-    <button id="emailBtn" class="email">Zaloguj e-mailem</button>
-    <button id="closeLogin">Zamknij</button>
-  </div>
-</div>
-
-<!-- ✅ JEDYNY SCRIPT – JAKO MODULE -->
-<script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-  console.log("✅ JS załadowany");
-
-  // ===== SUPABASE CONFIG =====
-  const SUPABASE_URL="https://https://tfbqqduxtsacvwfigsvt.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
-  const supabase = createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-
-  // ===== ELEMENTY UI =====
-  const avatarBtn = document.getElementById("avatarBtn");
-  const modal = document.getElementById("loginModal");
-  const closeLogin = document.getElementById("closeLogin");
-  const emailBtn = document.getElementById("emailBtn");
-  const emailInput = document.getElementById("emailInput");
-
-  // ===== OTWIERANIE MODALA =====
-  avatarBtn.addEventListener("click", () => {
-    modal.style.display = "flex";
-  });
-
-  closeLogin.addEventListener("click", () => {
-    modal.style.display = "none";
-  });
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.style.display = "none";
-  });
-
-  // ===== LOGOWANIE EMAIL OTP =====
-  emailBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-
-    if (!email) {
-      alert("Podaj email");
-      return;
-    }
-
-    console.log("➡️ Wysyłam OTP do:", email);
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo:"https://orep.pl/wyszukiwarka"
-      }
+    // 🔐 GENERUJ MAGIC LINK
+    const res = await fetch(`${supabaseUrl}/auth/v1/magiclink`, {
+      method: "POST",
+      headers: {
+        "apikey": serviceKey,
+        "Authorization": `Bearer ${serviceKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        redirect_to: redirectTo,
+      }),
     });
 
-    if (error) {
-      console.error("❌ Błąd Supabase:", error);
-      alert("Błąd: " + error.message);
-    } else {
-      alert("📧 Sprawdź email (link logowania)");
-      modal.style.display = "none";
+    const data = await res.json();
+    if (!data?.action_link) {
+      console.error("Supabase auth error:", data);
+      return new Response("Auth error", { status: 500 });
     }
-  });
-</script>
 
-</body>
-</html>
+    // ✉️ EMAIL PRZEZ RESEND
+    await resend.emails.send({
+      from: "OREP <noreply@orep.pl>",
+      to: email,
+      subject: "Zaloguj się do OREP",
+      html: `
+        <h3>Logowanie OREP</h3>
+        <p>Kliknij link:</p>
+        <a href="${data.action_link}">Zaloguj się</a>
+        <p>Link ważny 60 minut</p>
+      `,
+    });
+
+    return new Response("OK");
+  } catch (e) {
+    console.error("❌ ERROR", e);
+    return new Response("Server error", { status: 500 });
+  }
+});
