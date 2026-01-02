@@ -9,10 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* =======================
-       Reset + font
-    ======================== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
@@ -23,21 +21,47 @@
       padding: 20px;
     }
 
+    /* ======================
+       Szary box z logo i tekstem
+    ======================= */
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #e2e6ea;
+      padding: 40px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      max-width: 150px;
+      margin-bottom: 20px;
+    }
+
+    .intro-text {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
     /* =======================
        Formularz
     ======================== */
     .form-container {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 400px;
-      text-align: center;
+      background: #fff;
+      padding: 25px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
     .form-container h2 {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       font-weight: 600;
       color: #333;
     }
@@ -75,34 +99,30 @@
       font-size: 14px;
       color: #333;
       word-break: break-word;
+      min-height: 20px;
     }
 
-    .footer {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    a {
-      color: #2b6cb0;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 
 <body>
 
-  <div class="form-container">
-    <h2>Rejestracja / Logowanie</h2>
-    <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
-    <button class="btn-submit" id="emailBtn">Wyślij magic link</button>
-    <div class="log" id="log"></div>
-    <div class="footer">
-      Masz już konto? <a href="/login/">Zaloguj się</a>
+  <div class="wrapper">
+    <!-- LOGO -->
+    <img src="/path/to/logo.png" alt="OREP Logo" class="logo">
+
+    <!-- TEKST WYJAŚNIAJĄCY -->
+    <div class="intro-text">
+      Podaj swój adres e-mail, a wyślemy Ci link do logowania.  
+      Po kliknięciu w magic link zostaniesz automatycznie zalogowany i przekierowany do strony rejestracji.
+    </div>
+
+    <!-- FORMULARZ -->
+    <div class="form-container">
+      <h2>Rejestracja / Logowanie</h2>
+      <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
+      <button class="btn-submit" id="emailBtn">Wyślij magic link</button>
+      <div class="log" id="log"></div>
     </div>
   </div>
 
