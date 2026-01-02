@@ -1,74 +1,33 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Wysyłanie emaila</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <meta charset="UTF-8">
+  <title>Wyślij email</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 40px;
-    }
-    .box {
-      max-width: 400px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    button {
-      background: #2e7d32;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    .log {
-      margin-top: 15px;
-      font-size: 14px;
-    }
+    body { font-family: Arial, sans-serif; padding: 40px; background: #f4f6f8; }
+    .box { max-width: 400px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
+    input, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; }
+    button { background: #2e7d32; color: #fff; border: none; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    .log { margin-top: 15px; font-size: 14px; }
   </style>
 </head>
-
 <body>
 
   <div class="box">
     <h3>Wyślij email</h3>
-
-    <input
-      type="email"
-      id="email"
-      placeholder="Wpisz email"
-      required
-    />
-
+    <input type="email" id="email" placeholder="Wpisz email" required>
     <button id="sendBtn">Wyślij</button>
-
     <div class="log" id="log"></div>
   </div>
 
   <script>
-    // ===== SUPABASE CONFIG (PUBLIC / ANON KEY) =====
-    const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
     const btn = document.getElementById("sendBtn");
     const log = document.getElementById("log");
 
     btn.addEventListener("click", async () => {
       const email = document.getElementById("email").value.trim();
-
       if (!email) {
         log.innerText = "❌ Podaj email";
         return;
@@ -78,29 +37,22 @@
 
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/functions/v1/send-otp`,
+          "https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-otp",
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-
-              // 🔑 WYMAGANE PRZEZ SUPABASE EDGE FUNCTIONS
-              "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-              "apikey": SUPABASE_ANON_KEY
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email })
           }
         );
 
         const data = await res.json();
-
         if (!res.ok) {
           console.error(data);
-          log.innerText = "❌ Błąd: " + (data.error || res.status);
+          log.innerText = "❌ Błąd: " + (data.error || data.details || res.status);
           return;
         }
 
-        log.innerText = "✅ Email wysłany poprawnie!";
+        log.innerText = "✅ Email wysłany!";
         console.log("OK:", data);
 
       } catch (err) {
