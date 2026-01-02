@@ -18,23 +18,23 @@
       padding: 20px;
     }
 
-    /* Awatar */
+    /* AWATAR GRAFICZNY */
     .avatar-btn {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: #888;
+      background: #2b6cb0;
       color: #fff;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 20px;
       margin-bottom: 20px;
-      cursor: default; /* brak interakcji */
+      cursor: default;
     }
 
-    /* Formularz rejestracji */
+    /* FORMULARZ REJESTRACJI */
     form {
       background-color: #ffffff;
       padding: 30px 40px;
@@ -134,8 +134,8 @@
 
 <body>
 
-  <!-- AWATAR GRAFICZNY -->
-  <button class="avatar-btn">👤</button>
+  <!-- AWATAR GRAFICZNY (INFORMACYJNY) -->
+  <button class="avatar-btn" id="avatarBtn">👤</button>
 
   <!-- FORMULARZ REJESTRACJI -->
   <form id="register-form">
@@ -190,9 +190,21 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-
+    const supabaseKey = 'YOUR_ANON_KEY_HERE'
     const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const avatarBtn = document.getElementById('avatarBtn')
+    const emailInput = document.getElementById('email')
+
+    // Awatar zmienia inicjał po wpisaniu e-maila
+    emailInput.addEventListener('input', () => {
+      const email = emailInput.value.trim()
+      if (email) {
+        avatarBtn.textContent = email[0].toUpperCase()
+      } else {
+        avatarBtn.textContent = '👤'
+      }
+    })
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -219,7 +231,7 @@
           const file = plikInput.files[i];
           const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { error: uploadError } = await supabase.storage
             .from('attachments')
             .upload(filePath, file);
 
@@ -230,17 +242,10 @@
             return;
           }
 
-          const { data: publicUrlData, error: urlError } = supabase
+          const { data: publicUrlData } = supabase
             .storage
             .from('attachments')
             .getPublicUrl(filePath);
-
-          if (urlError) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('result').textContent = 'Błąd generowania URL: ' + urlError.message;
-            document.getElementById('result').classList.add('error');
-            return;
-          }
 
           plikUrls.push(publicUrlData.publicUrl);
         }
@@ -251,19 +256,10 @@
       const { error } = await supabase
         .from('tabela_elektrykow')
         .insert([{
-          imie,
-          nazwisko,
-          miasto,
-          wojewodztwo,
-          nrE,
-          nrEPomiary,
-          nrD,
-          dataWaznosci,
-          wydanePrzez,
-          email,
-          telefon,
-          zajmujeSie,
-          plik: plikiString
+          imie, nazwisko, miasto, wojewodztwo,
+          nrE, nrEPomiary, nrD,
+          dataWaznosci, wydanePrzez, email, telefon,
+          zajmujeSie, plik: plikiString
         }]);
 
       const result = document.getElementById('result')
@@ -274,10 +270,8 @@
         result.textContent = 'Błąd: ' + error.message
         result.classList.add('error')
       } else {
-        result.textContent = '✅ Rejestracja zakończona sukcesem!';
-        result.classList.add('success');
-        // ewentualnie przekierowanie:
-        // window.location.href = '/logowanie';
+        // PRZEKIEROWANIE po sukcesie
+        window.location.href = '/logowanie';
       }
     });
   </script>
