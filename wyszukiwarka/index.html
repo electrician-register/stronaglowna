@@ -2,16 +2,39 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Rejestracja</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f6f8;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      padding: 40px;
+      padding: 20px;
     }
+
+    /* Awatar */
+    .avatar-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #888;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 20px;
+      cursor: default; /* brak interakcji */
+    }
+
+    /* Formularz rejestracji */
     form {
       background-color: #ffffff;
       padding: 30px 40px;
@@ -20,11 +43,13 @@
       width: 100%;
       max-width: 600px;
     }
+
     h2 {
       text-align: center;
       color: #333;
       margin-bottom: 20px;
     }
+
     label {
       display: block;
       margin-top: 15px;
@@ -32,6 +57,7 @@
       color: #555;
       font-weight: 600;
     }
+
     input[type="text"],
     input[type="email"],
     input[type="tel"],
@@ -43,11 +69,23 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 15px;
+      transition: border 0.2s;
     }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+
     textarea {
       resize: vertical;
       min-height: 80px;
     }
+
+    input[type="file"] {
+      margin-top: 10px;
+    }
+
     button {
       margin-top: 20px;
       width: 100%;
@@ -59,7 +97,13 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
     #result {
       font-weight: bold;
       padding: 10px;
@@ -67,103 +111,176 @@
       text-align: center;
       border-radius: 6px;
     }
+
     .success {
       background-color: #4CAF50;
       color: white;
     }
+
     .error {
       background-color: #f44336;
       color: white;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      color: #333;
+      font-weight: bold;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
-<form id="register-form">
-  <h2>Rejestracja</h2>
 
-  <label>Imię:</label>
-  <input type="text" id="imie" required>
+  <!-- AWATAR GRAFICZNY -->
+  <button class="avatar-btn">👤</button>
 
-  <label>Nazwisko:</label>
-  <input type="text" id="nazwisko" required>
+  <!-- FORMULARZ REJESTRACJI -->
+  <form id="register-form">
+    <h2>Rejestracja</h2>
 
-  <label>Miasto:</label>
-  <input type="text" id="miasto">
+    <label for="imie">Imię:</label>
+    <input type="text" id="imie" name="imie" required>
 
-  <label>Województwo:</label>
-  <input type="text" id="wojewodztwo">
+    <label for="nazwisko">Nazwisko:</label>
+    <input type="text" id="nazwisko" name="nazwisko" required>
 
-  <label>Nr uprawnień E:</label>
-  <input type="text" id="nrE">
+    <label for="miasto">Miasto:</label>
+    <input type="text" id="miasto" name="miasto">
 
-  <label>Nr uprawnień E z pomiarami:</label>
-  <input type="text" id="nrEPomiary">
+    <label for="wojewodztwo">Województwo:</label>
+    <input type="text" id="wojewodztwo" name="wojewodztwo">
 
-  <label>Nr uprawnień D:</label>
-  <input type="text" id="nrD">
+    <label for="nrE">Nr uprawnień E:</label>
+    <input type="text" id="nrE" name="nrE">
 
-  <label>Data ważności:</label>
-  <input type="date" id="dataWaznosci">
+    <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
+    <input type="text" id="nrEPomiary" name="nrEPomiary">
 
-  <label>Wydane przez:</label>
-  <input type="text" id="wydanePrzez">
+    <label for="nrD">Nr uprawnień D:</label>
+    <input type="text" id="nrD" name="nrD">
 
-  <label>Email:</label>
-  <input type="email" id="email">
+    <label for="dataWaznosci">Data ważności:</label>
+    <input type="date" id="dataWaznosci" name="dataWaznosci">
 
-  <label>Telefon:</label>
-  <input type="tel" id="telefon">
+    <label for="wydanePrzez">Wydane przez:</label>
+    <input type="text" id="wydanePrzez" name="wydanePrzez">
 
-  <label>Zajmuje się:</label>
-  <textarea id="zajmujeSie"></textarea>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email">
 
-  <label>Załącz skan uprawnień:</label>
-  <input type="file" id="plik" multiple>
+    <label for="telefon">Telefon:</label>
+    <input type="tel" id="telefon" name="telefon">
 
-  <button type="submit">Zarejestruj</button>
-  <p id="result"></p>
-</form>
+    <label for="zajmujeSie">Zajmuje się:</label>
+    <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Opis specjalizacji..."></textarea>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    <label for="plik">Załącz skan uprawnień:</label>
+    <input type="file" id="plik" name="plik" accept="*/*" multiple>
 
-const supabase = createClient(
-  'https://tfbqqduxtsacvwfigsvt.supabase.co',
-  'TWÓJ_ANON_KEY'
-)
+    <button type="submit">Zarejestruj</button>
 
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault()
+    <p id="result"></p>
+    <p id="loading">Trwa rejestracja, proszę czekać...</p>
+  </form>
 
-  const result = document.getElementById('result')
-  result.textContent = ''
-  result.className = ''
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  const { error } = await supabase.from('tabela_elektrykow').insert([{
-    imie: imie.value,
-    nazwisko: nazwisko.value,
-    miasto: miasto.value,
-    wojewodztwo: wojewodztwo.value,
-    nrE: nrE.value,
-    nrEPomiary: nrEPomiary.value,
-    nrD: nrD.value,
-    dataWaznosci: dataWaznosci.value,
-    wydanePrzez: wydanePrzez.value,
-    email: email.value,
-    telefon: telefon.value,
-    zajmujeSie: zajmujeSie.value
-  }])
+    const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
 
-  if (error) {
-    result.textContent = 'Błąd: ' + error.message
-    result.classList.add('error')
-  } else {
-    result.textContent = '✅ Wniosek został wysłany do weryfikacji'
-    result.classList.add('success')
-    document.getElementById('register-form').reset()
-  }
-})
-</script>
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      document.getElementById('loading').style.display = 'block';
+
+      const imie = document.getElementById('imie').value
+      const nazwisko = document.getElementById('nazwisko').value
+      const miasto = document.getElementById('miasto').value
+      const wojewodztwo = document.getElementById('wojewodztwo').value
+      const nrE = document.getElementById('nrE').value
+      const nrEPomiary = document.getElementById('nrEPomiary').value
+      const nrD = document.getElementById('nrD').value
+      const dataWaznosci = document.getElementById('dataWaznosci').value
+      const wydanePrzez = document.getElementById('wydanePrzez').value
+      const email = document.getElementById('email').value
+      const telefon = document.getElementById('telefon').value
+      const zajmujeSie = document.getElementById('zajmujeSie').value
+
+      const plikInput = document.getElementById('plik');
+      let plikUrls = [];
+
+      if (plikInput.files.length > 0) {
+        for (let i = 0; i < plikInput.files.length; i++) {
+          const file = plikInput.files[i];
+          const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('attachments')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
+            document.getElementById('result').classList.add('error');
+            return;
+          }
+
+          const { data: publicUrlData, error: urlError } = supabase
+            .storage
+            .from('attachments')
+            .getPublicUrl(filePath);
+
+          if (urlError) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').textContent = 'Błąd generowania URL: ' + urlError.message;
+            document.getElementById('result').classList.add('error');
+            return;
+          }
+
+          plikUrls.push(publicUrlData.publicUrl);
+        }
+      }
+
+      const plikiString = plikUrls.join(',');
+
+      const { error } = await supabase
+        .from('tabela_elektrykow')
+        .insert([{
+          imie,
+          nazwisko,
+          miasto,
+          wojewodztwo,
+          nrE,
+          nrEPomiary,
+          nrD,
+          dataWaznosci,
+          wydanePrzez,
+          email,
+          telefon,
+          zajmujeSie,
+          plik: plikiString
+        }]);
+
+      const result = document.getElementById('result')
+      result.classList.remove('success', 'error')
+      document.getElementById('loading').style.display = 'none';
+
+      if (error) {
+        result.textContent = 'Błąd: ' + error.message
+        result.classList.add('error')
+      } else {
+        result.textContent = '✅ Rejestracja zakończona sukcesem!';
+        result.classList.add('success');
+        // ewentualnie przekierowanie:
+        // window.location.href = '/logowanie';
+      }
+    });
+  </script>
+
 </body>
 </html>
