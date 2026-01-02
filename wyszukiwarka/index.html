@@ -4,36 +4,115 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logowanie – Supabase</title>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; padding: 40px; }
-    button { padding: 12px; width: 100%; margin: 6px 0; font-size: 16px; cursor: pointer; }
-    .email { background: #555; color: white; border: none; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); justify-content: center; align-items: center; }
-    .box { background: white; padding: 20px; width: 300px; border-radius: 8px; text-align: center; }
-    input { width: 100%; padding: 10px; margin-bottom: 8px; font-size: 16px; }
-    .avatar-btn { width: 48px; height: 48px; border-radius: 50%; background: #888; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; border: none; }
-    .avatar-btn.logged-in { background: #2b6cb0; }
-    .log { font-size: 14px; margin-top: 10px; color: #333; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+    }
+
+    .avatar-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #888;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-size: 20px;
+    }
+
+    .avatar-btn.logged-in {
+      background: #2b6cb0;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      width: 300px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px;
+      width: 100%;
+      margin: 6px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .email {
+      background: #555;
+      color: white;
+      border: none;
+    }
+
+    .log {
+      font-size: 14px;
+      margin-top: 10px;
+    }
   </style>
 </head>
+
 <body>
 
-<div>
-  <button id="avatarBtn" class="avatar-btn">👤</button>
-</div>
+<!-- Avatar -->
+<button id="avatarBtn" class="avatar-btn">👤</button>
 
+<!-- Modal -->
 <div class="modal" id="loginModal">
   <div class="box">
     <h3>Logowanie</h3>
+
     <input type="email" id="emailInput" placeholder="Email" />
+
     <button class="email" id="emailBtn">Zaloguj e-mailem</button>
     <button id="closeLogin">Zamknij</button>
+
     <div class="log" id="log"></div>
   </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+/* ================================
+   KONFIGURACJA SUPABASE
+================================ */
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
+const supabase = supabaseJs.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+/* ================================
+   LOGIKA UI + LOGOWANIE
+================================ */
+document.addEventListener('DOMContentLoaded', async () => {
   const avatarBtn = document.getElementById('avatarBtn');
   const modal = document.getElementById('loginModal');
   const closeLogin = document.getElementById('closeLogin');
@@ -41,37 +120,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const emailInput = document.getElementById('emailInput');
   const log = document.getElementById('log');
 
-  avatarBtn.addEventListener('click', () => modal.style.display = 'flex');
-  closeLogin.addEventListener('click', () => modal.style.display = 'none');
-  modal.addEventListener('click', e => { if(e.target===modal) modal.style.display='none'; });
+  // Otwórz / zamknij modal
+  avatarBtn.onclick = () => modal.style.display = 'flex';
+  closeLogin.onclick = () => modal.style.display = 'none';
+  modal.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
 
-  emailBtn.addEventListener('click', async () => {
+  // Sprawdź czy użytkownik już zalogowany
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    avatarBtn.classList.add('logged-in');
+    avatarBtn.textContent = user.email[0].toUpperCase();
+  }
+
+  // Logowanie magic link
+  emailBtn.onclick = async () => {
     const email = emailInput.value.trim();
-    if(!email){ log.innerText="❌ Podaj email"; return; }
-
-    log.innerText="⏳ Wysyłam magic link...";
-
-    try {
-      const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await res.json();
-      if(!res.ok){ 
-        console.error(data);
-        log.innerText="❌ Błąd: "+(data.error||res.status); 
-        return; 
-      }
-
-      log.innerText="✅ Sprawdź email – magic link wysłany!";
-      modal.style.display='none';
-    } catch(err){
-      console.error(err);
-      log.innerText="❌ Błąd połączenia";
+    if (!email) {
+      log.innerText = "❌ Podaj email";
+      return;
     }
-  });
+
+    log.innerText = "⏳ Wysyłam magic link...";
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: "https://orep.pl/wyszukiwarka"
+      }
+    });
+
+    if (error) {
+      log.innerText = "❌ " + error.message;
+      return;
+    }
+
+    log.innerText = "✅ Sprawdź email";
+    setTimeout(() => modal.style.display = 'none', 800);
+  };
 });
 </script>
 
