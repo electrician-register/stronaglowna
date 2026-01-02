@@ -1,1 +1,170 @@
-qqq
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logowanie – Supabase</title>
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+    }
+
+    .avatar-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #888;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-size: 20px;
+    }
+
+    .avatar-btn.logged-in {
+      background: #2b6cb0;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      width: 300px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px;
+      width: 100%;
+      margin: 6px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .email {
+      background: #555;
+      color: white;
+      border: none;
+    }
+
+    .log {
+      font-size: 14px;
+      margin-top: 10px;
+      white-space: pre-line; /* <-- WAŻNE */
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- AWATAR -->
+<button id="avatarBtn" class="avatar-btn">👤</button>
+
+<!-- MODAL LOGOWANIA -->
+<div class="modal" id="loginModal">
+  <div class="box">
+    <h3>Logowanie</h3>
+
+    <input type="email" id="emailInput" placeholder="Email" />
+
+    <button class="email" id="emailBtn">Zaloguj e-mailem</button>
+    <button id="closeLogin">Zamknij</button>
+
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+/* ==========================
+   SUPABASE CONFIG
+========================== */
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
+const sb = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+/* ==========================
+   APP LOGIC
+========================== */
+document.addEventListener('DOMContentLoaded', async () => {
+  const avatarBtn = document.getElementById('avatarBtn');
+  const modal = document.getElementById('loginModal');
+  const closeLogin = document.getElementById('closeLogin');
+  const emailBtn = document.getElementById('emailBtn');
+  const emailInput = document.getElementById('emailInput');
+  const log = document.getElementById('log');
+
+  avatarBtn.addEventListener('click', () => {
+    modal.style.display = 'flex';
+  });
+
+  closeLogin.onclick = () => modal.style.display = 'none';
+  modal.onclick = e => {
+    if (e.target === modal) modal.style.display = 'none';
+  };
+
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    avatarBtn.classList.add('logged-in');
+    avatarBtn.textContent = user.email[0].toUpperCase();
+  }
+
+  emailBtn.onclick = async () => {
+    const email = emailInput.value.trim();
+    if (!email) {
+      log.innerText = "❌ adres e-mail jest niepoprawny";
+      return;
+    }
+
+    log.innerText = "⏳ Wysyłamy link logowania…";
+
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: "https://orep.pl/wyszukiwarka"
+      }
+    });
+
+    if (error) {
+      log.innerText = "❌ " + error.message;
+      return;
+    }
+
+    log.innerText =
+      "✅ Wysłaliśmy e-mail z linkiem logowania.\n\n" +
+      "👉 Otwórz swoją skrzynkę pocztową i kliknij link, aby się zalogować.\n\n" +
+      "Jeśli nie widzisz wiadomości — sprawdź folder SPAM.";
+  };
+});
+</script>
+
+</body>
+</html>
