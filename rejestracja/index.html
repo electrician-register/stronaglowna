@@ -3,168 +3,160 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logowanie – Supabase</title>
+  <title>Rejestracja – OREP</title>
 
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    /* =======================
+       Reset + font
+    ======================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
-      padding: 40px;
-    }
-
-    .avatar-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #888;
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      font-size: 20px;
-    }
-
-    .avatar-btn.logged-in {
-      background: #2b6cb0;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
+      background: #f4f6f8;
+      display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 999;
-    }
-
-    .box {
-      background: white;
+      min-height: 100vh;
       padding: 20px;
-      width: 300px;
-      border-radius: 8px;
+    }
+
+    /* =======================
+       Formularz
+    ======================== */
+    .form-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
       text-align: center;
     }
 
-    input {
+    .form-container h2 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input[type="email"] {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 8px;
+      padding: 12px 15px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       font-size: 16px;
     }
 
     button {
-      padding: 12px;
       width: 100%;
-      margin: 6px 0;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
       font-size: 16px;
       cursor: pointer;
     }
 
-    .email {
-      background: #555;
+    .btn-submit {
+      background-color: #2b6cb0;
       color: white;
-      border: none;
+      font-weight: 600;
+    }
+
+    .btn-submit:hover {
+      background-color: #1e4e8c;
     }
 
     .log {
+      margin-top: 15px;
       font-size: 14px;
-      margin-top: 10px;
-      white-space: pre-line; /* <-- WAŻNE */
+      color: #333;
+      word-break: break-word;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    a {
+      color: #2b6cb0;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 
 <body>
 
-<!-- AWATAR -->
-<button id="avatarBtn" class="avatar-btn">👤</button>
-
-<!-- MODAL LOGOWANIA -->
-<div class="modal" id="loginModal">
-  <div class="box">
-    <h3>Logowanie</h3>
-
-    <input type="email" id="emailInput" placeholder="Email" />
-
-    <button class="email" id="emailBtn">Zaloguj e-mailem</button>
-    <button id="closeLogin">Zamknij</button>
-
+  <div class="form-container">
+    <h2>Rejestracja / Logowanie</h2>
+    <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
+    <button class="btn-submit" id="emailBtn">Wyślij magic link</button>
     <div class="log" id="log"></div>
+    <div class="footer">
+      Masz już konto? <a href="/login/">Zaloguj się</a>
+    </div>
   </div>
-</div>
 
-<script>
-/* ==========================
-   SUPABASE CONFIG
-========================== */
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+  <script>
+    /* =========================
+       SUPABASE CONFIG
+    ========================== */
+    const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const sb = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ==========================
-   APP LOGIC
-========================== */
-document.addEventListener('DOMContentLoaded', async () => {
-  const avatarBtn = document.getElementById('avatarBtn');
-  const modal = document.getElementById('loginModal');
-  const closeLogin = document.getElementById('closeLogin');
-  const emailBtn = document.getElementById('emailBtn');
-  const emailInput = document.getElementById('emailInput');
-  const log = document.getElementById('log');
+    /* =========================
+       APP LOGIC
+    ========================== */
+    document.addEventListener('DOMContentLoaded', async () => {
+      const emailInput = document.getElementById('emailInput');
+      const emailBtn = document.getElementById('emailBtn');
+      const log = document.getElementById('log');
 
-  avatarBtn.addEventListener('click', () => {
-    modal.style.display = 'flex';
-  });
-
-  closeLogin.onclick = () => modal.style.display = 'none';
-  modal.onclick = e => {
-    if (e.target === modal) modal.style.display = 'none';
-  };
-
-  const { data: { user } } = await sb.auth.getUser();
-  if (user) {
-    avatarBtn.classList.add('logged-in');
-    avatarBtn.textContent = user.email[0].toUpperCase();
-  }
-
-  emailBtn.onclick = async () => {
-    const email = emailInput.value.trim();
-    if (!email) {
-      log.innerText = "❌ adres e-mail jest niepoprawny";
-      return;
-    }
-
-    log.innerText = "⏳ Wysyłamy link logowania…";
-
-    const { error } = await sb.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: "https://orep.pl/rejestracja_formularz"
+      // sprawdź czy użytkownik jest już zalogowany
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        log.innerText = `✅ Zalogowany jako ${user.email}`;
+        emailInput.disabled = true;
+        emailBtn.disabled = true;
       }
+
+      // wysyłanie magic link
+      emailBtn.onclick = async () => {
+        const email = emailInput.value.trim();
+        if (!email) {
+          log.innerText = "❌ Podaj poprawny adres e-mail";
+          return;
+        }
+
+        log.innerText = "⏳ Wysyłanie magic linka...";
+
+        const { error } = await sb.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: "https://orep.pl/rejestracja_formularz"
+          }
+        });
+
+        if (error) {
+          log.innerText = "❌ " + error.message;
+          return;
+        }
+
+        log.innerText = "✅ Sprawdź skrzynkę e-mail i kliknij magic link";
+      };
     });
-
-    if (error) {
-      log.innerText = "❌ " + error.message;
-      return;
-    }
-
-    log.innerText =
-      "✅ Wysłaliśmy e-mail z linkiem logowania.\n\n" +
-      "👉 Otwórz swoją skrzynkę pocztową i kliknij link, aby się zalogować.\n\n" +
-      "Jeśli nie widzisz wiadomości — sprawdź folder SPAM.";
-  };
-});
-</script>
+  </script>
 
 </body>
 </html>
