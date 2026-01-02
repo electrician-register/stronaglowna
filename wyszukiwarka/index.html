@@ -144,11 +144,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   emailBtn.onclick = async () => {
     const email = emailInput.value.trim();
     if (!email) {
-      log.innerText = "❌ Podaj email";
+      log.innerText = "❌ adres e-mail jest niepoprawny";
       return;
     }
 
-    log.innerText = "⏳ Wysyłam magic link...";
+    log.innerText = "⏳ Zapisuję Twoje dane w bazie danych Auth";
 
     const { error } = await sb.auth.signInWithOtp({
       email,
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    log.innerText = "✅ Sprawdź email";
+    log.innerText = "✅ Wysłaliśmy Tobie wiadomość e-mail. Potwierdź swoją tożsamość";
     setTimeout(() => modal.style.display = 'none', 800);
   };
 });
