@@ -2,169 +2,168 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logowanie – Supabase</title>
-
-  <!-- Supabase JS CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <title>Rejestracja</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 40px;
     }
-
-    .avatar-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #888;
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      font-size: 20px;
+    form {
+      background-color: #ffffff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
     }
-
-    .avatar-btn.logged-in {
-      background: #2b6cb0;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    .box {
-      background: white;
-      padding: 20px;
-      width: 300px;
-      border-radius: 8px;
+    h2 {
       text-align: center;
+      color: #333;
+      margin-bottom: 20px;
     }
-
-    input {
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: 600;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    select,
+    textarea {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 8px;
-      font-size: 16px;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
     }
-
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
     button {
-      padding: 12px;
+      margin-top: 20px;
       width: 100%;
-      margin: 6px 0;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
       font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
     }
-
-    .email {
-      background: #555;
-      color: white;
-      border: none;
+    #result {
+      font-weight: bold;
+      padding: 10px;
+      margin-top: 15px;
+      text-align: center;
+      border-radius: 6px;
     }
-
-    .log {
-      font-size: 14px;
-      margin-top: 10px;
-      white-space: pre-line; /* <-- WAŻNE */
+    .success {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .error {
+      background-color: #f44336;
+      color: white;
     }
   </style>
 </head>
 
 <body>
+<form id="register-form">
+  <h2>Rejestracja</h2>
 
-<!-- AWATAR -->
-<button id="avatarBtn" class="avatar-btn">👤</button>
+  <label>Imię:</label>
+  <input type="text" id="imie" required>
 
-<!-- MODAL LOGOWANIA -->
-<div class="modal" id="loginModal">
-  <div class="box">
-    <h3>Logowanie</h3>
+  <label>Nazwisko:</label>
+  <input type="text" id="nazwisko" required>
 
-    <input type="email" id="emailInput" placeholder="Email" />
+  <label>Miasto:</label>
+  <input type="text" id="miasto">
 
-    <button class="email" id="emailBtn">Zaloguj e-mailem</button>
-    <button id="closeLogin">Zamknij</button>
+  <label>Województwo:</label>
+  <input type="text" id="wojewodztwo">
 
-    <div class="log" id="log"></div>
-  </div>
-</div>
+  <label>Nr uprawnień E:</label>
+  <input type="text" id="nrE">
 
-<script>
-/* ==========================
-   SUPABASE CONFIG
-========================== */
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+  <label>Nr uprawnień E z pomiarami:</label>
+  <input type="text" id="nrEPomiary">
 
-const sb = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  <label>Nr uprawnień D:</label>
+  <input type="text" id="nrD">
 
-/* ==========================
-   APP LOGIC
-========================== */
-document.addEventListener('DOMContentLoaded', async () => {
-  const avatarBtn = document.getElementById('avatarBtn');
-  const modal = document.getElementById('loginModal');
-  const closeLogin = document.getElementById('closeLogin');
-  const emailBtn = document.getElementById('emailBtn');
-  const emailInput = document.getElementById('emailInput');
-  const log = document.getElementById('log');
+  <label>Data ważności:</label>
+  <input type="date" id="dataWaznosci">
 
-  avatarBtn.addEventListener('click', () => {
-    modal.style.display = 'flex';
-  });
+  <label>Wydane przez:</label>
+  <input type="text" id="wydanePrzez">
 
-  closeLogin.onclick = () => modal.style.display = 'none';
-  modal.onclick = e => {
-    if (e.target === modal) modal.style.display = 'none';
-  };
+  <label>Email:</label>
+  <input type="email" id="email">
 
-  const { data: { user } } = await sb.auth.getUser();
-  if (user) {
-    avatarBtn.classList.add('logged-in');
-    avatarBtn.textContent = user.email[0].toUpperCase();
+  <label>Telefon:</label>
+  <input type="tel" id="telefon">
+
+  <label>Zajmuje się:</label>
+  <textarea id="zajmujeSie"></textarea>
+
+  <label>Załącz skan uprawnień:</label>
+  <input type="file" id="plik" multiple>
+
+  <button type="submit">Zarejestruj</button>
+  <p id="result"></p>
+</form>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+  'https://tfbqqduxtsacvwfigsvt.supabase.co',
+  'TWÓJ_ANON_KEY'
+)
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+  const result = document.getElementById('result')
+  result.textContent = ''
+  result.className = ''
+
+  const { error } = await supabase.from('tabela_elektrykow').insert([{
+    imie: imie.value,
+    nazwisko: nazwisko.value,
+    miasto: miasto.value,
+    wojewodztwo: wojewodztwo.value,
+    nrE: nrE.value,
+    nrEPomiary: nrEPomiary.value,
+    nrD: nrD.value,
+    dataWaznosci: dataWaznosci.value,
+    wydanePrzez: wydanePrzez.value,
+    email: email.value,
+    telefon: telefon.value,
+    zajmujeSie: zajmujeSie.value
+  }])
+
+  if (error) {
+    result.textContent = 'Błąd: ' + error.message
+    result.classList.add('error')
+  } else {
+    result.textContent = '✅ Wniosek został wysłany do weryfikacji'
+    result.classList.add('success')
+    document.getElementById('register-form').reset()
   }
-
-  emailBtn.onclick = async () => {
-    const email = emailInput.value.trim();
-    if (!email) {
-      log.innerText = "❌ adres e-mail jest niepoprawny";
-      return;
-    }
-
-    log.innerText = "⏳ Wysyłamy link logowania…";
-
-    const { error } = await sb.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: "https://orep.pl/wyszukiwarka"
-      }
-    });
-
-    if (error) {
-      log.innerText = "❌ " + error.message;
-      return;
-    }
-
-    log.innerText =
-      "✅ Wysłaliśmy e-mail z linkiem logowania.\n\n" +
-      "👉 Otwórz swoją skrzynkę pocztową i kliknij link, aby się zalogować.\n\n" +
-      "Jeśli nie widzisz wiadomości — sprawdź folder SPAM.";
-  };
-});
+})
 </script>
-
 </body>
 </html>
