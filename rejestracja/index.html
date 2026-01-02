@@ -58,6 +58,7 @@
       padding: 25px 20px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 2px solid red; /* <-- tutaj czerwona obramówka */
     }
 
     .form-container h2 {
@@ -109,7 +110,7 @@
 
   <div class="wrapper">
     <!-- LOGO -->
-    <img src="logo1.png" alt="OREP Logo" class="logo">
+    <img src="/path/to/logo.png" alt="OREP Logo" class="logo">
 
     <!-- TEKST WYJAŚNIAJĄCY -->
     <div class="intro-text">
@@ -127,23 +128,16 @@
   </div>
 
   <script>
-    /* =========================
-       SUPABASE CONFIG
-    ========================== */
     const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    /* =========================
-       APP LOGIC
-    ========================== */
     document.addEventListener('DOMContentLoaded', async () => {
       const emailInput = document.getElementById('emailInput');
       const emailBtn = document.getElementById('emailBtn');
       const log = document.getElementById('log');
 
-      // sprawdź czy użytkownik jest już zalogowany
       const { data: { user } } = await sb.auth.getUser();
       if (user) {
         log.innerText = `✅ Zalogowany jako ${user.email}`;
@@ -151,7 +145,6 @@
         emailBtn.disabled = true;
       }
 
-      // wysyłanie magic link
       emailBtn.onclick = async () => {
         const email = emailInput.value.trim();
         if (!email) {
