@@ -1,66 +1,199 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Wyślij email</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wyszukiwarka – OREP</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 40px; background: #f4f6f8; }
-    .box { max-width: 400px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
-    input, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; }
-    button { background: #2e7d32; color: #fff; border: none; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    .log { margin-top: 15px; font-size: 14px; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h3 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    .email {
+      background-color: #555;
+      color: #fff;
+    }
+
+    #logoutBtn {
+      background-color: #c53030;
+      color: #fff;
+      display: none;
+    }
+
+    .log {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .avatar-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #888;
+      color: #fff;
+      font-weight: 700;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .avatar-btn.logged-in {
+      background: #2b6cb0;
+    }
+
+    .username-label {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="box">
-    <h3>Wyślij email</h3>
-    <input type="email" id="email" placeholder="Wpisz email" required>
-    <button id="sendBtn">Wyślij</button>
-    <div class="log" id="log"></div>
+<div class="box">
+  <div class="avatar-container">
+    <button id="avatarBtn" class="avatar-btn">👤</button>
+    <div id="userLabel" class="username-label" aria-live="polite"></div>
   </div>
 
-  <script>
-    const btn = document.getElementById("sendBtn");
-    const log = document.getElementById("log");
+  <input type="email" id="emailInput" placeholder="Twój email" autocomplete="email" />
+  <button id="emailBtn" class="email">Wyślij link logowania</button>
+  <button id="logoutBtn">Wyloguj</button>
+  <div class="log" id="log"></div>
+</div>
 
-    btn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      if (!email) {
-        log.innerText = "❌ Podaj email";
-        return;
-      }
+<div class="modal" id="loginModal">
+  <div class="box">
+    <h3>Logowanie</h3>
+    <input type="email" id="modalEmail" placeholder="Email" />
+    <button id="modalEmailBtn" class="email">Wyślij link logowania</button>
+    <button id="closeModal">Zamknij</button>
+    <div class="log" id="modalLog"></div>
+  </div>
+</div>
 
-      log.innerText = "⏳ Wysyłam email...";
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-      try {
-        const res = await fetch(
-          "https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-otp",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email })
-          }
-        );
+  const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-        const data = await res.json();
-        if (!res.ok) {
-          console.error(data);
-          log.innerText = "❌ Błąd: " + (data.error || data.details || res.status);
-          return;
-        }
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        log.innerText = "✅ Email wysłany!";
-        console.log("OK:", data);
+  const avatarBtn = document.getElementById("avatarBtn");
+  const userLabel = document.getElementById("userLabel");
+  const emailInput = document.getElementById("emailInput");
+  const emailBtn = document.getElementById("emailBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const log = document.getElementById("log");
+  const modal = document.getElementById("loginModal");
+  const closeModal = document.getElementById("closeModal");
+  const modalEmail = document.getElementById("modalEmail");
+  const modalEmailBtn = document.getElementById("modalEmailBtn");
+  const modalLog = document.getElementById("modalLog");
 
-      } catch (err) {
-        console.error(err);
-        log.innerText = "❌ Błąd połączenia";
-      }
+  function setAvatar(email) {
+    if (!email) {
+      avatarBtn.textContent = "👤";
+      avatarBtn.classList.remove("logged-in");
+      userLabel.textContent = "";
+      logoutBtn.style.display = "none";
+    } else {
+      const initials = email.split("@")[0].slice(0,2).toUpperCase();
+      avatarBtn.textContent = initials;
+      avatarBtn.classList.add("logged-in");
+      userLabel.textContent = email;
+      logoutBtn.style.display = "inline-block";
+    }
+  }
+
+  avatarBtn.addEventListener("click", () => modal.style.display = "flex");
+  closeModal.addEventListener("click", () => modal.style.display = "none");
+  modal.addEventListener("click", e => { if(e.target === modal) modal.style.display='none' });
+
+  logoutBtn.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    setAvatar(null);
+    modal.style.display = "none";
+    alert("Wylogowano");
+  });
+
+  async function sendOtp(email, logEl) {
+    if (!email) {
+      logEl.innerText = "❌ Podaj email";
+      return;
+    }
+    logEl.innerText = "⏳ Wysyłam link logowania...";
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: "https://orep.pl/wyszukiwarka" }
     });
-  </script>
+
+    if (error) {
+      console.error("❌ Błąd Supabase:", error);
+      logEl.innerText = "❌ Błąd: " + error.message;
+    } else {
+      logEl.innerText = "📧 Sprawdź swój email (link logowania)";
+      modal.style.display = "none";
+    }
+  }
+
+  emailBtn.addEventListener("click", () => sendOtp(emailInput.value.trim(), log));
+  modalEmailBtn.addEventListener("click", () => sendOtp(modalEmail.value.trim(), modalLog));
+
+  supabase.auth.getSession().then(({ data }) => setAvatar(data.session?.user?.email));
+</script>
 
 </body>
 </html>
