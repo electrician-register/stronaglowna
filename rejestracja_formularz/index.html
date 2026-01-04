@@ -5,50 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
 
-  <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-    .form-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 600px;
-    }
-    .avatar-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: #2b6cb0;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 20px;
-      margin-bottom: 15px;
-      cursor: default;
-    }
-    form {
-      background-color: #ffffff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f8; display: flex; justify-content: center; padding: 20px; }
+    .form-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; max-width: 600px; }
+    .avatar-btn { width: 64px; height: 64px; border-radius: 50%; background: #2b6cb0; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; margin-bottom: 15px; cursor: default; }
+    form { background-color: #ffffff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; }
     h2 { text-align: center; color: #333; margin-bottom: 20px; }
     label { display: block; margin-top: 15px; margin-bottom: 5px; color: #555; font-weight: 600; }
-    input[type="text"], input[type="email"], input[type="tel"], select, textarea {
-      width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; transition: border 0.2s;
-    }
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; transition: border 0.2s; }
     input:focus, select:focus, textarea:focus { border-color: #4CAF50; outline: none; }
     textarea { resize: vertical; min-height: 80px; }
     input[type="file"] { margin-top: 10px; }
@@ -70,10 +36,10 @@
       <h2>Rejestracja</h2>
 
       <label for="imie">Imię:</label>
-      <input type="text" id="imie" name="imie" required oninput="this.value = this.value.toUpperCase();">
+      <input type="text" id="imie" name="imie" required oninput="this.value = this.value.toUpperCase(); updateAvatar();">
 
       <label for="nazwisko">Nazwisko:</label>
-      <input type="text" id="nazwisko" name="nazwisko" required oninput="this.value = this.value.toUpperCase();">
+      <input type="text" id="nazwisko" name="nazwisko" required oninput="this.value = this.value.toUpperCase(); updateAvatar();">
 
       <label for="miasto">Miasto:</label>
       <input type="text" id="miasto" name="miasto">
@@ -82,13 +48,13 @@
       <input type="text" id="wojewodztwo" name="wojewodztwo">
 
       <label for="nrE">Nr uprawnień E:</label>
-      <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej: Nr uprawnień E z pomiarami"></textarea>
+      <textarea id="nrE" name="nrE"></textarea>
      
       <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-      <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
+      <textarea id="nrEPomiary" name="nrEPomiary"></textarea>
 
       <label for="nrD">Nr uprawnień D:</label>
-      <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
+      <textarea id="nrD" name="nrD"></textarea>
 
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" readonly>
@@ -97,7 +63,7 @@
       <input type="tel" id="telefon" name="telefon">
 
       <label for="zajmujeSie">Zajmuje się:</label>
-      <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Tu możesz podać informację o Tobie, które zostaną wyświetlone osobie szukającej elektryka w Twojej okolicy"></textarea>
+      <textarea id="zajmujeSie" name="zajmujeSie"></textarea>
 
       <label for="plik">Załącz skan uprawnień:</label>
       <input type="file" id="plik" name="plik" accept="*/*" multiple>
@@ -113,19 +79,29 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+    const supabaseKey = 'TWÓJ_KEY'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const avatarBtn = document.getElementById('avatarBtn')
 
-    // 🔹 pobranie tokenu z magic linka
+    // 🔹 Pobranie tokenu z URL
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
+
+    function updateAvatar() {
+      const imie = document.getElementById('imie').value
+      const nazwisko = document.getElementById('nazwisko').value
+      if (imie || nazwisko) {
+        avatarBtn.textContent = (imie[0] || '👤').toUpperCase() + (nazwisko[0] || '').toUpperCase()
+      } else {
+        avatarBtn.textContent = '⚡'
+      }
+    }
 
     async function fetchUserData() {
       if (!token) return
       const { data, error } = await supabase
-        .from('users')  // zmiana nazwy tabeli
+        .from('users')
         .select('imie, nazwisko, email')
         .eq('token', token)
         .single()
@@ -139,9 +115,7 @@
         document.getElementById('imie').value = data.imie
         document.getElementById('nazwisko').value = data.nazwisko
         document.getElementById('email').value = data.email
-        avatarBtn.textContent =
-          (data.imie[0] || '👤').toUpperCase() +
-          (data.nazwisko[0] || '').toUpperCase()
+        updateAvatar()
       }
     }
 
@@ -192,9 +166,8 @@
 
       const plikiString = plikUrls.join(',')
 
-      // 🔹 zapis danych do istniejącego klienta według tokenu
       const { error } = await supabase
-        .from('users')  // zmiana nazwy tabeli
+        .from('users')
         .update({
           miasto, wojewodztwo, nrE, nrEPomiary, nrD, telefon, zajmujeSie, plik: plikiString, status: 'completed'
         })
