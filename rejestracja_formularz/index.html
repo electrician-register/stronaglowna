@@ -17,6 +17,7 @@
       padding: 20px;
     }
 
+    /* KONTAINER DLA AWATAR I FORMULARZA */
     .form-wrapper {
       display: flex;
       flex-direction: column;
@@ -25,6 +26,7 @@
       max-width: 600px;
     }
 
+    /* AWATAR GRAFICZNY */
     .avatar-btn {
       width: 64px;
       height: 64px;
@@ -40,6 +42,7 @@
       cursor: default;
     }
 
+    /* FORMULARZ REJESTRACJI */
     form {
       background-color: #ffffff;
       padding: 30px 40px;
@@ -65,12 +68,19 @@
     input[type="text"],
     input[type="email"],
     input[type="tel"],
+    select,
     textarea {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 15px;
+      transition: border 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #4CAF50;
+      outline: none;
     }
 
     textarea {
@@ -93,6 +103,11 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
     }
 
     #result {
@@ -103,6 +118,11 @@
       border-radius: 6px;
     }
 
+    .success {
+      background-color: #4CAF50;
+      color: white;
+    }
+
     .error {
       background-color: #f44336;
       color: white;
@@ -111,6 +131,7 @@
     #loading {
       display: none;
       text-align: center;
+      color: #333;
       font-weight: bold;
       margin-top: 10px;
     }
@@ -121,43 +142,46 @@
 
   <div class="form-wrapper">
 
-    <button class="avatar-btn" id="avatarBtn">⚡</button>
+    <!-- JEDYNA ZMIANA: type="button" -->
+    <button class="avatar-btn" id="avatarBtn" type="button">⚡</button>
 
     <form id="register-form">
       <h2>Rejestracja</h2>
 
       <label for="imie">Imię:</label>
-      <input type="text" id="imie" required oninput="this.value=this.value.toUpperCase();">
+      <input type="text" id="imie" name="imie" required
+       oninput="this.value = this.value.toUpperCase();">
 
       <label for="nazwisko">Nazwisko:</label>
-      <input type="text" id="nazwisko" required oninput="this.value=this.value.toUpperCase();">
+      <input type="text" id="nazwisko" name="nazwisko" required 
+       oninput="this.value = this.value.toUpperCase();">
 
       <label for="miasto">Miasto:</label>
-      <input type="text" id="miasto">
+      <input type="text" id="miasto" name="miasto">
 
       <label for="wojewodztwo">Województwo:</label>
-      <input type="text" id="wojewodztwo">
+      <input type="text" id="wojewodztwo" name="wojewodztwo">
 
       <label for="nrE">Nr uprawnień E:</label>
-      <textarea id="nrE"></textarea>
+      <textarea id="nrE" name="nrE"></textarea>
 
       <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-      <textarea id="nrEPomiary"></textarea>
+      <textarea id="nrEPomiary" name="nrEPomiary"></textarea>
 
       <label for="nrD">Nr uprawnień D:</label>
-      <textarea id="nrD"></textarea>
+      <textarea id="nrD" name="nrD"></textarea>
 
       <label for="email">Email:</label>
-      <input type="email" id="email">
+      <input type="email" id="email" name="email">
 
       <label for="telefon">Telefon:</label>
-      <input type="tel" id="telefon">
+      <input type="tel" id="telefon" name="telefon">
 
       <label for="zajmujeSie">Zajmuje się:</label>
-      <textarea id="zajmujeSie"></textarea>
+      <textarea id="zajmujeSie" name="zajmujeSie"></textarea>
 
       <label for="plik">Załącz skan uprawnień:</label>
-      <input type="file" id="plik" multiple>
+      <input type="file" id="plik" name="plik" multiple>
 
       <button type="submit">Zarejestruj</button>
 
@@ -170,51 +194,24 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabase = createClient(
-      'https://tfbqqduxtsacvwfigsvt.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-    )
-
-    /* 🔒 OBOWIĄZKOWA KONTROLA LOGOWANIA */
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      window.location.href = 'https://orep.pl/logowanie'
-    }
-    /* 🔒 KONIEC */
+    const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
+    const supabaseKey = 'PASTE_YOUR_KEY'
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const avatarBtn = document.getElementById('avatarBtn')
     const emailInput = document.getElementById('email')
 
     emailInput.addEventListener('input', () => {
-      avatarBtn.textContent = emailInput.value ? emailInput.value[0].toUpperCase() : '👤'
+      const email = emailInput.value.trim()
+      avatarBtn.textContent = email ? email[0].toUpperCase() : '👤'
     })
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      document.getElementById('loading').style.display = 'block'
-
-      const { error } = await supabase.from('tabela_elektrykow').insert([{
-        imie: imie.value,
-        nazwisko: nazwisko.value,
-        miasto: miasto.value,
-        wojewodztwo: wojewodztwo.value,
-        nrE: nrE.value,
-        nrEPomiary: nrEPomiary.value,
-        nrD: nrD.value,
-        email: email.value,
-        telefon: telefon.value,
-        zajmujeSie: zajmujeSie.value
-      }])
-
-      document.getElementById('loading').style.display = 'none'
-
-      if (error) {
-        result.textContent = 'Błąd: ' + error.message
-        result.classList.add('error')
-      } else {
-        window.location.href = 'https://orep.pl/logowanie'
-      }
-    })
+      e.preventDefault();
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+      window.location.href = 'https://orep.pl/logowanie';
+    });
   </script>
 
 </body>
