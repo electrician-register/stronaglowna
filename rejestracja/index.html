@@ -21,9 +21,6 @@
       padding: 20px;
     }
 
-    /* ======================
-       Szary box z nagłówkiem i tekstem
-    ======================= */
     .wrapper {
       display: flex;
       flex-direction: column;
@@ -32,13 +29,12 @@
       padding: 40px 20px;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      border: 20px solid white; /* biała obramówka wokół szarego tła */
+      border: 20px solid white;
       max-width: 500px;
       width: 100%;
       text-align: center;
     }
 
-    /* Nowy nagłówek */
     .container {
       display: flex;
       flex-direction: column;
@@ -56,13 +52,8 @@
       gap: 5px;
     }
 
-    .header-text .black {
-      color: #000;
-    }
-
-    .header-text .blue {
-      color: #2b6cb0;
-    }
+    .header-text .black { color: #000; }
+    .header-text .blue { color: #2b6cb0; }
 
     .intro-text {
       font-size: 16px;
@@ -71,16 +62,13 @@
       line-height: 1.5;
     }
 
-    /* =======================
-       Formularz
-    ======================== */
     .form-container {
       width: 100%;
       background: #fff;
       padding: 25px 20px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      border: 2px solid blue; /* czerwona obramówka formularza */
+      border: 2px solid blue;
     }
 
     .form-container h2 {
@@ -124,7 +112,6 @@
       word-break: break-word;
       min-height: 20px;
     }
-
   </style>
 </head>
 
@@ -132,7 +119,6 @@
 
   <div class="wrapper">
 
-    <!-- NOWY NAGŁÓWEK Z TEKSTEM -->
     <div class="container">
       <div class="header-text">
         <div class="text">
@@ -144,16 +130,20 @@
       </div>
     </div>
 
-    <!-- TEKST WYJAŚNIAJĄCY -->
     <div class="intro-text">
       Podaj swój adres e-mail. Po logowaniu otrzymasz dostęp do formularza rejestracji. Link wyślemy na Twój adres e-mail.
     </div>
 
-    <!-- FORMULARZ -->
     <div class="form-container">
       <h2>Rejestracja / Logowanie</h2>
       <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
       <button class="btn-submit" id="emailBtn">Wyślij</button>
+
+      <!-- ✅ DODANY PRZYCISK ZAMKNIJ -->
+      <button onclick="window.location.href='/'" style="margin-top:10px;background:#555;color:#fff;">
+        Zamknij
+      </button>
+
       <div class="log" id="log"></div>
     </div>
 
@@ -184,7 +174,7 @@
           return;
         }
 
-        log.innerText = "⏳ Wysyłanie magic linka...";
+        log.innerText = "⏳ Trwa wysyłanie...";
 
         const { error } = await sb.auth.signInWithOtp({
           email,
@@ -198,7 +188,7 @@
           return;
         }
 
-        log.innerText = "✅ Sprawdź skrzynkę e-mail i kliknij magic link";
+        log.innerText = "✅ Sprawdź skrzynkę e-mail";
       };
     });
   </script>
