@@ -5,158 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
 
-  <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    /* KONTAINER DLA AWATAR I FORMULARZA */
-    .form-wrapper {
-      display: flex;
-      flex-direction: column; /* pionowo: awatar nad formularzem */
-      align-items: flex-start; /* wszystko wyrównane do lewej */
-      width: 100%;
-      max-width: 600px;
-    }
-
-    /* AWATAR GRAFICZNY */
-    .avatar-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: #2b6cb0;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 20px;
-      margin-bottom: 15px; /* przerwa między awatarem a formularzem */
-      cursor: default;
-    }
-
-    /* FORMULARZ REJESTRACJI */
-    form {
-      background-color: #ffffff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      color: #555;
-      font-weight: 600;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-      transition: border 0.2s;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #4CAF50;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    input[type="file"] {
-      margin-top: 10px;
-    }
-
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    #result {
-      font-weight: bold;
-      padding: 10px;
-      margin-top: 15px;
-      text-align: center;
-      border-radius: 6px;
-    }
-
-    .success {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .error {
-      background-color: #f44336;
-      color: white;
-    }
-
-    #loading {
-      display: none;
-      text-align: center;
-      color: #333;
-      font-weight: bold;
-      margin-top: 10px;
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f8; display: flex; justify-content: center; padding: 20px; }
+    .form-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; max-width: 600px; }
+    .avatar-btn { width: 64px; height: 64px; border-radius: 50%; background: #2b6cb0; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; margin-bottom: 15px; cursor: default; }
+    form { background-color: #ffffff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; }
+    h2 { text-align: center; color: #333; margin-bottom: 20px; }
+    label { display: block; margin-top: 15px; margin-bottom: 5px; color: #555; font-weight: 600; }
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; transition: border 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #4CAF50; outline: none; }
+    textarea { resize: vertical; min-height: 80px; }
+    input[type="file"] { margin-top: 10px; }
+    button { margin-top: 20px; width: 100%; padding: 12px; background-color: #4CAF50; color: white; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s ease; }
+    button:hover { background-color: #45a049; }
+    #result { font-weight: bold; padding: 10px; margin-top: 15px; text-align: center; border-radius: 6px; }
+    .success { background-color: #4CAF50; color: white; }
+    .error { background-color: #f44336; color: white; }
+    #loading { display: none; text-align: center; color: #333; font-weight: bold; margin-top: 10px; }
   </style>
 </head>
 
 <body>
 
-  <!-- WSPÓLNY KONTAINER DLA AWATAR I FORMULARZA -->
   <div class="form-wrapper">
-
-    <!-- AWATAR GRAFICZNY (INFORMACYJNY) -->
     <button class="avatar-btn" id="avatarBtn">⚡</button>
 
-    <!-- FORMULARZ REJESTRACJI -->
     <form id="register-form">
       <h2>Rejestracja</h2>
 
       <label for="imie">Imię:</label>
-      <input type="text" id="imie" name="imie" required
-       oninput="this.value = this.value.toUpperCase();">
+      <input type="text" id="imie" name="imie" required oninput="this.value = this.value.toUpperCase(); updateAvatar();">
 
       <label for="nazwisko">Nazwisko:</label>
-      <input type="text" id="nazwisko" name="nazwisko" required 
-       oninput="this.value = this.value.toUpperCase();">
+      <input type="text" id="nazwisko" name="nazwisko" required oninput="this.value = this.value.toUpperCase(); updateAvatar();">
 
       <label for="miasto">Miasto:</label>
       <input type="text" id="miasto" name="miasto">
@@ -165,22 +48,22 @@
       <input type="text" id="wojewodztwo" name="wojewodztwo">
 
       <label for="nrE">Nr uprawnień E:</label>
-      <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej: Nr uprawnień E z pomiarami"></textarea>
+      <textarea id="nrE" name="nrE"></textarea>
      
       <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-      <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
+      <textarea id="nrEPomiary" name="nrEPomiary"></textarea>
 
       <label for="nrD">Nr uprawnień D:</label>
-      <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
+      <textarea id="nrD" name="nrD"></textarea>
 
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email">
+      <input type="email" id="email" name="email" readonly>
 
       <label for="telefon">Telefon:</label>
       <input type="tel" id="telefon" name="telefon">
 
       <label for="zajmujeSie">Zajmuje się:</label>
-      <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Tu możesz podać informację o Tobie, które zostaną wyświetlone osobie szukającej elektryka w Twojej okolicy"></textarea>
+      <textarea id="zajmujeSie" name="zajmujeSie"></textarea>
 
       <label for="plik">Załącz skan uprawnień:</label>
       <input type="file" id="plik" name="plik" accept="*/*" multiple>
@@ -190,32 +73,57 @@
       <p id="result"></p>
       <p id="loading">Trwa rejestracja, proszę czekać...</p>
     </form>
-
   </div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+    const supabaseKey = 'TWÓJ_KEY'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const avatarBtn = document.getElementById('avatarBtn')
-    const emailInput = document.getElementById('email')
 
-    // Awatar zmienia inicjał po wpisaniu e-maila
-    emailInput.addEventListener('input', () => {
-      const email = emailInput.value.trim()
-      if (email) {
-        avatarBtn.textContent = email[0].toUpperCase()
+    // 🔹 Pobranie tokenu z URL
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('token')
+
+    function updateAvatar() {
+      const imie = document.getElementById('imie').value
+      const nazwisko = document.getElementById('nazwisko').value
+      if (imie || nazwisko) {
+        avatarBtn.textContent = (imie[0] || '👤').toUpperCase() + (nazwisko[0] || '').toUpperCase()
       } else {
-        avatarBtn.textContent = '👤'
+        avatarBtn.textContent = '⚡'
       }
-    })
+    }
+
+    async function fetchUserData() {
+      if (!token) return
+      const { data, error } = await supabase
+        .from('users')
+        .select('imie, nazwisko, email')
+        .eq('token', token)
+        .single()
+
+      if (error) {
+        console.error('Błąd pobierania danych:', error.message)
+        return
+      }
+
+      if (data) {
+        document.getElementById('imie').value = data.imie
+        document.getElementById('nazwisko').value = data.nazwisko
+        document.getElementById('email').value = data.email
+        updateAvatar()
+      }
+    }
+
+    fetchUserData()
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      document.getElementById('loading').style.display = 'block';
+      e.preventDefault()
+      document.getElementById('loading').style.display = 'block'
 
       const imie = document.getElementById('imie').value
       const nazwisko = document.getElementById('nazwisko').value
@@ -228,56 +136,54 @@
       const telefon = document.getElementById('telefon').value
       const zajmujeSie = document.getElementById('zajmujeSie').value
 
-      const plikInput = document.getElementById('plik');
-      let plikUrls = [];
+      const plikInput = document.getElementById('plik')
+      let plikUrls = []
 
       if (plikInput.files.length > 0) {
         for (let i = 0; i < plikInput.files.length; i++) {
-          const file = plikInput.files[i];
-          const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
+          const file = plikInput.files[i]
+          const filePath = `permissions/${Date.now()}_${i}_${file.name}`
 
           const { error: uploadError } = await supabase.storage
             .from('attachments')
-            .upload(filePath, file);
+            .upload(filePath, file)
 
           if (uploadError) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('result').textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
-            document.getElementById('result').classList.add('error');
-            return;
+            document.getElementById('loading').style.display = 'none'
+            const result = document.getElementById('result')
+            result.textContent = 'Błąd przesyłania pliku: ' + uploadError.message
+            result.classList.add('error')
+            return
           }
 
-          const { data: publicUrlData } = supabase
-            .storage
+          const { data: publicUrlData } = supabase.storage
             .from('attachments')
-            .getPublicUrl(filePath);
+            .getPublicUrl(filePath)
 
-          plikUrls.push(publicUrlData.publicUrl);
+          plikUrls.push(publicUrlData.publicUrl)
         }
-        }
+      }
 
-      const plikiString = plikUrls.join(',');
+      const plikiString = plikUrls.join(',')
 
       const { error } = await supabase
-        .from('tabela_elektrykow')
-        .insert([{
-          imie, nazwisko, miasto, wojewodztwo,
-          nrE, nrEPomiary, nrD, email, telefon,
-          zajmujeSie, plik: plikiString
-        }]);
+        .from('users')
+        .update({
+          miasto, wojewodztwo, nrE, nrEPomiary, nrD, telefon, zajmujeSie, plik: plikiString, status: 'completed'
+        })
+        .eq('token', token)
 
       const result = document.getElementById('result')
       result.classList.remove('success', 'error')
-      document.getElementById('loading').style.display = 'none';
+      document.getElementById('loading').style.display = 'none'
 
       if (error) {
         result.textContent = 'Błąd: ' + error.message
         result.classList.add('error')
       } else {
-        // PRZEKIEROWANIE NA STRONĘ LOGOWANIA PO SUKCESIE
-        window.location.href = 'https://orep.pl/logowanie';
+        window.location.href = 'https://orep.pl/logowanie'
       }
-    });
+    })
   </script>
 
 </body>
