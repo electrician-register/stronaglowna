@@ -91,7 +91,7 @@
       <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email">
+      <input type="email" id="email" name="email" readonly>
 
       <label for="telefon">Telefon:</label>
       <input type="tel" id="telefon" name="telefon">
@@ -113,19 +113,19 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-    const supabaseKey = 'TWÓJ_KEY'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const avatarBtn = document.getElementById('avatarBtn')
 
-    // 1️⃣ odczyt tokenu z linku
+    // 🔹 pobranie tokenu z magic linka
     const params = new URLSearchParams(window.location.search)
-    const token = params.get('token') // np. https://.../rejestracja_formularz.html?token=XYZ
+    const token = params.get('token')
 
     async function fetchUserData() {
       if (!token) return
       const { data, error } = await supabase
-        .from('zaproszenia') // tabela, w której przechowywane są tokeny + dane klienta
+        .from('users')  // zmiana nazwy tabeli
         .select('imie, nazwisko, email')
         .eq('token', token)
         .single()
@@ -139,19 +139,17 @@
         document.getElementById('imie').value = data.imie
         document.getElementById('nazwisko').value = data.nazwisko
         document.getElementById('email').value = data.email
-
-        // zmiana awatara
         avatarBtn.textContent =
           (data.imie[0] || '👤').toUpperCase() +
           (data.nazwisko[0] || '').toUpperCase()
       }
     }
 
-    fetchUserData() // automatyczne wypełnienie po wejściu
+    fetchUserData()
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      document.getElementById('loading').style.display = 'block';
+      e.preventDefault()
+      document.getElementById('loading').style.display = 'block'
 
       const imie = document.getElementById('imie').value
       const nazwisko = document.getElementById('nazwisko').value
@@ -194,9 +192,9 @@
 
       const plikiString = plikUrls.join(',')
 
-      // 2️⃣ ZAPIS DO BAZY (aktualizacja istniejącego klienta wg tokenu)
+      // 🔹 zapis danych do istniejącego klienta według tokenu
       const { error } = await supabase
-        .from('zaproszenia')
+        .from('users')  // zmiana nazwy tabeli
         .update({
           miasto, wojewodztwo, nrE, nrEPomiary, nrD, telefon, zajmujeSie, plik: plikiString, status: 'completed'
         })
