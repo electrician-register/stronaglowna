@@ -13,27 +13,34 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f6f8;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
       padding: 20px;
     }
 
-    /* AWATAR GRAFICZNY */
- .avatar-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #2b6cb0;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center; /* wyrównanie w lewo */
-  font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 20px;
-  cursor: default;
-}
+    /* KONTAINER DLA AWATAR I FORMULARZA */
+    .form-wrapper {
+      display: flex;
+      flex-direction: column; /* pionowo: awatar nad formularzem */
+      align-items: flex-start; /* wszystko wyrównane do lewej */
+      width: 100%;
+      max-width: 600px;
+    }
 
+    /* AWATAR GRAFICZNY */
+    .avatar-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2b6cb0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 15px; /* przerwa między awatarem a formularzem */
+      cursor: default;
+    }
 
     /* FORMULARZ REJESTRACJI */
     form {
@@ -42,7 +49,6 @@
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 600px;
     }
 
     h2 {
@@ -134,55 +140,58 @@
 
 <body>
 
-  <!-- AWATAR GRAFICZNY (INFORMACYJNY) -->
-  <button class="avatar-btn" id="avatarBtn">⚡
-</button>
+  <!-- WSPÓLNY KONTAINER DLA AWATAR I FORMULARZA -->
+  <div class="form-wrapper">
 
-  <!-- FORMULARZ REJESTRACJI -->
-  <form id="register-form">
-    <h2>Rejestracja</h2>
+    <!-- AWATAR GRAFICZNY (INFORMACYJNY) -->
+    <button class="avatar-btn" id="avatarBtn">⚡</button>
 
-    <label for="imie">Imię:</label>
-    <input type="text" id="imie" name="imie" required
-     oninput="this.value = this.value.toUpperCase();">
+    <!-- FORMULARZ REJESTRACJI -->
+    <form id="register-form">
+      <h2>Rejestracja</h2>
 
+      <label for="imie">Imię:</label>
+      <input type="text" id="imie" name="imie" required
+       oninput="this.value = this.value.toUpperCase();">
 
-    <label for="nazwisko">Nazwisko:</label>
-    <input type="text" id="nazwisko" name="nazwisko" required 
-    oninput="this.value = this.value.toUpperCase();">
+      <label for="nazwisko">Nazwisko:</label>
+      <input type="text" id="nazwisko" name="nazwisko" required 
+       oninput="this.value = this.value.toUpperCase();">
 
-    <label for="miasto">Miasto:</label>
-    <input type="text" id="miasto" name="miasto">
+      <label for="miasto">Miasto:</label>
+      <input type="text" id="miasto" name="miasto">
 
-    <label for="wojewodztwo">Województwo:</label>
-    <input type="text" id="wojewodztwo" name="wojewodztwo">
+      <label for="wojewodztwo">Województwo:</label>
+      <input type="text" id="wojewodztwo" name="wojewodztwo">
 
-    <label for="nrE">Nr uprawnień E:</label>
-    <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej - nrEPomiary"></textarea>
-   
-    <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-    <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
+      <label for="nrE">Nr uprawnień E:</label>
+      <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej - nrEPomiary"></textarea>
+     
+      <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
+      <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
-    <label for="nrD">Nr uprawnień D:</label>
-    <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
+      <label for="nrD">Nr uprawnień D:</label>
+      <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email">
 
-    <label for="telefon">Telefon:</label>
-    <input type="tel" id="telefon" name="telefon">
+      <label for="telefon">Telefon:</label>
+      <input type="tel" id="telefon" name="telefon">
 
-    <label for="zajmujeSie">Zajmuje się:</label>
-    <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Tu możesz podać informację o Tobie, które zostaną wyświetlone osobie szukającej elektryka w Twojej okolicy"></textarea>
+      <label for="zajmujeSie">Zajmuje się:</label>
+      <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Tu możesz podać informację o Tobie, które zostaną wyświetlone osobie szukającej elektryka w Twojej okolicy"></textarea>
 
-    <label for="plik">Załącz skan uprawnień:</label>
-    <input type="file" id="plik" name="plik" accept="*/*" multiple>
+      <label for="plik">Załącz skan uprawnień:</label>
+      <input type="file" id="plik" name="plik" accept="*/*" multiple>
 
-    <button type="submit">Zarejestruj</button>
+      <button type="submit">Zarejestruj</button>
 
-    <p id="result"></p>
-    <p id="loading">Trwa rejestracja, proszę czekać...</p>
-  </form>
+      <p id="result"></p>
+      <p id="loading">Trwa rejestracja, proszę czekać...</p>
+    </form>
+
+  </div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -265,7 +274,6 @@
         result.textContent = 'Błąd: ' + error.message
         result.classList.add('error')
       } else {
-        // PRZEKIEROWANIE po sukcesie
         window.location.href = '/logowanie';
       }
     });
