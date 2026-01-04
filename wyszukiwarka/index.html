@@ -61,7 +61,6 @@
     input[type="text"],
     input[type="email"],
     input[type="tel"],
-    input[type="date"],
     select,
     textarea {
       width: 100%;
@@ -142,10 +141,13 @@
     <h2>Rejestracja</h2>
 
     <label for="imie">Imię:</label>
-    <input type="text" id="imie" name="imie" required>
+    <input type="text" id="imie" name="imie" required
+     oninput="this.value = this.value.toUpperCase();">
+
 
     <label for="nazwisko">Nazwisko:</label>
-    <input type="text" id="nazwisko" name="nazwisko" required>
+    <input type="text" id="nazwisko" name="nazwisko" required 
+    oninput="this.value = this.value.toUpperCase();">
 
     <label for="miasto">Miasto:</label>
     <input type="text" id="miasto" name="miasto">
@@ -157,16 +159,10 @@
     <input type="text" id="nrE" name="nrE">
 
     <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-    <input type="text" id="nrEPomiary" name="nrEPomiary">
+    <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
     <label for="nrD">Nr uprawnień D:</label>
-    <input type="text" id="nrD" name="nrD">
-
-    <label for="dataWaznosci">Data ważności:</label>
-    <input type="date" id="dataWaznosci" name="dataWaznosci">
-
-    <label for="wydanePrzez">Wydane przez:</label>
-    <input type="text" id="wydanePrzez" name="wydanePrzez">
+    <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
     <label for="email">Email:</label>
     <input type="email" id="email" name="email">
@@ -175,7 +171,7 @@
     <input type="tel" id="telefon" name="telefon">
 
     <label for="zajmujeSie">Zajmuje się:</label>
-    <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Opis specjalizacji..."></textarea>
+    <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Tu możesz podać informację o Tobie, które zostaną wyświetlone osobie szukającej elektryka w Twojej okolicy"></textarea>
 
     <label for="plik">Załącz skan uprawnień:</label>
     <input type="file" id="plik" name="plik" accept="*/*" multiple>
@@ -217,8 +213,6 @@
       const nrE = document.getElementById('nrE').value
       const nrEPomiary = document.getElementById('nrEPomiary').value
       const nrD = document.getElementById('nrD').value
-      const dataWaznosci = document.getElementById('dataWaznosci').value
-      const wydanePrzez = document.getElementById('wydanePrzez').value
       const email = document.getElementById('email').value
       const telefon = document.getElementById('telefon').value
       const zajmujeSie = document.getElementById('zajmujeSie').value
@@ -257,8 +251,7 @@
         .from('tabela_elektrykow')
         .insert([{
           imie, nazwisko, miasto, wojewodztwo,
-          nrE, nrEPomiary, nrD,
-          dataWaznosci, wydanePrzez, email, telefon,
+          nrE, nrEPomiary, nrD, email, telefon,
           zajmujeSie, plik: plikiString
         }]);
 
