@@ -17,7 +17,6 @@
       padding: 20px;
     }
 
-    /* KONTAINER DLA AWATAR I FORMULARZA */
     .form-wrapper {
       display: flex;
       flex-direction: column;
@@ -26,7 +25,6 @@
       max-width: 600px;
     }
 
-    /* AWATAR GRAFICZNY */
     .avatar-btn {
       width: 64px;
       height: 64px;
@@ -42,7 +40,6 @@
       cursor: default;
     }
 
-    /* FORMULARZ REJESTRACJI */
     form {
       background-color: #ffffff;
       padding: 30px 40px;
@@ -65,31 +62,12 @@
       font-weight: 600;
     }
 
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select,
-    textarea {
+    input, textarea {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 15px;
-      transition: border 0.2s;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #4CAF50;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    input[type="file"] {
-      margin-top: 10px;
     }
 
     button {
@@ -103,35 +81,11 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    #result {
-      font-weight: bold;
-      padding: 10px;
-      margin-top: 15px;
-      text-align: center;
-      border-radius: 6px;
-    }
-
-    .success {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .error {
-      background-color: #f44336;
-      color: white;
     }
 
     #loading {
       display: none;
       text-align: center;
-      color: #333;
       font-weight: bold;
       margin-top: 10px;
     }
@@ -140,79 +94,57 @@
 
 <body>
 
-  <div class="form-wrapper">
+<div class="form-wrapper">
 
-    <!-- JEDYNA ZMIANA: type="button" -->
-    <button class="avatar-btn" id="avatarBtn" type="button">⚡</button>
+  <button class="avatar-btn" id="avatarBtn">⚡</button>
 
-    <form id="register-form">
-      <h2>Rejestracja</h2>
+  <form id="register-form">
+    <h2>Rejestracja</h2>
 
-      <label for="imie">Imię:</label>
-      <input type="text" id="imie" name="imie" required
-       oninput="this.value = this.value.toUpperCase();">
+    <label>Imię:</label>
+    <input id="imie" required oninput="this.value=this.value.toUpperCase()">
 
-      <label for="nazwisko">Nazwisko:</label>
-      <input type="text" id="nazwisko" name="nazwisko" required 
-       oninput="this.value = this.value.toUpperCase();">
+    <label>Nazwisko:</label>
+    <input id="nazwisko" required oninput="this.value=this.value.toUpperCase()">
 
-      <label for="miasto">Miasto:</label>
-      <input type="text" id="miasto" name="miasto">
+    <label>Email:</label>
+    <input type="email" id="email">
 
-      <label for="wojewodztwo">Województwo:</label>
-      <input type="text" id="wojewodztwo" name="wojewodztwo">
+    <button type="submit">Zarejestruj</button>
+    <p id="loading">Trwa rejestracja...</p>
+  </form>
 
-      <label for="nrE">Nr uprawnień E:</label>
-      <textarea id="nrE" name="nrE"></textarea>
+</div>
 
-      <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-      <textarea id="nrEPomiary" name="nrEPomiary"></textarea>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-      <label for="nrD">Nr uprawnień D:</label>
-      <textarea id="nrD" name="nrD"></textarea>
+  const supabase = createClient(
+    'https://tfbqqduxtsacvwfigsvt.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+  )
 
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email">
+  const avatarBtn = document.getElementById('avatarBtn')
+  const emailInput = document.getElementById('email')
 
-      <label for="telefon">Telefon:</label>
-      <input type="tel" id="telefon" name="telefon">
+  emailInput.addEventListener('input', () => {
+    if (emailInput.value) {
+      avatarBtn.textContent = emailInput.value[0].toUpperCase()
+    }
+  })
 
-      <label for="zajmujeSie">Zajmuje się:</label>
-      <textarea id="zajmujeSie" name="zajmujeSie"></textarea>
+  // ✅ DODANE – AUTOMATYCZNE USTAWIENIE AWATARA PO MAGIC LINKU
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user && user.email) {
+    avatarBtn.textContent = user.email[0].toUpperCase()
+    emailInput.value = user.email
+  }
 
-      <label for="plik">Załącz skan uprawnień:</label>
-      <input type="file" id="plik" name="plik" multiple>
-
-      <button type="submit">Zarejestruj</button>
-
-      <p id="result"></p>
-      <p id="loading">Trwa rejestracja, proszę czekać...</p>
-    </form>
-
-  </div>
-
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-    const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-    const supabaseKey = 'PASTE_YOUR_KEY'
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    const avatarBtn = document.getElementById('avatarBtn')
-    const emailInput = document.getElementById('email')
-
-    emailInput.addEventListener('input', () => {
-      const email = emailInput.value.trim()
-      avatarBtn.textContent = email ? email[0].toUpperCase() : '👤'
-    })
-
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      document.getElementById('loading').style.display = 'block';
-      document.getElementById('loading').style.display = 'none';
-      window.location.href = 'https://orep.pl/logowanie';
-    });
-  </script>
+  document.getElementById('register-form').addEventListener('submit', e => {
+    e.preventDefault()
+    document.getElementById('loading').style.display = 'block'
+  })
+</script>
 
 </body>
 </html>
