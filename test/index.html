@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Test SMTP</title>
+
+  <!-- 1️⃣ ŁADUJEMY BIBLIOTEKĘ SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <h2>Test SMTP – magic link</h2>
+
+  <!-- 2️⃣ POLE DO WPISANIA EMAILA -->
+  <input type="email" id="email" placeholder="test@email.com">
+
+  <!-- 3️⃣ PRZYCISK WYSYŁAJĄCY MAILA -->
+  <button id="send">Wyślij testowy mail</button>
+
+  <!-- 4️⃣ MIEJSCE NA KOMUNIKATY -->
+  <p id="log"></p>
+
+  <script>
+    // 5️⃣ ADRES TWOJEGO PROJEKTU SUPABASE
+    const SUPABASE_URL = "https://TWÓJ_PROJECT_ID.supabase.co";
+
+    // 6️⃣ PUBLICZNY KLUCZ ANON (SAFE!)
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
+    // 7️⃣ TWORZYMY POŁĄCZENIE Z SUPABASE
+    const sb = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    // 8️⃣ POBIERAMY ELEMENTY HTML
+    const btn = document.getElementById("send");
+    const log = document.getElementById("log");
+
+    // 9️⃣ REAKCJA NA KLIKNIĘCIE PRZYCISKU
+    btn.onclick = async () => {
+
+      // 🔟 ODCZYT EMAILA Z POLA
+      const email = document.getElementById("email").value.trim();
+
+      // 1️⃣1️⃣ PROSTA WALIDACJA
+      if (!email) {
+        log.innerText = "❌ Podaj adres e-mail";
+        return;
+      }
+
+      // 1️⃣2️⃣ INFO DLA UŻYTKOWNIKA
+      log.innerText = "⏳ Wysyłam maila...";
+
+      // 1️⃣3️⃣ WYSYŁKA MAGIC LINKA
+      const { error } = await sb.auth.signInWithOtp({
+        email: email,
+        options: {
+          // 1️⃣4️⃣ GDZIE MA PRZEKIEROWAĆ PO KLIKNIĘCIU
+          emailRedirectTo: "https://orep.pl"
+        }
+      });
+
+      // 1️⃣5️⃣ OBSŁUGA BŁĘDU
+      if (error) {
+        log.innerText = "❌ Błąd SMTP: " + error.message;
+        return;
+      }
+
+      // 1️⃣6️⃣ SUKCES
+      log.innerText = "✅ Mail wysłany – sprawdź skrzynkę";
+    };
+  </script>
+
+</body>
+</html>
