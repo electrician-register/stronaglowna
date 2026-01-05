@@ -101,7 +101,7 @@
     async function fetchUserData() {
       if (!token) return
       const { data, error } = await supabase
-        .from('users')
+        .from('auth.users')
         .select('imie, nazwisko, email')
         .eq('token', token)
         .single()
