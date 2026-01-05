@@ -64,9 +64,11 @@
 
       // 1️⃣5️⃣ OBSŁUGA BŁĘDU
       if (error) {
-        log.innerText = "❌ Błąd SMTP: " + error.message;
-        return;
-      }
+  console.error('SUPABASE ERROR:', error)
+  alert(error.message)
+} else {
+  console.log('OK:', data)
+}
 
       // 1️⃣6️⃣ SUKCES
       log.innerText = "✅ Mail wysłany – sprawdź skrzynkę";
