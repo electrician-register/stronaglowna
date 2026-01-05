@@ -39,7 +39,28 @@
     const log = document.getElementById("log");
 
     // 9️⃣ REAKCJA NA KLIKNIĘCIE PRZYCISKU
-    btn.onclick = async () => {
+   btn.onclick = async () => {
+  const email = emailInput.value.trim()
+
+  console.log('EMAIL:', email)
+
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      redirectTo: 'https://orep.pl/rejestracja_formularz'
+    }
+  })
+
+  console.log('DATA:', data)
+  console.log('ERROR:', error)
+
+  if (error) {
+    alert(error.message)
+  } else {
+    alert('Email wysłany')
+  }
+}
+
 
       // 🔟 ODCZYT EMAILA Z POLA
       const email = document.getElementById("email").value.trim();
