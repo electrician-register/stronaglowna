@@ -247,10 +247,15 @@
       result.classList.remove('success', 'error')
       document.getElementById('loading').style.display = 'none';
 
-      if (error) {
-        result.textContent = 'Błąd: ' + error.message
-        result.classList.add('error')
-      } else {
+     if (error) {
+    // polskie komunikaty dla unikalnego email
+    let message = error.message
+    if (message.includes('unique_email')) {
+      message = 'Ten adres e-mail jest już zarejestrowany'
+    }
+    result.textContent = 'Błąd: ' + message
+    result.classList.add('error')
+  } else {
         // PRZEKIEROWANIE NA STRONĘ LOGOWANIA PO SUKCESIE
         window.location.href = 'https://orep.pl/logowanie';
       }
