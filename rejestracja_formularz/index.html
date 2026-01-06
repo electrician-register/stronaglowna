@@ -114,16 +114,11 @@
     <label for="nrD">Nr uprawnień D:</label>
     <input type="text" id="nrD" name="nrD">
 
-    
- <label for="wydanePrzez">Wydane przez:</label>
-    <input type="text" id="wydanePrzez" name="wydanePrzez">
-
     <label for="email">Email:</label>
     <input type="email" id="email" name="email">
 
     <label for="telefon">Telefon:</label>
-    <input type="tel" id="telefon" name="telefon">
- <textarea id="telefon" name="telefon" placeholder="Twój telefon będzie widoczny dla klientów"></textarea>
+     <textarea id="telefon" name="telefon" placeholder="Twój telefon będzie widoczny dla klientów"></textarea>
 
     <label for="zajmujeSie">Zajmuje się:</label>
     <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Opis specjalizacji..."></textarea>
@@ -155,8 +150,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const nrE = document.getElementById('nrE').value
   const nrEPomiary = document.getElementById('nrEPomiary').value
   const nrD = document.getElementById('nrD').value
-  const dataWaznosci = document.getElementById('dataWaznosci').value
-  const wydanePrzez = document.getElementById('wydanePrzez').value
+  
   const email = document.getElementById('email').value
   const telefon = document.getElementById('telefon').value
   const zajmujeSie = document.getElementById('zajmujeSie').value
@@ -210,8 +204,6 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
       nrE,
       nrEPomiary,
       nrD,
-      dataWaznosci,
-      wydanePrzez,
       email,
       telefon,
       zajmujeSie,
