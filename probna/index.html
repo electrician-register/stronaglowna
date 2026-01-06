@@ -2,16 +2,40 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Rejestracja</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f6f8;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      padding: 40px;
+      padding: 20px;
     }
+
+    /* AWATAR GRAFICZNY */
+ .avatar-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2b6cb0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* wyrównanie w lewo */
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 20px;
+  cursor: default;
+}
+
+
+    /* FORMULARZ REJESTRACJI */
     form {
       background-color: #ffffff;
       padding: 30px 40px;
@@ -20,11 +44,13 @@
       width: 100%;
       max-width: 600px;
     }
+
     h2 {
       text-align: center;
       color: #333;
       margin-bottom: 20px;
     }
+
     label {
       display: block;
       margin-top: 15px;
@@ -32,10 +58,10 @@
       color: #555;
       font-weight: 600;
     }
+
     input[type="text"],
     input[type="email"],
     input[type="tel"],
-    input[type="date"],
     select,
     textarea {
       width: 100%;
@@ -45,17 +71,21 @@
       font-size: 15px;
       transition: border 0.2s;
     }
+
     input:focus, select:focus, textarea:focus {
       border-color: #4CAF50;
       outline: none;
     }
+
     textarea {
       resize: vertical;
       min-height: 80px;
     }
+
     input[type="file"] {
       margin-top: 10px;
     }
+
     button {
       margin-top: 20px;
       width: 100%;
@@ -69,9 +99,11 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
+
     button:hover {
       background-color: #45a049;
     }
+
     #result {
       font-weight: bold;
       padding: 10px;
@@ -79,25 +111,45 @@
       text-align: center;
       border-radius: 6px;
     }
+
     .success {
       background-color: #4CAF50;
       color: white;
     }
+
     .error {
       background-color: #f44336;
       color: white;
     }
+
+    #loading {
+      display: none;
+      text-align: center;
+      color: #333;
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
+
 <body>
+
+  <!-- AWATAR GRAFICZNY (INFORMACYJNY) -->
+  <button class="avatar-btn" id="avatarBtn">⚡
+</button>
+
+  <!-- FORMULARZ REJESTRACJI -->
   <form id="register-form">
     <h2>Rejestracja</h2>
 
     <label for="imie">Imię:</label>
-    <input type="text" id="imie" name="imie" required>
+    <input type="text" id="imie" name="imie" required
+     oninput="this.value = this.value.toUpperCase();">
+
 
     <label for="nazwisko">Nazwisko:</label>
-    <input type="text" id="nazwisko" name="nazwisko" required>
+    <input type="text" id="nazwisko" name="nazwisko" required 
+    oninput="this.value = this.value.toUpperCase();">
 
     <label for="miasto">Miasto:</label>
     <input type="text" id="miasto" name="miasto">
@@ -106,19 +158,13 @@
     <input type="text" id="wojewodztwo" name="wojewodztwo">
 
     <label for="nrE">Nr uprawnień E:</label>
-    <input type="text" id="nrE" name="nrE">
-
+    <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej - nrEPomiary"></textarea>
+   
     <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-    <input type="text" id="nrEPomiary" name="nrEPomiary">
+    <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
     <label for="nrD">Nr uprawnień D:</label>
-    <input type="text" id="nrD" name="nrD">
-
-    <label for="dataWaznosci">Data ważności:</label>
-    <input type="date" id="dataWaznosci" name="dataWaznosci">
-
-    <label for="wydanePrzez">Wydane przez:</label>
-    <input type="text" id="wydanePrzez" name="wydanePrzez">
+    <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
     <label for="email">Email:</label>
     <input type="email" id="email" name="email">
@@ -127,109 +173,103 @@
     <input type="tel" id="telefon" name="telefon">
 
     <label for="zajmujeSie">Zajmuje się:</label>
-    <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Opis specjalizacji..."></textarea>
+    <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Tu możesz podać informację o Tobie, które zostaną wyświetlone osobie szukającej elektryka w Twojej okolicy"></textarea>
 
     <label for="plik">Załącz skan uprawnień:</label>
     <input type="file" id="plik" name="plik" accept="*/*" multiple>
 
     <button type="submit">Zarejestruj</button>
+
     <p id="result"></p>
-    <p id="loading" style="display:none; text-align:center; color:#333; font-weight:bold;">Trwa rejestracja, proszę czekać...</p>
+    <p id="loading">Trwa rejestracja, proszę czekać...</p>
   </form>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co' // w supabase wybierasz projekt np. ELEKTRYCY, po lewej na dole wybieraz USTAWIENIA i tam DATA API i tam URL 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
- //  w supabase wybierasz projekt np. ELEKTRYCY, po lewej na dole wybieraz USTAWIENIA i tam API KEYS i tam LEGACY ANON
-  const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  document.getElementById('loading').style.display = 'block';
+    const avatarBtn = document.getElementById('avatarBtn')
+    const emailInput = document.getElementById('email')
 
-  const imie = document.getElementById('imie').value 
-  const nazwisko = document.getElementById('nazwisko').value
-  const miasto = document.getElementById('miasto').value
-  const wojewodztwo = document.getElementById('wojewodztwo').value
-  const nrE = document.getElementById('nrE').value
-  const nrEPomiary = document.getElementById('nrEPomiary').value
-  const nrD = document.getElementById('nrD').value
-  const dataWaznosci = document.getElementById('dataWaznosci').value
-  const wydanePrzez = document.getElementById('wydanePrzez').value
-  const email = document.getElementById('email').value
-  const telefon = document.getElementById('telefon').value
-  const zajmujeSie = document.getElementById('zajmujeSie').value
+    // Awatar zmienia inicjał po wpisaniu e-maila
+    emailInput.addEventListener('input', () => {
+      const email = emailInput.value.trim()
+      if (email) {
+        avatarBtn.textContent = email[0].toUpperCase()
+      } else {
+        avatarBtn.textContent = '👤'
+      }
+    })
 
-  const plikInput = document.getElementById('plik');
-  let plikUrls = [];
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      document.getElementById('loading').style.display = 'block';
 
-  if (plikInput.files.length > 0) {
-    for (let i = 0; i < plikInput.files.length; i++) {
-      const file = plikInput.files[i];
-      const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
+      const imie = document.getElementById('imie').value
+      const nazwisko = document.getElementById('nazwisko').value
+      const miasto = document.getElementById('miasto').value
+      const wojewodztwo = document.getElementById('wojewodztwo').value
+      const nrE = document.getElementById('nrE').value
+      const nrEPomiary = document.getElementById('nrEPomiary').value
+      const nrD = document.getElementById('nrD').value
+      const email = document.getElementById('email').value
+      const telefon = document.getElementById('telefon').value
+      const zajmujeSie = document.getElementById('zajmujeSie').value
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('attachments')
-        .upload(filePath, file);
+      const plikInput = document.getElementById('plik');
+      let plikUrls = [];
 
-      if (uploadError) {
-        document.getElementById('loading').style.display = 'none';
-        console.error('Błąd przesyłania pliku:', uploadError.message);
-        document.getElementById('result').textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
-        document.getElementById('result').classList.add('error');
-        return;
+      if (plikInput.files.length > 0) {
+        for (let i = 0; i < plikInput.files.length; i++) {
+          const file = plikInput.files[i];
+          const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('attachments')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
+            document.getElementById('result').classList.add('error');
+            return;
+          }
+
+          const { data: publicUrlData } = supabase
+            .storage
+            .from('attachments')
+            .getPublicUrl(filePath);
+
+          plikUrls.push(publicUrlData.publicUrl);
+        }
       }
 
-      const { data: publicUrlData, error: urlError } = supabase
-        .storage
-        .from('attachments')
-        .getPublicUrl(filePath);
+      const plikiString = plikUrls.join(',');
 
-      if (urlError) {
-        document.getElementById('loading').style.display = 'none';
-        console.error('Błąd generowania URL:', urlError.message);
-        document.getElementById('result').textContent = 'Błąd generowania URL: ' + urlError.message;
-        document.getElementById('result').classList.add('error');
-        return;
+      const { error } = await supabase
+        .from('tabela_elektrykow')
+        .insert([{
+          imie, nazwisko, miasto, wojewodztwo,
+          nrE, nrEPomiary, nrD, email, telefon,
+          zajmujeSie, plik: plikiString
+        }]);
+
+      const result = document.getElementById('result')
+      result.classList.remove('success', 'error')
+      document.getElementById('loading').style.display = 'none';
+
+      if (error) {
+        result.textContent = 'Błąd: ' + error.message
+        result.classList.add('error')
+      } else {
+        // PRZEKIEROWANIE po sukcesie
+        window.location.href = '/logowanie';
       }
+    });
+  </script>
 
-      plikUrls.push(publicUrlData.publicUrl);
-    }
-  }
-
-  const plikiString = plikUrls.join(',');
-
-  const { error } = await supabase
-    .from('tabela_elektrykow')
-    .insert([{
-      imie,
-      nazwisko,
-      miasto,
-      wojewodztwo,
-      nrE,
-      nrEPomiary,
-      nrD,
-      dataWaznosci,
-      wydanePrzez,
-      email,
-      telefon,
-      zajmujeSie,
-      plik: plikiString
-    }]);
-
-  const result = document.getElementById('result')
-  result.classList.remove('success', 'error')
-  document.getElementById('loading').style.display = 'none';
-
-  if (error) {
-    result.textContent = 'Błąd: ' + error.message
-    result.classList.add('error')
-  } else {
-    window.location.href = '/logowanie';
-  }
-});
-</script>
 </body>
-</html>    
+</html>
