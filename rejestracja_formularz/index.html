@@ -237,7 +237,7 @@
 
       const { error } = await supabase
         .from('tabela_elektrykow')
-        .insert([{
+        .upsert([{
           imie, nazwisko, miasto, wojewodztwo,
           nrE, nrEPomiary, nrD, email, telefon,
           zajmujeSie, plik: plikiString
@@ -246,7 +246,9 @@
       const result = document.getElementById('result')
       result.classList.remove('success', 'error')
       document.getElementById('loading').style.display = 'none';
-
+  {
+    onConflict: 'email' // klucz unikalny
+  });
      if (error) {
     // polskie komunikaty dla unikalnego email
     let message = error.message
