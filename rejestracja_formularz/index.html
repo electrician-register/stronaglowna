@@ -212,6 +212,12 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
  {
     onConflict: 'email'
   });
+if (error) {
+  console.error('Błąd zapisu:', error.message);
+  alert('Nie udało się zapisać danych: ' + error.message);
+} else {
+  alert('Dane zapisane pomyślnie!');
+}
 
   const result = document.getElementById('result')
   result.classList.remove('success', 'error')
