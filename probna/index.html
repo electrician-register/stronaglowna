@@ -251,14 +251,12 @@
 
       const { error } = await supabase
         .from('tabela_elektrykow')
-        .upsert([{
+        .insert([{
           imie, nazwisko, miasto, wojewodztwo,
           nrE, nrEPomiary, nrD, email, telefon,
           zajmujeSie, plik: plikiString
-        }]), 
-        {
-    onConflict: 'email' // klucz unikalny
-  });
+        }]);
+     
 
       const result = document.getElementById('result')
       result.classList.remove('success', 'error')
