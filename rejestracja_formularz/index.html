@@ -118,7 +118,7 @@
     <input type="email" id="email" name="email">
 
     <label for="telefon">Telefon:</label>
-     <textarea id="telefon" name="telefon" placeholder="Twój telefon będzie widoczny dla klientów"></textarea>
+    <textarea id="telefon" name="telefon" placeholder="Twój telefon będzie widoczny dla klientów"></textarea>
 
     <label for="zajmujeSie">Zajmuje się:</label>
     <textarea id="zajmujeSie" name="zajmujeSie" placeholder="Opis specjalizacji..."></textarea>
@@ -128,75 +128,70 @@
 
     <button type="submit">Zarejestruj</button>
     <p id="result"></p>
-    <p id="loading" style="display:none; text-align:center; color:#333; font-weight:bold;">Trwa rejestracja, proszę czekać...</p>
+    <p id="loading" style="display:none; text-align:center; color:#333; font-weight:bold;">
+      Trwa rejestracja, proszę czekać...
+    </p>
   </form>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co' // w supabase wybierasz projekt np. ELEKTRYCY, po lewej na dole wybieraz USTAWIENIA i tam DATA API i tam URL 
+const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
- //  w supabase wybierasz projekt np. ELEKTRYCY, po lewej na dole wybieraz USTAWIENIA i tam API KEYS i tam LEGACY ANON
-  const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  document.getElementById('loading').style.display = 'block';
+  e.preventDefault()
 
-  const imie = document.getElementById('imie').value 
-  const nazwisko = document.getElementById('nazwisko').value
-  const miasto = document.getElementById('miasto').value
-  const wojewodztwo = document.getElementById('wojewodztwo').value
-  const nrE = document.getElementById('nrE').value
-  const nrEPomiary = document.getElementById('nrEPomiary').value
-  const nrD = document.getElementById('nrD').value
-  
-  const email = document.getElementById('email').value
-  const telefon = document.getElementById('telefon').value
-  const zajmujeSie = document.getElementById('zajmujeSie').value
+  const result = document.getElementById('result')
+  result.textContent = ''
+  result.className = ''
 
-  const plikInput = document.getElementById('plik');
-  let plikUrls = [];
+  document.getElementById('loading').style.display = 'block'
+
+  const imie = imie.value
+  const nazwisko = nazwisko.value
+  const miasto = miasto.value
+  const wojewodztwo = wojewodztwo.value
+  const nrE = nrE.value
+  const nrEPomiary = nrEPomiary.value
+  const nrD = nrD.value
+  const email = email.value
+  const telefon = telefon.value
+  const zajmujeSie = zajmujeSie.value
+
+  const plikInput = document.getElementById('plik')
+  let plikUrls = []
 
   if (plikInput.files.length > 0) {
     for (let i = 0; i < plikInput.files.length; i++) {
-      const file = plikInput.files[i];
-      const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
+      const file = plikInput.files[i]
+      const filePath = `permissions/${Date.now()}_${i}_${file.name}`
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('attachments')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          contentType: file.type
+        })
 
       if (uploadError) {
-        document.getElementById('loading').style.display = 'none';
-        console.error('Błąd przesyłania pliku:', uploadError.message);
-        document.getElementById('result').textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
-        document.getElementById('result').classList.add('error');
-        return;
+        document.getElementById('loading').style.display = 'none'
+        result.textContent = uploadError.message
+        result.classList.add('error')
+        return
       }
 
-      const { data: publicUrlData, error: urlError } = supabase
-        .storage
+      const { data } = supabase.storage
         .from('attachments')
-        .getPublicUrl(filePath);
+        .getPublicUrl(filePath)
 
-      if (urlError) {
-        document.getElementById('loading').style.display = 'none';
-        console.error('Błąd generowania URL:', urlError.message);
-        document.getElementById('result').textContent = 'Błąd generowania URL: ' + urlError.message;
-        document.getElementById('result').classList.add('error');
-        return;
-      }
-
-      plikUrls.push(publicUrlData.publicUrl);
+      plikUrls.push(data.publicUrl)
     }
   }
 
-  const plikiString = plikUrls.join(',');
-
   const { error } = await supabase
     .from('tabela_elektrykow')
-    .insert([{
+    .upsert([{
       imie,
       nazwisko,
       miasto,
@@ -207,29 +202,20 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
       email,
       telefon,
       zajmujeSie,
-      plik: plikiString
-    }],
- {
-    onConflict: 'email'
-  });
-if (error) {
-  console.error('Błąd zapisu:', error.message);
-  alert('Nie udało się zapisać danych: ' + error.message);
-} else {
-  alert('Dane zapisane pomyślnie!');
-}
+      plik: plikUrls.join(',')
+    }], {
+      onConflict: 'email'
+    })
 
-  const result = document.getElementById('result')
-  result.classList.remove('success', 'error')
-  document.getElementById('loading').style.display = 'none';
+  document.getElementById('loading').style.display = 'none'
 
   if (error) {
-    result.textContent = 'Błąd: ' + error.message
+    result.textContent = error.message
     result.classList.add('error')
   } else {
-    window.location.href = '/logowanie';
+    window.location.href = '/logowanie'
   }
-});
+})
 </script>
 </body>
-</html>    
+</html>
