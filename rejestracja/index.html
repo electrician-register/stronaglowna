@@ -139,8 +139,10 @@
       <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
       <button class="btn-submit" id="emailBtn">Zaloguj</button>
 
-      <!-- ✅ DODANY PRZYCISK ZAMKNIJ -->
-      <button onclick="window.location.href='/'" style="margin-top:10px;background:#FF0000;color:#fff;">
+      <!-- ✅ PRZYCISK ZAMKNIJ Z WYLOGOWANIEM -->
+      <button 
+        onclick="logoutAndClose()" 
+        style="margin-top:10px;background:#FF0000;color:#fff;">
         Zamknij
       </button>
 
@@ -191,6 +193,12 @@
         log.innerText = "✅ Sprawdź skrzynkę e-mail";
       };
     });
+
+    // Funkcja wylogowania i zamknięcia
+    async function logoutAndClose() {
+      await sb.auth.signOut();
+      window.location.href = '/';
+    }
   </script>
 
 </body>
