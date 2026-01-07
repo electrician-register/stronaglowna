@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rejestracja – OREP</title>
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* Twój istniejący styl (skrócone dla czytelności) */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #000; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+    .wrapper{ display:flex; flex-direction:column; align-items:center; background:#e2e6ea; padding:40px 20px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); border:20px solid white; max-width:500px; width:100%; text-align:center; }
+    .form-container{ width:100%; background:#fff; padding:25px 20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05); border:2px solid blue; }
+    input[type="email"], input[type="password"] { width:100%; padding:12px 15px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; font-size:16px; }
+    button { width:100%; padding:12px; border:none; border-radius:6px; font-size:16px; cursor:pointer; }
+    .btn-submit { background-color:#2b6cb0; color:white; font-weight:600; margin-bottom:8px; }
+    .btn-secondary { background:#fff; color:#2b6cb0; border:1px solid #2b6cb0; margin-bottom:8px; }
+    .log { margin-top:15px; font-size:14px; color:#333; word-break:break-word; min-height:20px; }
+    .actions { display:flex; gap:8px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="form-container">
+      <h2>Logowanie / Rejestracja</h2>
+
+      <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
+      <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
+
+      <div class="actions">
+        <button class="btn-submit" id="signupBtn">Zarejestruj</button>
+        <button class="btn-secondary" id="loginBtn">Zaloguj</button>
+      </div>
+
+      <button 
+        onclick="logoutAndClose()" 
+        style="margin-top:10px;background:#FF0000;color:#fff;border:none;border-radius:6px;padding:10px;">
+        Zamknij
+      </button>
+
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      const signupBtn = document.getElementById('signupBtn');
+      const loginBtn = document.getElementById('loginBtn');
+      const log = document.getElementById('log');
+
+      // Sprawdź obecne zalogowanie
+      try {
+        const { data } = await sb.auth.getUser();
+        if (data?.user) {
+          log.innerText = `✅ Zalogowany jako ${data.user.email}`;
+          emailInput.disabled = true;
+          passwordInput.disabled = true;
+          signupBtn.disabled = true;
+          loginBtn.disabled = true;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+
+      // Rejestracja z hasłem
+      signupBtn.onclick = async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email) {
+          log.innerText = "❌ Podaj poprawny adres e-mail";
+          return;
+        }
+        if (!password || password.length < 8) {
+          log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
+          return;
+        }
+
+        log.innerText = "⏳ Trwa rejestracja...";
+
+        try {
+          const { data, error } = await sb.auth.signUp({ email, password });
+
+          if (error) {
+            // Supabase zwróci tu też błąd gdy hasło jest skompromitowane (leaked)
+            log.innerText = "❌ " + error.message;
+            return;
+          }
+
+          // Jeżeli email confirmations są włączone, user może być null dopóki potwierdzi e-mail
+          if (data?.user) {
+            log.innerText = `✅ Zarejestrowano jako ${data.user.email}`;
+          } else {
+            log.innerText = "✅ Rejestracja zakończona. Sprawdź e-mail i potwierdź konto.";
+          }
+
+        } catch (e) {
+          console.error(e);
+          log.innerText = "❌ Wystąpił błąd podczas rejestracji";
+        }
+      };
+
+      // Logowanie z hasłem
+      loginBtn.onclick = async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email) {
+          log.innerText = "❌ Podaj poprawny adres e-mail";
+          return;
+        }
+        if (!password) {
+          log.innerText = "❌ Podaj hasło";
+          return;
+        }
+
+        log.innerText = "⏳ Trwa logowanie...";
+
+        try {
+          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+          if (error) {
+            log.innerText = "❌ " + error.message;
+            return;
+          }
+
+          if (data?.user) {
+            log.innerText = `✅ Zalogowano jako ${data.user.email}`;
+            emailInput.disabled = true;
+            passwordInput.disabled = true;
+            signupBtn.disabled = true;
+            loginBtn.disabled = true;
+          } else {
+            log.innerText = "✅ Zalogowano. Jeśli wymagane, potwierdź e-mail.";
+          }
+        } catch (e) {
+          console.error(e);
+          log.innerText = "❌ Wystąpił błąd podczas logowania";
+        }
+      };
+    });
+
+    // Wylogowanie i przekierowanie
+    async function logoutAndClose() {
+      try {
+        await sb.auth.signOut();
+      } catch (e) {
+        console.error(e);
+      }
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
