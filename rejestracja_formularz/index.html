@@ -15,18 +15,27 @@
       display: flex;
       justify-content: center;
       padding: 20px;
+      position: relative;
     }
 
-    /* KONTAINER DLA AWATAR I FORMULARZA */
+    /* E-mail zalogowanego użytkownika */
+    #userEmail {
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      font-weight: bold;
+      color: #333;
+      display: none;
+    }
+
+    /* KONTAINER DLA FORMULARZA */
     .form-wrapper {
       display: flex;
-      flex-direction: column; /* pionowo: awatar nad formularzem */
-      align-items: flex-start; /* wszystko wyrównane do lewej */
+      flex-direction: column;
+      align-items: flex-start;
       width: 100%;
       max-width: 600px;
     }
-
-
 
     /* FORMULARZ REJESTRACJI */
     form {
@@ -126,22 +135,21 @@
 
 <body>
 
-  <!-- WSPÓLNY KONTAINER DLA AWATAR I FORMULARZA -->
-  <div class="form-wrapper">
+  <!-- E-mail zalogowanego użytkownika -->
+  <div id="userEmail"></div>
 
- 
+  <!-- WSPÓLNY KONTAINER DLA FORMULARZA -->
+  <div class="form-wrapper">
 
     <!-- FORMULARZ REJESTRACJI -->
     <form id="register-form">
       <h2>Rejestracja</h2>
 
       <label for="imie">Imię:</label>
-      <input type="text" id="imie" name="imie" required
-       oninput="this.value = this.value.toUpperCase();">
+      <input type="text" id="imie" name="imie" required oninput="this.value = this.value.toUpperCase();">
 
       <label for="nazwisko">Nazwisko:</label>
-      <input type="text" id="nazwisko" name="nazwisko" required 
-       oninput="this.value = this.value.toUpperCase();">
+      <input type="text" id="nazwisko" name="nazwisko" required oninput="this.value = this.value.toUpperCase();">
 
       <label for="miasto">Miasto:</label>
       <input type="text" id="miasto" name="miasto">
@@ -151,7 +159,7 @@
 
       <label for="nrE">Nr uprawnień E:</label>
       <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej: Nr uprawnień E z pomiarami"></textarea>
-     
+
       <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
       <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
@@ -185,11 +193,26 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const avatarBtn = document.getElementById('avatarBtn')
     const emailInput = document.getElementById('email')
+    const userEmailDiv = document.getElementById('userEmail')
 
+    // Pokazanie e-maila zalogowanego użytkownika
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user) {
+          userEmailDiv.textContent = data.user.email;
+          userEmailDiv.style.display = 'block';
+        } else {
+          userEmailDiv.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Błąd przy pobieraniu użytkownika:', err);
+        userEmailDiv.style.display = 'none';
+      }
+    });
 
-
+    // Obsługa formularza rejestracji
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       document.getElementById('loading').style.display = 'block';
@@ -247,16 +270,15 @@
       result.classList.remove('success', 'error')
       document.getElementById('loading').style.display = 'none';
 
-     if (error) {
-    // polskie komunikaty dla unikalnego email
-    let message = error.message
-    if (message.includes('unique_email')) {
-      message = 'Ten adres e-mail jest już zarejestrowany'
-    }
-    result.textContent = 'Błąd: ' + message
-    result.classList.add('error')
-  } else {
-        // PRZEKIEROWANIE NA STRONĘ LOGOWANIA PO SUKCESIE
+      if (error) {
+        let message = error.message
+        if (message.includes('unique_email')) {
+          message = 'Ten adres e-mail jest już zarejestrowany'
+        }
+        result.textContent = 'Błąd: ' + message
+        result.classList.add('error')
+      } else {
+        // Przekierowanie po sukcesie
         window.location.href = 'https://orep.pl/logowanie';
       }
     });
