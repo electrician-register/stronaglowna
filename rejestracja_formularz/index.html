@@ -73,9 +73,9 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+    const supabase = createClient(supabaseUrl, supabaseKey);
     const emailInput = document.getElementById('email');
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -108,7 +108,7 @@
       const telefon = document.getElementById('telefon').value.trim();
       const zajmujeSie = document.getElementById('zajmujeSie').value.trim();
 
-      // 🔹 Walidacja: nrE i nrEPomiary nie mogą być wypełnione jednocześnie
+      // Walidacja
       if (nrE && nrEPomiary) {
         document.getElementById('loading').style.display = 'none';
         result.textContent = 'Musisz wybrać EKSPLOATACJA lub EKSPLOATACJA Z POMIARAMI';
@@ -116,7 +116,6 @@
         return;
       }
 
-      // 🔹 Walidacja: nrD wymaga nrEPomiary
       if (nrD && !nrEPomiary) {
         document.getElementById('loading').style.display = 'none';
         result.textContent = 'Aby posiadać uprawnienia DOZOROWE, trzeba mieć również EKSPLOATACJE Z POMIARAMI';
@@ -124,18 +123,16 @@
         return;
       }
 
+      // Upload plików z signed URL (dla RLS)
       const plikInput = document.getElementById('plik');
       let plikUrls = [];
 
       if (plikInput.files.length > 0) {
         for (let i = 0; i < plikInput.files.length; i++) {
           const file = plikInput.files[i];
-          const filePath = `permissions/${Date.now()}_${i}_${file.name}`;
+          const filePath = `permissions/${supabase.auth.user().id}/${Date.now()}_${i}_${file.name}`;
 
-          const { error: uploadError } = await supabase.storage
-            .from('attachments')
-            .upload(filePath, file);
-
+          const { error: uploadError } = await supabase.storage.from('attachments').upload(filePath, file, { upsert: true });
           if (uploadError) {
             document.getElementById('loading').style.display = 'none';
             result.textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
@@ -143,24 +140,18 @@
             return;
           }
 
-          const { data: publicUrlData } = supabase
-            .storage
-            .from('attachments')
-            .getPublicUrl(filePath);
-
-          plikUrls.push(publicUrlData.publicUrl);
+          const { data } = supabase.storage.from('attachments').createSignedUrl(filePath, 3600);
+          plikUrls.push(data.signedUrl);
         }
       }
 
       const plikiString = plikUrls.join(',');
 
-      const { error } = await supabase
-        .from('tabela_elektrykow')
-        .upsert([{
-          imie, nazwisko, miasto, wojewodztwo,
-          nrE, nrEPomiary, nrD, email, telefon,
-          zajmujeSie, plik: plikiString
-        }], { onConflict: 'email' });
+      const { error } = await supabase.from('tabela_elektrykow').upsert([{
+        imie, nazwisko, miasto, wojewodztwo,
+        nrE, nrEPomiary, nrD, email, telefon,
+        zajmujeSie, plik: plikiString
+      }], { onConflict: 'email' });
 
       document.getElementById('loading').style.display = 'none';
 
