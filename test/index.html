@@ -44,9 +44,7 @@
       border:2px solid blue;
     }
 
-    h2 {
-      margin-bottom:20px;
-    }
+    h2 { margin-bottom:20px; }
 
     input[type="email"],
     input[type="password"] {
@@ -103,6 +101,10 @@
       gap:8px;
     }
 
+    .hidden {
+      display:none !important;
+    }
+
     .log {
       margin-top:15px;
       font-size:14px;
@@ -121,16 +123,14 @@
       <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
       <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
 
-      <div class="actions">
+      <div class="actions" id="authActions">
         <button class="btn-submit" id="signupBtn">Zarejestruj</button>
         <button class="btn-secondary" id="loginBtn">Zaloguj</button>
       </div>
 
-      <button class="btn-close" onclick="closeOnly()">
-        Zamknij
-      </button>
+      <button class="btn-close" onclick="closeOnly()">Zamknij</button>
 
-      <button class="btn-logout" onclick="logoutOnly()">
+      <button class="btn-logout hidden" id="logoutBtn" onclick="logoutOnly()">
         Wyloguj
       </button>
 
@@ -149,16 +149,19 @@
       const passwordInput = document.getElementById('passwordInput');
       const signupBtn = document.getElementById('signupBtn');
       const loginBtn = document.getElementById('loginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const authActions = document.getElementById('authActions');
       const log = document.getElementById('log');
 
       try {
         const { data } = await sb.auth.getUser();
         if (data?.user) {
           log.innerText = `✅ Zalogowany jako ${data.user.email}`;
-          emailInput.disabled = true;
-          passwordInput.disabled = true;
-          signupBtn.disabled = true;
-          loginBtn.disabled = true;
+
+          emailInput.classList.add('hidden');
+          passwordInput.classList.add('hidden');
+          authActions.classList.add('hidden');
+          logoutBtn.classList.remove('hidden');
         }
       } catch (err) {
         console.error(err);
@@ -216,10 +219,10 @@
           }
           if (data?.user) {
             log.innerText = `✅ Zalogowano jako ${data.user.email}`;
-            emailInput.disabled = true;
-            passwordInput.disabled = true;
-            signupBtn.disabled = true;
-            loginBtn.disabled = true;
+            emailInput.classList.add('hidden');
+            passwordInput.classList.add('hidden');
+            authActions.classList.add('hidden');
+            logoutBtn.classList.remove('hidden');
           }
         } catch {
           log.innerText = "❌ Wystąpił błąd podczas logowania";
@@ -228,7 +231,6 @@
     });
 
     function closeOnly() {
-      // NIE wylogowuje – sesja zostaje
       window.location.href = '/';
     }
 
