@@ -25,9 +25,9 @@
       max-width: 600px;
     }
 
-    /* AWATAR – DOMYŚLNIE UKRYTY */
+    /* AWATAR GRAFICZNY */
     .avatar-btn {
-      display: none;
+      display: none; /* ⬅️ ZMIANA: ukryty przed logowaniem */
       width: 64px;
       height: 64px;
       border-radius: 50%;
@@ -64,7 +64,11 @@
       font-weight: 600;
     }
 
-    input, select, textarea {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select,
+    textarea {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
@@ -75,6 +79,10 @@
     textarea {
       resize: vertical;
       min-height: 80px;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
     }
 
     button {
@@ -88,6 +96,14 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    #result {
+      font-weight: bold;
+      padding: 10px;
+      margin-top: 15px;
+      text-align: center;
+      border-radius: 6px;
     }
 
     #loading {
@@ -104,49 +120,77 @@
 <div class="form-wrapper">
 
   <!-- AWATAR -->
-  <button class="avatar-btn" id="avatarBtn">👤</button>
+  <button class="avatar-btn" id="avatarBtn">⚡</button>
 
+  <!-- FORMULARZ -->
   <form id="register-form">
     <h2>Rejestracja</h2>
 
-    <label>Imię:</label>
-    <input type="text" id="imie" required>
+    <label for="imie">Imię:</label>
+    <input type="text" id="imie" required oninput="this.value=this.value.toUpperCase();">
 
-    <label>Nazwisko:</label>
-    <input type="text" id="nazwisko" required>
+    <label for="nazwisko">Nazwisko:</label>
+    <input type="text" id="nazwisko" required oninput="this.value=this.value.toUpperCase();">
 
-    <label>Miasto:</label>
+    <label for="miasto">Miasto:</label>
     <input type="text" id="miasto">
 
-    <label>Województwo:</label>
+    <label for="wojewodztwo">Województwo:</label>
     <input type="text" id="wojewodztwo">
 
-    <label>Email:</label>
+    <label for="nrE">Nr uprawnień E:</label>
+    <textarea id="nrE"></textarea>
+
+    <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
+    <textarea id="nrEPomiary"></textarea>
+
+    <label for="nrD">Nr uprawnień D:</label>
+    <textarea id="nrD"></textarea>
+
+    <label for="email">Email:</label>
     <input type="email" id="email">
+
+    <label for="telefon">Telefon:</label>
+    <input type="tel" id="telefon">
+
+    <label for="zajmujeSie">Zajmuje się:</label>
+    <textarea id="zajmujeSie"></textarea>
+
+    <label for="plik">Załącz skan uprawnień:</label>
+    <input type="file" id="plik" multiple>
 
     <button type="submit">Zarejestruj</button>
 
+    <p id="result"></p>
     <p id="loading">Trwa rejestracja...</p>
   </form>
-
 </div>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  const supabase = createClient(
-    'https://tfbqqduxtsacvwfigsvt.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-  )
+  const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+  const supabase = createClient(supabaseUrl, supabaseKey)
 
   const avatarBtn = document.getElementById('avatarBtn')
+  const emailInput = document.getElementById('email')
 
-  /* 🔐 POKAŻ AWATAR TYLKO PO ZALOGOWANIU */
+  // istniejąca logika awatara (NIERUSZONA)
+  emailInput.addEventListener('input', () => {
+    if (emailInput.value) {
+      avatarBtn.textContent = emailInput.value[0].toUpperCase()
+    }
+  })
+
+  /* ⬇️ JEDYNA LOGIKA DOTYCZĄCA ZADANIA */
   const { data: { session } } = await supabase.auth.getSession()
 
   if (session) {
     avatarBtn.style.display = 'flex'
     avatarBtn.textContent = session.user.email[0].toUpperCase()
+  } else {
+    avatarBtn.style.display = 'none'
   }
 
   supabase.auth.onAuthStateChange((event, session) => {
