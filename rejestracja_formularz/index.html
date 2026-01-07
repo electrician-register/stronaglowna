@@ -15,17 +15,6 @@
       display: flex;
       justify-content: center;
       padding: 20px;
-      position: relative;
-    }
-
-    /* E-mail zalogowanego użytkownika */
-    #userEmail {
-      position: fixed;
-      top: 10px;
-      right: 20px;
-      font-weight: bold;
-      color: #333;
-      display: none;
     }
 
     /* KONTAINER DLA FORMULARZA */
@@ -135,13 +124,7 @@
 
 <body>
 
-  <!-- E-mail zalogowanego użytkownika -->
-  <div id="userEmail"></div>
-
-  <!-- WSPÓLNY KONTAINER DLA FORMULARZA -->
   <div class="form-wrapper">
-
-    <!-- FORMULARZ REJESTRACJI -->
     <form id="register-form">
       <h2>Rejestracja</h2>
 
@@ -159,7 +142,7 @@
 
       <label for="nrE">Nr uprawnień E:</label>
       <textarea id="nrE" name="nrE" placeholder="Jeżeli posiadasz również uprawnienia pomiarowe, wypełniasz tylko pole poniżej: Nr uprawnień E z pomiarami"></textarea>
-
+     
       <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
       <textarea id="nrEPomiary" name="nrEPomiary" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
@@ -167,7 +150,7 @@
       <textarea id="nrD" name="nrD" placeholder="Jeżeli nie posiadasz pozostaw pole puste"></textarea>
 
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email">
+      <input type="email" id="email" name="email" readonly>
 
       <label for="telefon">Telefon:</label>
       <input type="tel" id="telefon" name="telefon">
@@ -183,7 +166,6 @@
       <p id="result"></p>
       <p id="loading">Trwa rejestracja, proszę czekać...</p>
     </form>
-
   </div>
 
   <script type="module">
@@ -193,40 +175,35 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const emailInput = document.getElementById('email')
-    const userEmailDiv = document.getElementById('userEmail')
+    const emailInput = document.getElementById('email');
 
-    // Pokazanie e-maila zalogowanego użytkownika
+    // Wstaw e-mail zalogowanego usera do pola email
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         const { data } = await supabase.auth.getUser();
         if (data?.user) {
-          userEmailDiv.textContent = data.user.email;
-          userEmailDiv.style.display = 'block';
-        } else {
-          userEmailDiv.style.display = 'none';
+          emailInput.value = data.user.email;
+          emailInput.readOnly = true; // nie edytowalne
         }
       } catch (err) {
         console.error('Błąd przy pobieraniu użytkownika:', err);
-        userEmailDiv.style.display = 'none';
       }
     });
 
-    // Obsługa formularza rejestracji
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       document.getElementById('loading').style.display = 'block';
 
-      const imie = document.getElementById('imie').value
-      const nazwisko = document.getElementById('nazwisko').value
-      const miasto = document.getElementById('miasto').value
-      const wojewodztwo = document.getElementById('wojewodztwo').value
-      const nrE = document.getElementById('nrE').value
-      const nrEPomiary = document.getElementById('nrEPomiary').value
-      const nrD = document.getElementById('nrD').value
-      const email = document.getElementById('email').value
-      const telefon = document.getElementById('telefon').value
-      const zajmujeSie = document.getElementById('zajmujeSie').value
+      const imie = document.getElementById('imie').value;
+      const nazwisko = document.getElementById('nazwisko').value;
+      const miasto = document.getElementById('miasto').value;
+      const wojewodztwo = document.getElementById('wojewodztwo').value;
+      const nrE = document.getElementById('nrE').value;
+      const nrEPomiary = document.getElementById('nrEPomiary').value;
+      const nrD = document.getElementById('nrD').value;
+      const email = document.getElementById('email').value;
+      const telefon = document.getElementById('telefon').value;
+      const zajmujeSie = document.getElementById('zajmujeSie').value;
 
       const plikInput = document.getElementById('plik');
       let plikUrls = [];
@@ -242,8 +219,9 @@
 
           if (uploadError) {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('result').textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
-            document.getElementById('result').classList.add('error');
+            const result = document.getElementById('result');
+            result.textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
+            result.className = 'error';
             return;
           }
 
@@ -266,19 +244,19 @@
           zajmujeSie, plik: plikiString
         }]);
 
-      const result = document.getElementById('result')
-      result.classList.remove('success', 'error')
+      const result = document.getElementById('result');
+      result.classList.remove('success', 'error');
       document.getElementById('loading').style.display = 'none';
 
       if (error) {
-        let message = error.message
+        let message = error.message;
         if (message.includes('unique_email')) {
-          message = 'Ten adres e-mail jest już zarejestrowany'
+          message = 'Ten adres e-mail jest już zarejestrowany';
         }
-        result.textContent = 'Błąd: ' + message
-        result.classList.add('error')
+        result.textContent = 'Błąd: ' + message;
+        result.className = 'error';
       } else {
-        // Przekierowanie po sukcesie
+        // PRZEKIEROWANIE PO SUKCESIE
         window.location.href = 'https://orep.pl/logowanie';
       }
     });
