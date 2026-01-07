@@ -111,7 +111,15 @@
       // 🔹 Walidacja: nrE i nrEPomiary nie mogą być wypełnione jednocześnie
       if (nrE && nrEPomiary) {
         document.getElementById('loading').style.display = 'none';
-        result.textContent = 'Nie możesz wypełnić jednocześnie Nr E i Nr E z pomiarami';
+        result.textContent = 'Musisz wybrać EKSPLOATACJA lub EKSPLOATACJA Z POMIARAMI';
+        result.className = 'error';
+        return;
+      }
+
+      // 🔹 Walidacja: nrD wymaga nrEPomiary
+      if (nrD && !nrEPomiary) {
+        document.getElementById('loading').style.display = 'none';
+        result.textContent = 'Aby posiadać uprawnienia DOZOROWE, trzeba mieć również EKSPLOATACJE Z POMIARAMI';
         result.className = 'error';
         return;
       }
