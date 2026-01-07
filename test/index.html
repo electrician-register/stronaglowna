@@ -134,8 +134,6 @@
     <!-- X – tylko zamyka, NIE wylogowuje -->
     <div class="close-x" onclick="closeOnly()">✕</div>
 
-      
-    
     <div class="form-container">
       <h2>Logowanie / Rejestracja</h2>
 
@@ -158,7 +156,6 @@
   <script>
     const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -170,20 +167,17 @@
       const authActions = document.getElementById('authActions');
       const log = document.getElementById('log');
 
+      // Sprawdzenie, czy użytkownik już jest zalogowany
       try {
         const { data } = await sb.auth.getUser();
         if (data?.user) {
-          log.innerText = `✅ Zalogowany jako ${data.user.email}`;
-          emailInput.classList.add('hidden');
-          passwordInput.classList.add('hidden');
-          authActions.classList.add('hidden');
-          logoutBtn.classList.remove('hidden');
           window.location.href = '/rejestracja_formularz';
         }
       } catch (err) {
         console.error(err);
       }
 
+      // Rejestracja
       signupBtn.onclick = async () => {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
@@ -201,7 +195,6 @@
         try {
           const { data, error } = await sb.auth.signUp({ email, password });
           if (error) {
-            // Tłumaczenie błędów po polsku
             if (error.message.includes("User already registered")) {
               log.innerText = "❌ Użytkownik o tym adresie e-mail już istnieje";
             } else if (error.message.includes("Invalid email")) {
@@ -214,7 +207,7 @@
             return;
           }
           if (data?.user) {
-            log.innerText = `✅ Zarejestrowano jako ${data.user.email}`;
+            window.location.href = '/rejestracja_formularz';
           } else {
             log.innerText = "✅ Rejestracja zakończona. Sprawdź e-mail i potwierdź konto.";
           }
@@ -223,6 +216,7 @@
         }
       };
 
+      // Logowanie
       loginBtn.onclick = async () => {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
@@ -240,7 +234,6 @@
         try {
           const { data, error } = await sb.auth.signInWithPassword({ email, password });
           if (error) {
-            // Tłumaczenie błędów po polsku
             if (error.message.includes("Invalid login credentials")) {
               log.innerText = "❌ Nieprawidłowy e-mail lub hasło";
             } else if (error.message.includes("Email not confirmed")) {
@@ -251,27 +244,24 @@
             return;
           }
           if (data?.user) {
-            log.innerText = `✅ Zalogowano jako ${data.user.email}`;
-            emailInput.classList.add('hidden');
-            passwordInput.classList.add('hidden');
-            authActions.classList.add('hidden');
-            logoutBtn.classList.remove('hidden');
+            window.location.href = '/rejestracja_formularz';
           }
         } catch {
           log.innerText = "❌ Wystąpił błąd podczas logowania";
         }
       };
 
+      // Wylogowanie
       logoutBtn.onclick = async () => {
         await sb.auth.signOut();
         window.location.href = '/';
       };
     });
 
+    // Tylko zamknięcie strony
     function closeOnly() {
       window.location.href = "/";
     }
   </script>
 </body>
 </html>
-
