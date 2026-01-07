@@ -74,16 +74,20 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'; // wstaw swój klucz
     const supabase = createClient(supabaseUrl, supabaseKey);
+
     const emailInput = document.getElementById('email');
 
+    // Pobranie aktualnego użytkownika
+    let currentUser = null;
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        const { data } = await supabase.auth.getUser();
-        if (data?.user) {
-          emailInput.value = data.user.email;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          emailInput.value = user.email;
           emailInput.readOnly = true;
+          currentUser = user;
         }
       } catch (err) {
         console.error('Błąd przy pobieraniu użytkownika:', err);
@@ -123,16 +127,26 @@
         return;
       }
 
-      // Upload plików z signed URL (dla RLS)
+      if (!currentUser) {
+        document.getElementById('loading').style.display = 'none';
+        result.textContent = 'Nie jesteś zalogowany';
+        result.className = 'error';
+        return;
+      }
+
+      // Upload plików
       const plikInput = document.getElementById('plik');
       let plikUrls = [];
 
       if (plikInput.files.length > 0) {
         for (let i = 0; i < plikInput.files.length; i++) {
           const file = plikInput.files[i];
-          const filePath = `permissions/${supabase.auth.user().id}/${Date.now()}_${i}_${file.name}`;
+          const filePath = `permissions/${currentUser.id}/${Date.now()}_${i}_${file.name}`;
 
-          const { error: uploadError } = await supabase.storage.from('attachments').upload(filePath, file, { upsert: true });
+          const { error: uploadError } = await supabase.storage
+            .from('attachments')
+            .upload(filePath, file, { upsert: true });
+
           if (uploadError) {
             document.getElementById('loading').style.display = 'none';
             result.textContent = 'Błąd przesyłania pliku: ' + uploadError.message;
@@ -140,13 +154,24 @@
             return;
           }
 
-          const { data } = supabase.storage.from('attachments').createSignedUrl(filePath, 3600);
-          plikUrls.push(data.signedUrl);
+          const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+            .from('attachments')
+            .createSignedUrl(filePath, 3600);
+
+          if (signedUrlError) {
+            document.getElementById('loading').style.display = 'none';
+            result.textContent = 'Błąd generowania URL pliku: ' + signedUrlError.message;
+            result.className = 'error';
+            return;
+          }
+
+          plikUrls.push(signedUrlData.signedUrl);
         }
       }
 
       const plikiString = plikUrls.join(',');
 
+      // Upsert do tabeli
       const { error } = await supabase.from('tabela_elektrykow').upsert([{
         imie, nazwisko, miasto, wojewodztwo,
         nrE, nrEPomiary, nrD, email, telefon,
