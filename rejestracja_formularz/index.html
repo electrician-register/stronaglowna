@@ -17,7 +17,6 @@
       padding: 20px;
     }
 
-    /* KONTAINER DLA FORMULARZA */
     .form-wrapper {
       display: flex;
       flex-direction: column;
@@ -26,7 +25,6 @@
       max-width: 600px;
     }
 
-    /* FORMULARZ REJESTRACJI */
     form {
       background-color: #ffffff;
       padding: 30px 40px;
@@ -183,7 +181,7 @@
         const { data } = await supabase.auth.getUser();
         if (data?.user) {
           emailInput.value = data.user.email;
-          emailInput.readOnly = true; // nie edytowalne
+          emailInput.readOnly = true;
         }
       } catch (err) {
         console.error('Błąd przy pobieraniu użytkownika:', err);
@@ -236,13 +234,14 @@
 
       const plikiString = plikUrls.join(',');
 
+      // 🔹 Minimalna zmiana: używamy upsert zamiast insert
       const { error } = await supabase
         .from('tabela_elektrykow')
-        .insert([{
+        .upsert([{
           imie, nazwisko, miasto, wojewodztwo,
           nrE, nrEPomiary, nrD, email, telefon,
           zajmujeSie, plik: plikiString
-        }]);
+        }], { onConflict: 'email' });
 
       const result = document.getElementById('result');
       result.classList.remove('success', 'error');
