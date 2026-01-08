@@ -121,11 +121,15 @@
   <input id="nazwisko" required oninput="this.value=this.value.toUpperCase()">
 
   <label>Miasto</label>
-  <input id="miasto">
+ <label for="wojewodztwo">Województwo:</label>
+<select id="wojewodztwo" required>
+  <option value="">— wybierz województwo —</option>
+</select>
 
-  <label>Województwo</label>
-  <input id="wojewodztwo">
-
+<label for="miasto">Miasto:</label>
+<select id="miasto" required disabled>
+  <option value="">— wybierz miasto —</option>
+</select>
   <label>Nr upr. EKSPLOATACJA</label>
   <textarea id="nrE"></textarea>
 
