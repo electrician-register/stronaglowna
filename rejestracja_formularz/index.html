@@ -147,12 +147,11 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   loading.style.display = 'none'
 
   if (error) {
-    result.textContent = error.message
-    result.className = 'error'
-  } else {
-    result.textContent = recordExists ? 'Dane zaktualizowane' : 'Rejestracja zakończona'
-    result.className = 'success'
-  }
+  result.textContent = error.message
+  result.className = 'error'
+} else {
+  window.location.href = 'https://orep.pl/logowanie';
+}
 })
 </script>
 </body>
