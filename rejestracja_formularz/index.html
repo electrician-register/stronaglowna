@@ -172,7 +172,7 @@ const fields = [
   'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
 ]
 
-/* ✅ KROK 8 — ŁADOWANIE WOJEWÓDZTW */
+/* ✅ KROK 8 — ŁADOWANIE WOJEWÓDZTW I DYNAMICZNE MIĘSTA */
 async function loadWojewodztwa() {
   const { data, error } = await supabase
     .from('wojewodztwa')
@@ -184,14 +184,47 @@ async function loadWojewodztwa() {
     return
   }
 
-  const select = document.getElementById('wojewodztwo')
+  const wojSelect = document.getElementById('wojewodztwo')
   data.forEach(w => {
     const option = document.createElement('option')
     option.value = w.id
     option.textContent = w.nazwa
-    select.appendChild(option)
+    wojSelect.appendChild(option)
   })
 }
+
+// Event: po zmianie województwa ładujemy miasta
+document.getElementById('wojewodztwo').addEventListener('change', async function() {
+  const wojId = this.value
+  const miastoSelect = document.getElementById('miasto')
+
+  if (!wojId) {
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+    miastoSelect.disabled = true
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('miasta')
+    .select('id, nazwa')
+    .eq('wojewodztwo_id', wojId)
+    .order('nazwa')
+
+  if (error) {
+    console.error('Błąd ładowania miast:', error)
+    return
+  }
+
+  miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+  data.forEach(m => {
+    const option = document.createElement('option')
+    option.value = m.id
+    option.textContent = m.nazwa
+    miastoSelect.appendChild(option)
+  })
+
+  miastoSelect.disabled = false
+})
 
 // Zamknięcie formularza → strona główna
 document.getElementById('close-btn').addEventListener('click', () => {
