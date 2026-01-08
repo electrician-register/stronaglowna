@@ -40,7 +40,7 @@
       font-weight: 600;
     }
 
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       border-radius: 6px;
@@ -109,7 +109,6 @@
 <div class="form-wrapper">
 <form id="register-form">
 
-  <!-- PRZYCISK ZAMYKANIA -->
   <button type="button" id="close-btn" aria-label="Zamknij formularz">❌</button>
 
   <h2 id="form-title">Rejestracja</h2>
@@ -120,16 +119,16 @@
   <label>Nazwisko</label>
   <input id="nazwisko" required oninput="this.value=this.value.toUpperCase()">
 
-  <label>Miasto</label>
- <label for="wojewodztwo">Województwo:</label>
-<select id="wojewodztwo" required>
-  <option value="">— wybierz województwo —</option>
-</select>
+  <label for="wojewodztwo">Województwo</label>
+  <select id="wojewodztwo" required>
+    <option value="">— wybierz województwo —</option>
+  </select>
 
-<label for="miasto">Miasto:</label>
-<select id="miasto" required disabled>
-  <option value="">— wybierz miasto —</option>
-</select>
+  <label for="miasto">Miasto</label>
+  <select id="miasto" required disabled>
+    <option value="">— wybierz miasto —</option>
+  </select>
+
   <label>Nr upr. EKSPLOATACJA</label>
   <textarea id="nrE"></textarea>
 
@@ -173,12 +172,37 @@ const fields = [
   'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
 ]
 
+/* ✅ KROK 8 — ŁADOWANIE WOJEWÓDZTW */
+async function loadWojewodztwa() {
+  const { data, error } = await supabase
+    .from('wojewodztwa')
+    .select('id, nazwa')
+    .order('nazwa')
+
+  if (error) {
+    console.error('Błąd ładowania województw:', error)
+    return
+  }
+
+  const select = document.getElementById('wojewodztwo')
+  data.forEach(w => {
+    const option = document.createElement('option')
+    option.value = w.id
+    option.textContent = w.nazwa
+    select.appendChild(option)
+  })
+}
+
 // Zamknięcie formularza → strona główna
 document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+  /* ⬅️ KROK 8 */
+  loadWojewodztwa()
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
