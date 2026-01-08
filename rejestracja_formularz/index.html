@@ -40,11 +40,29 @@
       font-weight: 600;
     }
 
+    /* Uniwersalny styl dla wszystkich pól formularza */
     input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      width: 100%;           /* pełna szerokość formularza */
+      padding: 10px;         /* identyczny padding */
+      border-radius: 6px;    /* zaokrąglone rogi */
+      border: 1px solid #ccc;/* spójny border */
+      font-size: 16px;       /* dopasowany font do reszty */
+      box-sizing: border-box;/* uwzględnia padding w szerokości */
+      background-color: #fff;/* białe tło jak reszta pól */
+      color: #000;           /* kolor tekstu */
+    }
+
+    /* Pole select, gdy jest disabled, wygląd spójny */
+    select:disabled {
+      background-color: #f4f6f8; /* lekko szare tło */
+      color: #555;                /* ciemniejszy tekst, czytelny */
+      cursor: not-allowed;        /* wskaźnik niedostępności */
+    }
+
+    /* Po aktywowaniu select wygląda normalnie */
+    select:not(:disabled) {
+      background-color: #fff;
+      color: #000;
     }
 
     textarea {
@@ -172,7 +190,6 @@ const fields = [
   'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
 ]
 
-/* ✅ KROK 8 — ŁADOWANIE WOJEWÓDZTW I DYNAMICZNE MIĘSTA */
 async function loadWojewodztwa() {
   const { data, error } = await supabase
     .from('wojewodztwa')
@@ -193,7 +210,6 @@ async function loadWojewodztwa() {
   })
 }
 
-// Event: po zmianie województwa ładujemy miasta
 document.getElementById('wojewodztwo').addEventListener('change', async function() {
   const wojId = this.value
   const miastoSelect = document.getElementById('miasto')
@@ -226,14 +242,12 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
   miastoSelect.disabled = false
 })
 
-// Zamknięcie formularza → strona główna
 document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-  /* ⬅️ KROK 8 */
   loadWojewodztwa()
 
   const { data: { user } } = await supabase.auth.getUser()
