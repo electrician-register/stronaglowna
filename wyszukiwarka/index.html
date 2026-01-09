@@ -20,10 +20,7 @@
     body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-      .logo {
-      width: 55px;
-      display: block;
-    }
+      .logo { width: 55px; display: block; }
     .header-text h1 { margin:0; font-size:28px; }
     .header-text p { margin:6px 0 0; opacity:0.9; }
 
@@ -143,6 +140,9 @@ async function szukaj() {
   const miasto = miastoSelect.value
   tbody.innerHTML = ''
 
+  console.log('wybrane wojewodztwo id:', wojId)
+  console.log('wybrane miasto:', miasto)
+
   if (!wojId || !miasto) {
     empty.textContent = 'Proszę wybrać województwo i miasto'
     empty.style.display = 'block'
@@ -152,6 +152,9 @@ async function szukaj() {
   const { data: wojData } = await supabase.from('wojewodztwa')
     .select('nazwa').eq('id', wojId).single()
   const wojewodztwo = wojData?.nazwa
+
+  console.log('nazwa wojewodztwa:', wojewodztwo)
+
   if (!wojewodztwo) return
 
   const { data, error } = await supabase.from('tabela_elektrykow')
@@ -159,6 +162,8 @@ async function szukaj() {
     .ilike('wojewodztwo', `%${wojewodztwo}%`)
     .ilike('miasto', `%${miasto}%`)
 
+  console.log('dane z tabela_elektrykow:', data)
+  console.log('błąd zapytania:', error)
 
   if (error) {
     empty.textContent = 'Błąd pobierania danych: ' + error.message
