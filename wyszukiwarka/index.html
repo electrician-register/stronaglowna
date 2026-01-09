@@ -3,39 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Supabase Test</title>
+<title>Wyszukiwarka elektryków</title>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+
+<style>
+body { font-family: Arial; padding:20px; }
+select, button { width:100%; padding:10px; margin-top:10px; }
+.card { border:1px solid #ccc; padding:10px; margin-top:10px; border-radius:6px; }
+</style>
 </head>
+
 <body>
 
-<h2>Test połączenia z Supabase</h2>
-<button id="btn">Pobierz dane</button>
-<pre id="out">Kliknij przycisk…</pre>
+<h2>Wyszukaj elektryka</h2>
+
+<select id="woj">
+  <option value="">Wybierz województwo</option>
+</select>
+
+<select id="miasto">
+  <option value="">Wybierz miasto</option>
+</select>
+<button id="szukaj">SzukaJ</button>
+
+<div id="wyniki"></div>
 
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+const supabase = createClient(
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+)
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const wojSelect = document.getElementById("woj")
+const miastoSelect = document.getElementById("miasto")
+const wyniki = document.getElementById("wyniki")
 
-document.getElementById("btn").addEventListener("click", async () => {
-  document.getElementById("out").textContent = "Ładowanie…";
+// ------------------------------------
+// Województwa
+// ------------------------------------
+async function loadWoj() {
+  const { data } = await supabase
+    .from("wojewodztwa")
+    .select("id,nazwa")
+    .order("nazwa")
+
+  data.forEach(w => {
+    const opt = document.createElement("option")
+    opt.value = w.id        // <<<< ID
+    opt.textContent = w.nazwa
+    wojSelect.appendChild(opt)
+  })
+}
+
+loadWoj()
+
+// ------------------------------------
+// Miasta po województwie
+// ------------------------------------
+wojSelect.addEventListener("change", async () => {
+  const wojId = wojSelect.value
+  miastoSelect.innerHTML = "<option value=''>Wybierz miasto</option>"
+
+  if (!wojId) return
+
+  const { data } = await supabase
+    .from("miasta")
+    .select("id,nazwa")
+    .eq("wojewodztwo_id", wojId)
+    .order("nazwa")
+
+  data.forEach(m => {
+    const opt = document.createElement("option")
+    opt.value = m.id       // <<<< ID
+    opt.textContent = m.nazwa
+    miastoSelect.appendChild(opt)
+  })
+})
+
+// ------------------------------------
+// Wyszukiwanie
+// ------------------------------------
+document.getElementById("szukaj").addEventListener("click", async () => {
+  wyniki.innerHTML = "Szukam..."
+
+  const wojId = wojSelect.value
+  const miastoId = miastoSelect.value
 
   const { data, error } = await supabase
     .from("tabela_elektrykow")
-    .select("id, imie, nazwisko, wojewodztwo, miasto, gwiazdki, status, email ")
-    .limit(5);
+    .select("imie,nazwisko,email,telefon")
+    .eq("wojewodztwo", wojId)   // <<< INT
+    .eq("miasto", miastoId)    // <<< INT
 
   if (error) {
-    document.getElementById("out").textContent =
-      "BŁĄD:\n" + JSON.stringify(error, null, 2);
-    return;
+    wyniki.innerHTML = "Błąd"
+    return
   }
 
-  document.getElementById("out").textContent =
-    "OK:\n" + JSON.stringify(data, null, 2);
-});
+  if (!data || data.length === 0) {
+    wyniki.innerHTML = "Brak wyników"
+    return
+  }
+
+  wyniki.innerHTML = ""
+
+  data.forEach(e => {
+    const div = document.createElement("div")
+    div.className = "card"
+    div.innerHTML = `
+      <b>${e.imie} ${e.nazwisko}</b><br>
+      ${e.email}<br>
+      ${e.telefon}
+    `
+    wyniki.appendChild(div)
+  })
+})
 </script>
 
 </body>
