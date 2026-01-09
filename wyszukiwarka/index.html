@@ -20,7 +20,10 @@
     body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-      .logo { width: 55px; display: block; }
+      .logo {
+      width: 55px;
+      display: block;
+    }
     .header-text h1 { margin:0; font-size:28px; }
     .header-text p { margin:6px 0 0; opacity:0.9; }
 
@@ -114,8 +117,10 @@ async function loadWojewodztwa() {
   })
 }
 
+// Wczytaj miasta po województwie
 wojSelect.addEventListener('change', async () => {
   const wojId = wojSelect.value
+  console.log('Wybrano województwo ID:', wojId)  // LOG
   miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
   miastoSelect.disabled = true
   if (!wojId) return
@@ -128,42 +133,33 @@ wojSelect.addEventListener('change', async () => {
 
   data.forEach(m => {
     const option = document.createElement('option')
-    option.value = m.nazwa  // używamy nazwy, bo tabela_elektrykow ma kolumnę 'miasto'
+    option.value = m.id   // tu używamy ID zamiast nazwy
     option.textContent = m.nazwa
     miastoSelect.appendChild(option)
   })
   miastoSelect.disabled = false
+  console.log('Załadowano miasta:', data)  // LOG
 })
 
 async function szukaj() {
   const wojId = wojSelect.value
-  const miasto = miastoSelect.value
+  const miastoId = miastoSelect.value
   tbody.innerHTML = ''
 
-  console.log('wybrane wojewodztwo id:', wojId)
-  console.log('wybrane miasto:', miasto)
+  console.log('Szukam dla województwa ID:', wojId, 'miasto ID:', miastoId)  // LOG
 
-  if (!wojId || !miasto) {
+  if (!wojId || !miastoId) {
     empty.textContent = 'Proszę wybrać województwo i miasto'
     empty.style.display = 'block'
     return
   }
 
-  const { data: wojData } = await supabase.from('wojewodztwa')
-    .select('nazwa').eq('id', wojId).single()
-  const wojewodztwo = wojData?.nazwa
-
-  console.log('nazwa wojewodztwa:', wojewodztwo)
-
-  if (!wojewodztwo) return
-
   const { data, error } = await supabase.from('tabela_elektrykow')
     .select('imie,nazwisko,email,telefon,gwiazdki')
-    .ilike('wojewodztwo', `%${wojewodztwo}%`)
-    .ilike('miasto', `%${miasto}%`)
+    .eq('wojewodztwo', wojId)
+    .eq('miasto', miastoId)
 
-  console.log('dane z tabela_elektrykow:', data)
-  console.log('błąd zapytania:', error)
+  console.log('Wyniki z bazy:', data)  // LOG
 
   if (error) {
     empty.textContent = 'Błąd pobierania danych: ' + error.message
