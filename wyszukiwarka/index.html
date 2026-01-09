@@ -156,8 +156,9 @@ async function szukaj() {
 
   const { data, error } = await supabase.from('tabela_elektrykow')
     .select('imie,nazwisko,email,telefon,gwiazdki')
-    .ilike('wojewodztwo', wojewodztwo)
-    .ilike('miasto', miasto)
+    .ilike('wojewodztwo', `%${wojewodztwo}%`)
+    .ilike('miasto', `%${miasto}%`)
+
 
   if (error) {
     empty.textContent = 'Błąd pobierania danych: ' + error.message
