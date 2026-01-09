@@ -180,7 +180,8 @@ async function szukaj() {
       <td>${e.nazwisko}</td>
       <td>${e.email}</td>
       <td>${e.telefon}</td>
-      <td class="stars">${'★'.repeat(e.gwiazdki || 0)}</td>
+      <td>${e.gwiazdki}</td>
+    
     `
     tbody.appendChild(tr)
   })
