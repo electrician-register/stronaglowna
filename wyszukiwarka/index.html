@@ -17,22 +17,19 @@
     }
 
     * { box-sizing: border-box; }
-    body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text); }
+    body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-    .logo { width: 55px; display:block; }
-    .header-text h1 { margin:0; font-size:28px; }
-    .header-text p { margin:6px 0 0; opacity:0.9; }
+      .logo { width: 55px; display: block; }
+      .header-text h1 { margin:0; font-size:28px; }
+      .header-text p { margin:6px 0 0; opacity:0.9; }
 
     main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
+
     .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
-
-    /* Działa na komputerze i telefonie */
-    .search-grid { display:flex; flex-wrap:wrap; gap:20px; }
-    .search-grid > div { flex:1 1 100%; } /* na telefonie pełna szerokość */
-
+    .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
     label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
-    select, button { padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; width:100%; }
+    select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
     button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
     button:hover { opacity:0.9; }
 
@@ -43,10 +40,10 @@
     .stars { color:#f5b301; font-size:16px; }
     .empty { text-align:center; padding:30px; color:var(--muted); }
 
-    @media(max-width:600px) { 
+    @media(max-width:600px) {
       .header-container { flex-direction:column; align-items:flex-start; }
-      .search-grid { display:block; } /* Wersja mobilna blok */
-      .search-grid > div { margin-bottom:12px; }
+      .search-grid { display:block; }
+      .search-grid > div { margin-bottom:15px; width:100%; }
     }
   </style>
 </head>
@@ -103,8 +100,8 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"
-const SUPABASE_ANON_KEY = "TWÓJ_PUBLIC_ANON_KEY"
+const SUPABASE_URL = "https://TWOJ_PROJECT.supabase.co"
+const SUPABASE_ANON_KEY = "TWOJ_PUBLIC_ANON_KEY"
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const wojSelect = document.getElementById('wojewodztwo')
@@ -124,7 +121,7 @@ async function loadWojewodztwa() {
   })
 }
 
-// Wczytaj miasta po województwie
+// Wczytaj miasta po wyborze województwa
 wojSelect.addEventListener('change', async () => {
   const wojId = wojSelect.value
   miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
@@ -146,7 +143,7 @@ wojSelect.addEventListener('change', async () => {
   miastoSelect.disabled = false
 })
 
-// Wyszukiwanie
+// Szukaj po kliknięciu
 document.getElementById('szukaj').addEventListener('click', async () => {
   const wojId = wojSelect.value
   const miastoId = miastoSelect.value
@@ -162,6 +159,7 @@ document.getElementById('szukaj').addEventListener('click', async () => {
     .select('imie,nazwisko,email,telefon,gwiazdki')
     .eq('wojewodztwo_id', wojId)
     .eq('miasto_id', miastoId)
+    .eq('status', 'zweryfikowane')
 
   if (error) {
     empty.textContent = 'Błąd pobierania danych: ' + error.message
@@ -190,6 +188,7 @@ document.getElementById('szukaj').addEventListener('click', async () => {
   empty.style.display = 'none'
 })
 
+// inicjalizacja
 loadWojewodztwa()
 </script>
 </body>
