@@ -172,7 +172,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
 
   const { data } = await supabase
     .from("tabela_elektrykow")
-    .select("imie,nazwisko,email,telefon")
+    .select("imie,nazwisko,email,telefon,gwiazdki")
     .eq("wojewodztwo_id", wojId)
     .eq("miasto_id", miastoId)
 
@@ -189,6 +189,8 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
       <div class="name">${e.imie} ${e.nazwisko}</div>
       <div class="small">${e.email}</div>
       <div class="small">${e.telefon}</div>
+      <div class="small">${e.gwiazdki}</div>
+      
     `
     results.appendChild(d)
   })
