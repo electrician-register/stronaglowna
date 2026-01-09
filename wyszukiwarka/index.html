@@ -178,7 +178,7 @@
 
   // Pobierz listę województw z bazy
   async function initFilters() {
-    let { data: woj, error } = await supabase.from('tabela_elektrykow').select('wojewodztwo').neq('wojewodztwo', '');
+    let { data: woj, error } = await supabase.from('wojewodztwa').select('nazwa').neq('nazwa', '');
     if (woj) {
       const unikat = [...new Set(woj.map(e => e.wojewodztwo))];
       unikat.forEach(w => {
@@ -195,10 +195,10 @@
     if (!woj) return;
 
     let { data: miasta } = await supabase
-      .from('tabela_elektrykow')
-      .select('miasto')
-      .eq('wojewodztwo', woj)
-      .neq('miasto', '');
+      .from('miasta')
+      .select('id,nazwa')
+      .eq('wojewodztwo_id', wojId)
+       .order('nazwa') ;
 
     const unikat = [...new Set(miasta.map(e => e.miasto))];
     unikat.forEach(m => {
@@ -224,8 +224,8 @@
 
     let { data, error } = await supabase
       .from('tabela_elektrykow')
-      .select('imie, nazwisko, email, tel, gwiazdki')
-      .eq('wojewodztwo', woj)
+      .select('imie, nazwisko, email, telefon, gwiazdki')
+      .eq('wojewodztwo', wojewodztwo)
       .eq('miasto', miasto);
 
     if (error) {
