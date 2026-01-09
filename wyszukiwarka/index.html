@@ -20,35 +20,24 @@
     body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-    .logo { width: 55px; display: block; }
-    .header-text h1 { margin:0; font-size:28px; }
-    .header-text p { margin:6px 0 0; opacity:0.9; }
+      .logo { width: 55px; display: block; }
+      .header-text h1 { margin:0; font-size:28px; }
+      .header-text p { margin:6px 0 0; opacity:0.9; }
 
     main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
     .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
-    
-    /* Zmienione na flex dla mobile, grid dla desktop */
-    .search-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
-    @media(max-width:600px) {
-      .search-grid { display: flex; flex-direction: column; gap:12px; }
-    }
-
+    .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
     label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
-    select, button { width:100%; min-width:0; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
+    select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
     button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
     button:hover { opacity:0.9; }
-
-    .results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; min-width:400px; }
+    .results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
+    table { width:100%; border-collapse:collapse; }
     th, td { padding:14px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
     th { font-size:14px; color:var(--muted); }
     .stars { color:#f5b301; font-size:16px; }
     .empty { text-align:center; padding:30px; color:var(--muted); }
-    
-    @media(max-width:600px) { 
-      .header-container { flex-direction:column; align-items:flex-start; } 
-      table, th, td { font-size:13px; padding:8px 6px; }
-    }
+    @media(max-width:600px) { .header-container { flex-direction:column; align-items:flex-start; } }
   </style>
 </head>
 <body>
@@ -68,13 +57,13 @@
     <div class="search-grid">
       <div>
         <label>Województwo</label>
-        <select id="wojewodztwo" onchange="loadMiasta()" oninput="loadMiasta()">
+        <select id="wojewodztwo">
           <option value="">-- wybierz --</option>
         </select>
       </div>
       <div>
         <label>Miasto</label>
-        <select id="miasto" disabled onchange="szukaj()" oninput="szukaj()">
+        <select id="miasto" disabled>
           <option value="">-- wybierz --</option>
         </select>
       </div>
@@ -126,9 +115,8 @@ async function loadWojewodztwa() {
 }
 
 // Wczytaj miasta po województwie
-window.loadMiasta = async function() {
+wojSelect.addEventListener('change', async () => {
   const wojId = wojSelect.value
-  console.log('Wybrano województwo ID:', wojId)  
   miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
   miastoSelect.disabled = true
   if (!wojId) return
@@ -146,15 +134,13 @@ window.loadMiasta = async function() {
     miastoSelect.appendChild(option)
   })
   miastoSelect.disabled = false
-  console.log('Załadowano miasta:', data)  
-}
+})
 
+// Funkcja wyszukiwania
 async function szukaj() {
   const wojId = wojSelect.value
   const miastoId = miastoSelect.value
-  tbody.innerHTML = ''
-
-  console.log('Szukam dla województwa ID:', wojId, 'miasto ID:', miastoId)  
+  tbody.innerHTML = ''  // Czyścimy tabelę przed dodaniem wyników
 
   if (!wojId || !miastoId) {
     empty.textContent = 'Proszę wybrać województwo i miasto'
@@ -166,8 +152,6 @@ async function szukaj() {
     .select('imie,nazwisko,email,telefon,gwiazdki')
     .eq('wojewodztwo', wojId)
     .eq('miasto', miastoId)
-
-  console.log('Wyniki z bazy:', data)  
 
   if (error) {
     empty.textContent = 'Błąd pobierania danych: ' + error.message
@@ -188,7 +172,7 @@ async function szukaj() {
       <td>${e.nazwisko}</td>
       <td>${e.email}</td>
       <td>${e.telefon}</td>
-      <td>${e.gwiazdki}</td>
+      <td class="stars">${'★'.repeat(e.gwiazdki || 0)}</td>
     `
     tbody.appendChild(tr)
   })
@@ -196,9 +180,10 @@ async function szukaj() {
   empty.style.display = 'none'
 }
 
-// inicjalizacja
+// Inicjalizacja
 loadWojewodztwa()
 window.szukaj = szukaj
+
 </script>
 </body>
 </html>
