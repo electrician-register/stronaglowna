@@ -24,7 +24,7 @@
     .header-text h1 { margin:0; font-size:28px; }
     .header-text p { margin:6px 0 0; opacity:0.9; }
 
-    main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
+    main { max-width:1200px; margin:25px auto 40px; padding:0 20px; }
     .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
     .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
     label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
@@ -116,34 +116,35 @@ async function loadWojewodztwa() {
 
 // Wczytaj miasta po województwie
 wojSelect.addEventListener('change', async () => {
-  const wojId = wojSelect.value
-  console.log('Wybrano województwo ID:', wojId)  // LOG
+  const wojId = wojSelect.value.trim()
+  console.log('Wybrano województwo ID:', wojId)
   miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
   miastoSelect.disabled = true
   if (!wojId) return
 
   const { data, error } = await supabase.from('miasta')
     .select('id,nazwa')
-    .eq('wojewodztwo_id', wojId)
+    .eq('wojewodztwo_id', parseInt(wojId))
     .order('nazwa')
   if (error) { console.error(error); return }
 
   data.forEach(m => {
     const option = document.createElement('option')
-    option.value = m.id   // używamy ID miasta
+    option.value = m.id  // używamy ID
     option.textContent = m.nazwa
     miastoSelect.appendChild(option)
   })
   miastoSelect.disabled = false
-  console.log('Załadowano miasta:', data)  // LOG
+  console.log('Załadowano miasta:', data)
 })
 
 async function szukaj() {
-  const wojIdNum = parseInt(wojSelect.value)     // konwertujemy na liczbę
-  const miastoIdNum = parseInt(miastoSelect.value) // konwertujemy na liczbę
+  const wojIdNum = parseInt(wojSelect.value.trim())
+  const miastoIdNum = parseInt(miastoSelect.value.trim())
   tbody.innerHTML = ''
 
-  console.log('Szukam dla województwa ID:', wojIdNum, 'miasto ID:', miastoIdNum)  // LOG
+  console.log('Szukam dla województwa ID:', wojIdNum, 'miasto ID:', miastoIdNum)
+  console.log('Typ wojIdNum:', typeof wojIdNum, 'Typ miastoIdNum:', typeof miastoIdNum)
 
   if (!wojIdNum || !miastoIdNum) {
     empty.textContent = 'Proszę wybrać województwo i miasto'
@@ -156,7 +157,7 @@ async function szukaj() {
     .eq('wojewodztwo', wojIdNum)
     .eq('miasto', miastoIdNum)
 
-  console.log('Wyniki z bazy:', data)  // LOG
+  console.log('Wyniki z bazy:', data)
 
   if (error) {
     empty.textContent = 'Błąd pobierania danych: ' + error.message
@@ -177,7 +178,7 @@ async function szukaj() {
       <td>${e.nazwisko}</td>
       <td>${e.email}</td>
       <td>${e.telefon}</td>
-      <td>${e.gwiazdki}</td>
+       <td>${e.gwiazdki}</td>
     `
     tbody.appendChild(tr)
   })
