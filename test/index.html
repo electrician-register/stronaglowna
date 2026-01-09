@@ -1,267 +1,216 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rejestracja – OREP</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ogólnopolski Rejestr Elektryków</title>
 
-  <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #000;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
-      padding:20px;
+    :root {
+      --primary: #0B5FA5;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1c1c1e;
+      --muted: #6b7280;
     }
 
-    .wrapper{
-      position: relative;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      background:#e2e6ea;
-      padding:40px 20px;
-      border-radius:12px;
-      box-shadow:0 4px 20px rgba(0,0,0,0.1);
-      border:20px solid white;
-      max-width:500px;
-      width:100%;
-      text-align:center;
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
+    header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
+    .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
+      .logo { width: 55px; display: block; }
+    .header-text h1 { margin:0; font-size:28px; }
+    .header-text p { margin:6px 0 0; opacity:0.9; }
+
+    main { max-width:1200px; margin:25px auto 40px; padding:0 20px; }
+    .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
+    .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+    label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
+    select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
+    button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
+    button:hover { opacity:0.9; }
+
+    .results-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      overflow-x: auto; /* umożliwia przewijanie tabeli na małych ekranach */
     }
 
-    /* X w rogu */
-    .close-x {
-      position:absolute;
-      top:8px;
-      right:12px;
-      font-size:22px;
-      font-weight:bold;
-      cursor:pointer;
-      color: #ff0000;
-      user-select:none;
+    table {
+      width: 100%;
+      min-width: 600px; /* wymusza minimalną szerokość tabeli, żeby nie ściskało */
+      border-collapse: collapse;
     }
 
-    .close-x:hover {
-      color:#000;
+    th, td { 
+      padding:14px 10px; 
+      text-align:left; 
+      border-bottom:1px solid #e5e7eb;
+      white-space: nowrap; /* tekst nie zawija się w komórkach */
     }
 
-    .form-container{
-      width:100%;
-      background:#fff;
-      padding:25px 20px;
-      border-radius:8px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.05);
-      border:2px solid blue;
-    }
+    th { font-size:14px; color:var(--muted); }
+    .stars { color:#f5b301; font-size:16px; }
+    .empty { text-align:center; padding:30px; color:var(--muted); }
 
-    h2 {
-      margin-bottom:20px;
-    }
-
-    input[type="email"],
-    input[type="password"] {
-      width:100%;
-      padding:12px 15px;
-      margin-bottom:15px;
-      border:1px solid #ccc;
-      border-radius:6px;
-      font-size:16px;
-    }
-
-    button {
-      width:100%;
-      min-height:48px;
-      border:none;
-      border-radius:6px;
-      font-size:16px;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0;
-      line-height:1;
-    }
-
-    .btn-submit {
-      background-color:#2b6cb0;
-      color:white;
-      font-weight:600;
-    }
-
-    .btn-secondary {
-      background:#008000;
-      color:#fff;
-      border:1px solid #fff;
-    }
-
-    .btn-logout {
-      background:#ff0000;
-      color:#fff;
-      margin-top:10px;
-    }
-
-    .actions {
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .hidden {
-      display:none !important;
-    }
-
-    .log {
-      margin-top:15px;
-      font-size:14px;
-      color:#333;
-      word-break:break-word;
-      min-height:20px;
+    @media(max-width:600px) { 
+      .header-container { flex-direction:column; align-items:flex-start; } 
     }
   </style>
 </head>
-
 <body>
 
-  <div class="wrapper">
+<header>
+  <div class="header-container">
+    <img src="/logo.png" alt="Logo" class="logo" />
+    <div class="header-text">
+      <h1>Ogólnopolski Rejestr Elektryków</h1>
+      <p>Oficjalna wyszukiwarka certyfikowanych elektryków w Polsce</p>
+    </div>
+  </div>
+</header>
 
-    <!-- X – tylko zamyka, NIE wylogowuje -->
-    <div class="close-x" onclick="closeOnly()">✕</div>
-
-    <div class="form-container">
-      <h2>Logowanie / Rejestracja</h2>
-
-      <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
-      <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
-
-      <div class="actions" id="authActions">
-        <button class="btn-submit" id="signupBtn">Zarejestruj</button>
-        <button class="btn-secondary" id="loginBtn">Zaloguj</button>
+<main>
+  <div class="search-card">
+    <div class="search-grid">
+      <div>
+        <label>Województwo</label>
+        <select id="wojewodztwo">
+          <option value="">-- wybierz --</option>
+        </select>
       </div>
-
-      <button id="logoutBtn" class="btn-logout hidden">
-        Wyloguj
-      </button>
-
-      <div class="log" id="log"></div>
+      <div>
+        <label>Miasto</label>
+        <select id="miasto" disabled>
+          <option value="">-- wybierz --</option>
+        </select>
+      </div>
+      <div style="align-self:end;">
+        <button onclick="szukaj()">Szukaj</button>
+      </div>
     </div>
   </div>
 
-  <script>
-    const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <div class="results-card">
+    <table id="wyniki">
+      <thead>
+        <tr>
+          <th>Imię</th>
+          <th>Nazwisko</th>
+          <th>Email</th>
+          <th>Telefon</th>
+          <th>Ocena</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="empty" class="empty">Wybierz województwo i miasto, aby zobaczyć wyniki</div>
+  </div>
+</main>
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const emailInput = document.getElementById('emailInput');
-      const passwordInput = document.getElementById('passwordInput');
-      const signupBtn = document.getElementById('signupBtn');
-      const loginBtn = document.getElementById('loginBtn');
-      const logoutBtn = document.getElementById('logoutBtn');
-      const authActions = document.getElementById('authActions');
-      const log = document.getElementById('log');
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-      // Sprawdzenie, czy użytkownik już jest zalogowany
-      try {
-        const { data } = await sb.auth.getUser();
-        if (data?.user) {
-          window.location.href = '/rejestracja_formularz';
-        }
-      } catch (err) {
-        console.error(err);
-      }
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-      // Rejestracja
-      signupBtn.onclick = async () => {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+const wojSelect = document.getElementById('wojewodztwo')
+const miastoSelect = document.getElementById('miasto')
+const tbody = document.querySelector('#wyniki tbody')
+const empty = document.getElementById('empty')
 
-        if (!email) {
-          log.innerText = "❌ Podaj poprawny adres e-mail";
-          return;
-        }
-        if (!password || password.length < 8) {
-          log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
-          return;
-        }
+// Wczytaj województwa
+async function loadWojewodztwa() {
+  const { data, error } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa')
+  if (error) { console.error(error); return }
+  data.forEach(w => {
+    const option = document.createElement('option')
+    option.value = w.id
+    option.textContent = w.nazwa
+    wojSelect.appendChild(option)
+  })
+}
 
-        log.innerText = "⏳ Trwa rejestracja...";
-        try {
-          const { data, error } = await sb.auth.signUp({ email, password });
-          if (error) {
-            if (error.message.includes("User already registered")) {
-              log.innerText = "❌ Użytkownik o tym adresie e-mail już istnieje";
-            } else if (error.message.includes("Invalid email")) {
-              log.innerText = "❌ Nieprawidłowy adres e-mail";
-            } else if (error.message.includes("Password should be at least")) {
-              log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
-            } else {
-              log.innerText = "❌ " + error.message;
-            }
-            return;
-          }
-          if (data?.user) {
-            window.location.href = '/rejestracja_formularz';
-          } else {
-            log.innerText = "✅ Rejestracja zakończona. Sprawdź e-mail i potwierdź konto.";
-          }
-        } catch {
-          log.innerText = "❌ Wystąpił błąd podczas rejestracji";
-        }
-      };
+// Wczytaj miasta po województwie
+wojSelect.addEventListener('change', async () => {
+  const wojId = wojSelect.value
+  console.log('Wybrano województwo ID:', wojId)
+  miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
+  miastoSelect.disabled = true
+  if (!wojId) return
 
-      // Logowanie
-      loginBtn.onclick = async () => {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+  const { data, error } = await supabase.from('miasta')
+    .select('id,nazwa')
+    .eq('wojewodztwo_id', wojId)
+    .order('nazwa')
+  if (error) { console.error(error); return }
 
-        if (!email) {
-          log.innerText = "❌ Podaj adres e-mail";
-          return;
-        }
-        if (!password) {
-          log.innerText = "❌ Podaj hasło";
-          return;
-        }
+  data.forEach(m => {
+    const option = document.createElement('option')
+    option.value = m.id
+    option.textContent = m.nazwa
+    miastoSelect.appendChild(option)
+  })
+  miastoSelect.disabled = false
+  console.log('Załadowano miasta:', data)
+})
 
-        log.innerText = "⏳ Trwa logowanie...";
-        try {
-          const { data, error } = await sb.auth.signInWithPassword({ email, password });
-          if (error) {
-            if (error.message.includes("Invalid login credentials")) {
-              log.innerText = "❌ Nieprawidłowy e-mail lub hasło";
-            } else if (error.message.includes("Email not confirmed")) {
-              log.innerText = "❌ Konto nie zostało jeszcze potwierdzone e-mailem";
-            } else {
-              log.innerText = "❌ " + error.message;
-            }
-            return;
-          }
-          if (data?.user) {
-            window.location.href = '/rejestracja_formularz';
-          }
-        } catch {
-          log.innerText = "❌ Wystąpił błąd podczas logowania";
-        }
-      };
+async function szukaj() {
+  const wojId = wojSelect.value
+  const miastoId = miastoSelect.value
+  tbody.innerHTML = ''
 
-      // Wylogowanie
-      logoutBtn.onclick = async () => {
-        await sb.auth.signOut();
-        window.location.href = '/';
-      };
-    });
+  console.log('Szukam dla województwa ID:', wojId, 'miasto ID:', miastoId)
 
-    // Tylko zamknięcie strony
-    function closeOnly() {
-      window.location.href = "/";
-    }
-  </script>
+  if (!wojId || !miastoId) {
+    empty.textContent = 'Proszę wybrać województwo i miasto'
+    empty.style.display = 'block'
+    return
+  }
+
+  const { data, error } = await supabase.from('tabela_elektrykow')
+    .select('imie,nazwisko,email,telefon,gwiazdki')
+    .eq('wojewodztwo', wojId)
+    .eq('miasto', miastoId)
+
+  console.log('Wyniki z bazy:', data)
+
+  if (error) {
+    empty.textContent = 'Błąd pobierania danych: ' + error.message
+    empty.style.display = 'block'
+    return
+  }
+
+  if (!data || data.length === 0) {
+    empty.textContent = 'Brak wyników dla wybranego województwa i miasta'
+    empty.style.display = 'block'
+    return
+  }
+
+  data.forEach(e => {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td>${e.imie}</td>
+      <td>${e.nazwisko}</td>
+      <td>${e.email}</td>
+      <td>${e.telefon}</td>
+      <td>${e.gwiazdki}</td>
+    `
+    tbody.appendChild(tr)
+  })
+
+  empty.style.display = 'none'
+}
+
+// inicjalizacja
+loadWojewodztwa()
+window.szukaj = szukaj
+
+</script>
 </body>
 </html>
