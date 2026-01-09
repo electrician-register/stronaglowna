@@ -1,196 +1,150 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ogólnopolski Rejestr Elektryków</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ogólnopolski Rejestr Elektryków</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    :root {
-      --primary: #0B5FA5;
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #1c1c1e;
-      --muted: #6b7280;
-    }
-
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
-    header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
-    .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-      .logo { width: 55px; display: block; }
-    .header-text h1 { margin:0; font-size:28px; }
-    .header-text p { margin:6px 0 0; opacity:0.9; }
-
-    main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
-    .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
-    .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
-    label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
-    select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
-    button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
-    button:hover { opacity:0.9; }
-    .results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); margin-bottom:20px; }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:14px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
-    th { font-size:14px; color:var(--muted); }
-    .stars { color:#f5b301; font-size:16px; }
-    .empty { text-align:center; padding:30px; color:var(--muted); }
-    #log { background: #eef; border:1px solid #99c; padding:10px; margin-top:10px; font-size:12px; white-space:pre-wrap; }
-    @media(max-width:600px) { .header-container { flex-direction:column; align-items:flex-start; } }
-  </style>
+<style>
+:root {
+  --primary:#0B5FA5;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#1c1c1e;
+  --muted:#6b7280;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:var(--bg)}
+header{background:linear-gradient(135deg,#0B5FA5,#083f6b);color:white;padding:40px 20px}
+.header-container{max-width:1200px;margin:0 auto;display:flex;gap:20px;align-items:center}
+.logo{width:55px}
+main{max-width:1200px;margin:20px auto;padding:0 20px}
+.search-card,.results-card{background:white;border-radius:12px;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.08);margin-bottom:20px}
+.search-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+select,button{width:100%;padding:12px;border-radius:8px;border:1px solid #d1d5db}
+button{background:#0B5FA5;color:white;font-weight:bold;border:none}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb}
+.empty{text-align:center;padding:20px;color:#6b7280}
+@media(max-width:600px){.header-container{flex-direction:column;align-items:flex-start}}
+</style>
 </head>
+
 <body>
 
 <header>
   <div class="header-container">
-    <img src="/logo.png" alt="Logo" class="logo" />
-    <div class="header-text">
+    <img src="/logo.png" class="logo">
+    <div>
       <h1>Ogólnopolski Rejestr Elektryków</h1>
-      <p>Oficjalna wyszukiwarka certyfikowanych elektryków w Polsce</p>
+      <p>Oficjalna wyszukiwarka certyfikowanych elektryków</p>
     </div>
   </div>
 </header>
 
 <main>
-  <div class="search-card">
-    <div class="search-grid">
-      <div>
-        <label>Województwo</label>
-        <select id="wojewodztwo">
-          <option value="">-- wybierz --</option>
-        </select>
-      </div>
-      <div>
-        <label>Miasto</label>
-        <select id="miasto" disabled>
-          <option value="">-- wybierz --</option>
-        </select>
-      </div>
-      <div style="align-self:end;">
-        <button onclick="szukaj()">Szukaj</button>
-      </div>
+
+<div class="search-card">
+  <div class="search-grid">
+    <div>
+      <label>Województwo</label>
+      <select id="wojewodztwo"><option value="">-- wybierz --</option></select>
+    </div>
+    <div>
+      <label>Miasto</label>
+      <select id="miasto" disabled><option value="">-- wybierz --</option></select>
+    </div>
+    <div style="align-self:end">
+      <button onclick="szukaj()">Szukaj</button>
     </div>
   </div>
+</div>
 
-  <div class="results-card">
-    <table id="wyniki">
-      <thead>
-        <tr>
-          <th>Imię</th>
-          <th>Nazwisko</th>
-          <th>Email</th>
-          <th>Telefon</th>
-          <th>Ocena</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="empty" class="empty">Wybierz województwo i miasto, aby zobaczyć wyniki</div>
-    <div id="log"></div>
-  </div>
+<div class="results-card">
+  <table>
+    <thead>
+      <tr><th>Imię</th><th>Nazwisko</th><th>Email</th><th>Telefon</th><th>Ocena</th></tr>
+    </thead>
+    <tbody id="wyniki"></tbody>
+  </table>
+  <div id="empty" class="empty">Wybierz województwo i miasto</div>
+</div>
+
 </main>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const supabase = createClient(
+ "https://tfbqqduxtsacvwfigsvt.supabase.co",
+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+)
 
-const wojSelect = document.getElementById('wojewodztwo')
-const miastoSelect = document.getElementById('miasto')
-const tbody = document.querySelector('#wyniki tbody')
+const woj = document.getElementById('wojewodztwo')
+const miasto = document.getElementById('miasto')
+const wyniki = document.getElementById('wyniki')
 const empty = document.getElementById('empty')
-const logDiv = document.getElementById('log')
 
-// Wczytaj województwa
-async function loadWojewodztwa() {
-  const { data, error } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa')
-  if (error) { logDiv.textContent += 'Błąd ładowania województw: ' + error.message + '\n'; return }
-  data.forEach(w => {
-    const option = document.createElement('option')
-    option.value = w.id
-    option.textContent = w.nazwa
-    wojSelect.appendChild(option)
-  })
-}
-
-// Wczytaj miasta po województwie
-wojSelect.addEventListener('change', async () => {
-  const wojId = wojSelect.value
-  logDiv.textContent += 'Wybrano województwo ID: ' + wojId + '\n'
-  miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
-  miastoSelect.disabled = true
-  if (!wojId) return
-
-  const { data, error } = await supabase.from('miasta')
-    .select('id,nazwa')
-    .eq('wojewodztwo_id', Number(wojId))
-    .order('nazwa')
-  if (error) { logDiv.textContent += 'Błąd ładowania miast: ' + error.message + '\n'; return }
-
-  data.forEach(m => {
-    const option = document.createElement('option')
-    option.value = m.id
-    option.textContent = m.nazwa
-    miastoSelect.appendChild(option)
-  })
-  miastoSelect.disabled = false
-  logDiv.textContent += 'Załadowano miasta: ' + JSON.stringify(data) + '\n'
+// województwa
+const { data: wojData } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa')
+wojData.forEach(w=>{
+  const o=document.createElement('option')
+  o.value=w.id
+  o.textContent=w.nazwa
+  woj.appendChild(o)
 })
 
-async function szukaj() {
-  const wojId = Number(wojSelect.value)
-  const miastoId = Number(miastoSelect.value)
-  tbody.innerHTML = ''
-  logDiv.textContent += 'Szukam dla województwa ID: ' + wojId + ', miasto ID: ' + miastoId + '\n'
+// miasta
+woj.addEventListener('change', async ()=>{
+  miasto.innerHTML='<option value="">-- wybierz --</option>'
+  miasto.disabled=true
+  if(!woj.value) return
 
-  if (!wojId || !miastoId) {
-    empty.textContent = 'Proszę wybrać województwo i miasto'
-    empty.style.display = 'block'
-    return
-  }
+  const { data } = await supabase.from('miasta')
+    .select('id,nazwa')
+    .eq('wojewodztwo_id', woj.value)
+    .order('nazwa')
 
-  const { data, error } = await supabase.from('tabela_elektrykow')
+  data.forEach(m=>{
+    const o=document.createElement('option')
+    o.value=m.id
+    o.textContent=m.nazwa
+    miasto.appendChild(o)
+  })
+  miasto.disabled=false
+})
+
+async function szukaj(){
+  wyniki.innerHTML=''
+  if(!woj.value||!miasto.value){empty.style.display='block';return}
+
+  // pobieramy NAZWY
+  const { data: wojN } = await supabase.from('wojewodztwa').select('nazwa').eq('id',woj.value).single()
+  const { data: miastoN } = await supabase.from('miasta').select('nazwa').eq('id',miasto.value).single()
+
+  const { data } = await supabase.from('tabela_elektrykow')
     .select('imie,nazwisko,email,telefon,gwiazdki')
-    .eq('wojewodztwo', wojId)
-    .eq('miasto', miastoId)
+    .eq('wojewodztwo', wojN.nazwa)
+    .eq('miasto', miastoN.nazwa)
 
-  logDiv.textContent += 'Wyniki z bazy: ' + JSON.stringify(data) + '\n'
+  if(!data || data.length===0){empty.style.display='block';return}
 
-  if (error) {
-    empty.textContent = 'Błąd pobierania danych: ' + error.message
-    empty.style.display = 'block'
-    return
-  }
-
-  if (!data || data.length === 0) {
-    empty.textContent = 'Brak wyników dla wybranego województwa i miasta'
-    empty.style.display = 'block'
-    return
-  }
-
-  data.forEach(e => {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
+  data.forEach(e=>{
+    wyniki.innerHTML+=`<tr>
       <td>${e.imie}</td>
       <td>${e.nazwisko}</td>
       <td>${e.email}</td>
       <td>${e.telefon}</td>
-      <td class="stars">${'★'.repeat(e.gwiazdki || 0)}</td>
-    `
-    tbody.appendChild(tr)
+      <td>${'★'.repeat(e.gwiazdki||0)}</td>
+    </tr>`
   })
-
-  empty.style.display = 'none'
+  empty.style.display='none'
 }
 
-// inicjalizacja
-loadWojewodztwa()
-window.szukaj = szukaj
-
+window.szukaj=szukaj
 </script>
+
 </body>
 </html>
