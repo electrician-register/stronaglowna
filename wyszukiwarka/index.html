@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wyszukiwarka elektryków</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding:20px; }
-    select, button { padding:10px; margin:5px 0; width:100%; }
-    #results { margin-top:20px; }
-    .card { border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:6px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wyszukiwarka elektryków</title>
+<style>
+  body { font-family: Arial, sans-serif; padding:20px; }
+  select, button { padding:10px; margin:5px 0; width:100%; }
+  #results { margin-top:20px; }
+  .card { border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:6px; }
+</style>
 </head>
 <body>
 
@@ -46,11 +46,7 @@ async function loadWojewodztwa() {
     .from("wojewodztwa")
     .select("id,nazwa")
     .order("nazwa")
-
-  if (error) {
-    console.error(error)
-    return
-  }
+  if (error) return console.error(error)
 
   data.forEach(w => {
     const opt = document.createElement("option")
@@ -59,7 +55,6 @@ async function loadWojewodztwa() {
     wojSelect.appendChild(opt)
   })
 }
-
 loadWojewodztwa()
 
 // -----------------------------
@@ -76,11 +71,7 @@ wojSelect.addEventListener("change", async () => {
     .select("id,nazwa")
     .eq("wojewodztwo_id", wojId)
     .order("nazwa")
-
-  if (error) {
-    console.error(error)
-    return
-  }
+  if (error) return console.error(error)
 
   data.forEach(m => {
     const opt = document.createElement("option")
@@ -102,7 +93,7 @@ document.getElementById("szukaj").addEventListener("click", async () => {
   let query = supabase
     .from("tabela_elektrykow")
     .select("*")
-    .eq("status", "verified") // <-- poprawione, zgodnie z enum
+    .eq("status", "verified") // dopasowanie do enum w Supabase
 
   if (wojId) query = query.eq("wojewodztwo_id", wojId)
   if (miastoId) query = query.eq("miasto_id", miastoId)
@@ -124,11 +115,7 @@ document.getElementById("szukaj").addEventListener("click", async () => {
   data.forEach(e => {
     const div = document.createElement("div")
     div.className = "card"
-    div.innerHTML = `
-      <b>${e.imie} ${e.nazwisko}</b><br>
-      ${e.email}<br>
-      ${e.telefon}
-    `
+    div.innerHTML = `<b>${e.imie} ${e.nazwisko}</b><br>${e.email}<br>${e.telefon}`
     resultsDiv.appendChild(div)
   })
 })
