@@ -173,8 +173,8 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
   const { data } = await supabase
     .from("tabela_elektrykow")
     .select("imie,nazwisko,email,telefon")
-    .eq("wojewodztwo_id", wojId)
-    .eq("miasto_id", miastoId)
+    .eq("wojewodztwo", wojId)
+    .eq("miasto", miastoId)
 
   if(!data || data.length === 0){
     results.innerHTML = "Brak wyników"
