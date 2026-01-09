@@ -20,7 +20,10 @@
     body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-    .logo { width:64px; height:64px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--primary); font-size:22px; }
+      .logo {
+      width: 55px;
+      display: block;
+    }
     .header-text h1 { margin:0; font-size:28px; }
     .header-text p { margin:6px 0 0; opacity:0.9; }
 
@@ -44,7 +47,7 @@
 
 <header>
   <div class="header-container">
-    <div class="logo">ORE</div>
+  <img src="logo.png" alt="Logo" class="logo" />
     <div class="header-text">
       <h1>Ogólnopolski Rejestr Elektryków</h1>
       <p>Oficjalna wyszukiwarka certyfikowanych elektryków w Polsce</p>
