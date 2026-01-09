@@ -3,180 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wyszukiwarka Elektryków</title>
+
+<title>Ogólnopolski Rejestr Elektryków</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
+:root{
+  --primary:#0B5FA5;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#1c1c1e;
+  --muted:#6b7280;
+}
+
+*{box-sizing:border-box}
+body{
   margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* HEADER */
+header{
+  background:linear-gradient(135deg,#0B5FA5,#083f6b);
+  color:white;
+  padding:30px 20px;
+}
+.header-wrap{
+  max-width:1000px;
+  margin:auto;
+}
+h1{margin:0;font-size:26px}
+p{margin:5px 0 0;opacity:.9}
+
+/* SEARCH */
+main{
+  max-width:1000px;
+  margin:-30px auto 40px;
+  padding:0 15px;
+}
+
+.search-card{
+  background:var(--card);
+  border-radius:12px;
   padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
 }
 
-h2 {
-  margin-bottom:10px;
-}
-
-select, button {
+select,button{
   width:100%;
   padding:12px;
-  margin-bottom:10px;
-  border-radius:6px;
+  margin-top:10px;
+  border-radius:8px;
   border:1px solid #ccc;
   font-size:16px;
 }
 
-button {
-  background:#0B5FA5;
+button{
+  background:var(--primary);
   color:white;
   border:none;
-  font-weight:bold;
+  cursor:pointer;
 }
 
-#results {
+/* RESULTS */
+#results{
   margin-top:20px;
 }
 
-.card {
+.card{
   background:white;
-  border-radius:8px;
-  padding:12px;
-  margin-bottom:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 
-.name {
-  font-size:18px;
+.name{
   font-weight:bold;
+  font-size:17px;
 }
-
-.small {
-  color:#555;
-  margin-top:3px;
-}
-
-.stars {
-  color:#f5b301;
+.small{
+  color:var(--muted);
+  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Wyszukaj elektryka</h2>
+<header>
+  <div class="header-wrap">
+    <h1>Ogólnopolski Rejestr Elektryków</h1>
+    <p>Oficjalna wyszukiwarka certyfikowanych elektryków</p>
+  </div>
+</header>
 
-<select id="wojewodztwo">
-  <option value="">Wybierz województwo</option>
-</select>
+<main>
+  <div class="search-card">
+    <select id="wojewodztwo">
+      <option value="">Wybierz województwo</option>
+    </select>
 
-<select id="miasto">
-  <option value="">Wybierz miasto</option>
-</select>
+    <select id="miasto">
+      <option value="">Wybierz miasto</option>
+    </select>
 
-<button id="szukaj">Szukaj</button>
+    <button id="szukaj">Szukaj</button>
+  </div>
 
-<div id="results"></div>
+  <div id="results"></div>
+</main>
 
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
-const supabaseUrl = "https://tfbqqduxtsacvwfigsvt.supabase.co"
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"   // ← wstaw swój klucz
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+)
 
-const wojSelect = document.getElementById("wojewodztwo")
-const miastoSelect = document.getElementById("miasto")
-const resultsDiv = document.getElementById("results")
+const woj = document.getElementById("wojewodztwo")
+const miasto = document.getElementById("miasto")
+const results = document.getElementById("results")
 
-// --------------------
-// WOJEWÓDZTWA
-// --------------------
-async function loadWojewodztwa() {
-  const { data, error } = await supabase
+// ---------- Województwa ----------
+async function loadWoj(){
+  const { data } = await supabase
     .from("wojewodztwa")
     .select("id,nazwa")
     .order("nazwa")
 
-  if (error) return
-
-  data.forEach(w => {
-    const opt = document.createElement("option")
-    opt.value = w.id
-    opt.textContent = w.nazwa
-    wojSelect.appendChild(opt)
+  data.forEach(w=>{
+    const o = document.createElement("option")
+    o.value = w.id
+    o.textContent = w.nazwa
+    woj.appendChild(o)
   })
 }
+loadWoj()
 
-loadWojewodztwa()
+// ---------- Miasta ----------
+woj.addEventListener("change", async ()=>{
+  miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
+  const wojId = woj.value
+  if(!wojId) return
 
-// --------------------
-// MIASTA
-// --------------------
-wojSelect.addEventListener("change", async () => {
-  const wojId = wojSelect.value
-  miastoSelect.innerHTML = "<option value=''>Wybierz miasto</option>"
-  if (!wojId) return
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("miasta")
     .select("id,nazwa")
     .eq("wojewodztwo_id", wojId)
     .order("nazwa")
 
-  if (error) return
-
-  data.forEach(m => {
-    const opt = document.createElement("option")
-    opt.value = m.id
-    opt.textContent = m.nazwa
-    miastoSelect.appendChild(opt)
+  data.forEach(m=>{
+    const o = document.createElement("option")
+    o.value = m.id
+    o.textContent = m.nazwa
+    miasto.appendChild(o)
   })
 })
 
-// --------------------
-// SZUKANIE
-// --------------------
-document.getElementById("szukaj").addEventListener("click", async () => {
+// ---------- Szukanie ----------
+document.getElementById("szukaj").addEventListener("click", async ()=>{
+  results.innerHTML = "Szukam..."
 
-  resultsDiv.innerHTML = "Szukam..."
+  const wojId = woj.value
+  const miastoId = miasto.value
 
-  const wojId = wojSelect.value
-  const miastoId = miastoSelect.value
-
-  let query = supabase
+  const { data } = await supabase
     .from("tabela_elektrykow")
-    .select("imie,nazwisko,email,telefon,gwiazdki,numer_uprawnien,rodzaj_uprawnien")
-    .eq("status", "verified")   // ← dostosuj do ENUM w bazie
+    .select("imie,nazwisko,email,telefon")
+    .eq("wojewodztwo", wojId)
+    .eq("miasto", miastoId)
 
-  if (wojId) query = query.eq("wojewodztwo", wojId)
-  if (miastoId) query = query.eq("miasto", miastoId)
-
-  const { data, error } = await query
-
-  if (error) {
-    resultsDiv.innerHTML = "Błąd zapytania"
+  if(!data || data.length === 0){
+    results.innerHTML = "Brak wyników"
     return
   }
 
-  if (!data || data.length === 0) {
-    resultsDiv.innerHTML = "Brak wyników"
-    return
-  }
-
-  resultsDiv.innerHTML = ""
-
-  data.forEach(e => {
+  results.innerHTML = ""
+  data.forEach(e=>{
     const d = document.createElement("div")
     d.className = "card"
     d.innerHTML = `
       <div class="name">${e.imie} ${e.nazwisko}</div>
       <div class="small">${e.email}</div>
       <div class="small">${e.telefon}</div>
-      <div class="small">Uprawnienia: ${e.rodzaj_uprawnien}</div>
-      <div class="small">Nr: ${e.numer_uprawnien}</div>
-      <div class="small stars">${"★".repeat(e.gwiazdki || 0)}</div>
     `
-    resultsDiv.appendChild(d)
+    results.appendChild(d)
   })
 })
 </script>
