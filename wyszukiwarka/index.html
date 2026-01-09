@@ -1,47 +1,79 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ogólnopolski Rejestr Elektryków</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  body { font-family: Arial,sans-serif; background:#f4f6f8; margin:0; padding:0; }
-  header { background:#0B5FA5; color:white; padding:30px 20px; text-align:center; }
-  main { max-width:1200px; margin:20px auto; padding:0 20px; }
-  .card { background:white; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.05); }
-  select, button { padding:10px; font-size:16px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box; margin-top:5px; }
-  button { background:#0B5FA5; color:white; border:none; cursor:pointer; font-weight:bold; }
-  table { width:100%; border-collapse:collapse; margin-top:20px; }
-  th, td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
-  .stars { color:#f5b301; }
-  .empty { text-align:center; padding:30px; color:#555; }
-  @media(max-width:600px){ select, button{font-size:14px;} }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ogólnopolski Rejestr Elektryków</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary: #0B5FA5;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1c1c1e;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
+    header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
+    .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
+    .logo { width:64px; height:64px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--primary); font-size:22px; }
+    .header-text h1 { margin:0; font-size:28px; }
+    .header-text p { margin:6px 0 0; opacity:0.9; }
+
+    main { max-width:1200px; margin:-40px auto 40px; padding:0 20px; }
+    .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
+    .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+    label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
+    select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
+    button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
+    button:hover { opacity:0.9; }
+    .results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:14px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
+    th { font-size:14px; color:var(--muted); }
+    .stars { color:#f5b301; font-size:16px; }
+    .empty { text-align:center; padding:30px; color:var(--muted); }
+    @media(max-width:600px) { .header-container { flex-direction:column; align-items:flex-start; } }
+  </style>
 </head>
 <body>
 
 <header>
-  <h1>Ogólnopolski Rejestr Elektryków</h1>
-  <p>Wyszukiwarka certyfikowanych elektryków w Polsce</p>
+  <div class="header-container">
+    <div class="logo">ORE</div>
+    <div class="header-text">
+      <h1>Ogólnopolski Rejestr Elektryków</h1>
+      <p>Oficjalna wyszukiwarka certyfikowanych elektryków w Polsce</p>
+    </div>
+  </div>
 </header>
 
 <main>
-  <div class="card">
-    <label>Województwo</label>
-    <select id="wojewodztwo">
-      <option value="">-- wybierz --</option>
-    </select>
-
-    <label>Miasto</label>
-    <select id="miasto" disabled>
-      <option value="">-- wybierz --</option>
-    </select>
-
-    <button onclick="szukaj()">Szukaj</button>
+  <div class="search-card">
+    <div class="search-grid">
+      <div>
+        <label>Województwo</label>
+        <select id="wojewodztwo">
+          <option value="">-- wybierz --</option>
+        </select>
+      </div>
+      <div>
+        <label>Miasto</label>
+        <select id="miasto" disabled>
+          <option value="">-- wybierz --</option>
+        </select>
+      </div>
+      <div style="align-self:end;">
+        <button onclick="szukaj()">Szukaj</button>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="results-card">
     <table id="wyniki">
       <thead>
         <tr>
@@ -61,25 +93,24 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabase = createClient(
-  'https://tfbqqduxtsacvwfigsvt.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-)
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const wojSelect = document.getElementById('wojewodztwo')
 const miastoSelect = document.getElementById('miasto')
 const tbody = document.querySelector('#wyniki tbody')
 const empty = document.getElementById('empty')
 
-// Pobierz województwa
+// Wczytaj województwa
 async function loadWojewodztwa() {
   const { data, error } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa')
-  if (error) return console.error(error)
+  if (error) { console.error(error); return }
   data.forEach(w => {
-    const opt = document.createElement('option')
-    opt.value = w.id
-    opt.textContent = w.nazwa
-    wojSelect.appendChild(opt)
+    const option = document.createElement('option')
+    option.value = w.id
+    option.textContent = w.nazwa
+    wojSelect.appendChild(option)
   })
 }
 
@@ -89,13 +120,17 @@ wojSelect.addEventListener('change', async () => {
   miastoSelect.disabled = true
   if (!wojId) return
 
-  const { data, error } = await supabase.from('miasta').select('id,nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
-  if (error) return console.error(error)
+  const { data, error } = await supabase.from('miasta')
+    .select('id,nazwa')
+    .eq('wojewodztwo_id', wojId)
+    .order('nazwa')
+  if (error) { console.error(error); return }
+
   data.forEach(m => {
-    const opt = document.createElement('option')
-    opt.value = m.nazwa // wartość miasto nazwa
-    opt.textContent = m.nazwa
-    miastoSelect.appendChild(opt)
+    const option = document.createElement('option')
+    option.value = m.nazwa  // używamy nazwy, bo tabela_elektrykow ma kolumnę 'miasto'
+    option.textContent = m.nazwa
+    miastoSelect.appendChild(option)
   })
   miastoSelect.disabled = false
 })
@@ -111,18 +146,18 @@ async function szukaj() {
     return
   }
 
-  // Pobierz nazwę województwa
-  const { data: wojData } = await supabase.from('wojewodztwa').select('nazwa').eq('id', wojId).single()
+  const { data: wojData } = await supabase.from('wojewodztwa')
+    .select('nazwa').eq('id', wojId).single()
   const wojewodztwo = wojData?.nazwa
+  if (!wojewodztwo) return
 
-  const { data, error } = await supabase
-    .from('tabela_elektrykow')
+  const { data, error } = await supabase.from('tabela_elektrykow')
     .select('imie,nazwisko,email,telefon,gwiazdki')
-    .eq('wojewodztwo', wojewodztwo)
-    .eq('miasto', miasto)
+    .ilike('wojewodztwo', wojewodztwo)
+    .ilike('miasto', miasto)
 
   if (error) {
-    empty.textContent = 'Błąd pobierania danych'
+    empty.textContent = 'Błąd pobierania danych: ' + error.message
     empty.style.display = 'block'
     return
   }
@@ -148,8 +183,8 @@ async function szukaj() {
   empty.style.display = 'none'
 }
 
+// inicjalizacja
 loadWojewodztwa()
 </script>
-
 </body>
 </html>
