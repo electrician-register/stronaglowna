@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ogólnopolski Rejestr Elektryków</title>
 
-  <!-- Supabase wczytany globalnie -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -22,8 +21,8 @@
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
       .logo { width: 55px; display: block; }
-      .header-text h1 { margin:0; font-size:28px; }
-      .header-text p { margin:6px 0 0; opacity:0.9; }
+    .header-text h1 { margin:0; font-size:28px; }
+    .header-text p { margin:6px 0 0; opacity:0.9; }
 
     main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
     .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
@@ -92,10 +91,13 @@
 </main>
 
 <script>
-  // inicjalizacja Supabase globalnie
+  // Twój stary, działający kod, bez type="module"
   const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const supabase = supabaseJs.createClient
+    ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) // fallback
+    : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const wojSelect = document.getElementById('wojewodztwo');
   const miastoSelect = document.getElementById('miasto');
@@ -128,7 +130,7 @@
 
     data.forEach(m => {
       const option = document.createElement('option');
-      option.value = m.id;
+      option.value = m.id;  // ID miasta
       option.textContent = m.nazwa;
       miastoSelect.appendChild(option);
     });
@@ -188,3 +190,4 @@
 </script>
 </body>
 </html>
+
