@@ -3,193 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ogólnopolski Rejestr Elektryków</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root {
-  --primary: #0B5FA5;
-  --bg: #f4f6f8;
-  --card: #ffffff;
-  --text: #1c1c1e;
-  --muted: #6b7280;
-}
-
-* { box-sizing: border-box; }
-body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
-header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
-.header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-.logo { width: 55px; display: block; }
-.header-text h1 { margin:0; font-size:28px; }
-.header-text p { margin:6px 0 0; opacity:0.9; }
-
-main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
-.search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
-.search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
-label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
-select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
-button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
-button:hover { opacity:0.9; }
-.results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
-table { width:100%; border-collapse:collapse; }
-th, td { padding:14px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
-th { font-size:14px; color:var(--muted); }
-.stars { color:#f5b301; font-size:16px; }
-.empty { text-align:center; padding:30px; color:var(--muted); }
-@media(max-width:600px) { .header-container { flex-direction:column; align-items:flex-start; } }
-</style>
+<title>Supabase Test</title>
 </head>
 <body>
 
-<header>
-  <div class="header-container">
-    <img src="/logo.png" alt="Logo" class="logo" />
-    <div class="header-text">
-      <h1>Ogólnopolski Rejestr Elektryków</h1>
-      <p>Oficjalna wyszukiwarka certyfikowanych elektryków w Polsce</p>
-    </div>
-  </div>
-</header>
-
-<main>
-  <div class="search-card">
-    <div class="search-grid">
-      <div>
-        <label>Województwo</label>
-        <select id="wojewodztwo">
-          <option value="">-- wybierz --</option>
-        </select>
-      </div>
-      <div>
-        <label>Miasto</label>
-        <select id="miasto" disabled>
-          <option value="">-- wybierz --</option>
-        </select>
-      </div>
-      <div style="align-self:end;">
-        <button onclick="szukaj()">Szukaj</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="results-card">
-    <table id="wyniki">
-      <thead>
-        <tr>
-          <th>Imię</th>
-          <th>Nazwisko</th>
-          <th>Email</th>
-          <th>Telefon</th>
-          <th>Ocena</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="empty" class="empty">Wybierz województwo i miasto, aby zobaczyć wyniki</div>
-  </div>
-</main>
+<h2>Test połączenia z Supabase</h2>
+<button id="btn">Pobierz dane</button>
+<pre id="out">Kliknij przycisk…</pre>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const wojSelect = document.getElementById('wojewodztwo')
-const miastoSelect = document.getElementById('miasto')
-const tbody = document.querySelector('#wyniki tbody')
-const empty = document.getElementById('empty')
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Wczytaj województwa
-async function loadWojewodztwa() {
-  const { data, error } = await supabase.from('wojewodztwa').select('nazwa').order('nazwa')
-  if (error) { console.error(error); return }
-  data.forEach(w => {
-    const option = document.createElement('option')
-    option.value = w.nazwa  // używamy nazwy
-    option.textContent = w.nazwa
-    wojSelect.appendChild(option)
-  })
-}
+document.getElementById("btn").addEventListener("click", async () => {
+  document.getElementById("out").textContent = "Ładowanie…";
 
-// Wczytaj miasta po województwie
-wojSelect.addEventListener('change', async () => {
-  const woj = wojSelect.value
-  miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
-  miastoSelect.disabled = true
-  if (!woj) return
-
-  const { data, error } = await supabase.from('miasta')
-    .select('nazwa')
-    .eq('wojewodztwo_id', await getWojewodztwoId(woj))
-    .order('nazwa')
-
-  if (error) { console.error(error); return }
-  data.forEach(m => {
-    const option = document.createElement('option')
-    option.value = m.nazwa
-    option.textContent = m.nazwa
-    miastoSelect.appendChild(option)
-  })
-  miastoSelect.disabled = false
-})
-
-// Funkcja pomocnicza do pobrania ID województwa po nazwie
-async function getWojewodztwoId(nazwa) {
-  const { data } = await supabase.from('wojewodztwa').select('id').eq('nazwa', nazwa).single()
-  return data?.id
-}
-
-// Szukaj elektryków
-async function szukaj() {
-  const woj = wojSelect.value
-  const miasto = miastoSelect.value
-  tbody.innerHTML = ''
-
-  if (!woj || !miasto) {
-    empty.textContent = 'Proszę wybrać województwo i miasto'
-    empty.style.display = 'block'
-    return
-  }
-
-  const { data, error } = await supabase.from('tabela_elektrykow')
-    .select('imie,nazwisko,email,telefon,gwiazdki')
-    .eq('wojewodztwo', woj)
-    .eq('miasto', miasto)
+  const { data, error } = await supabase
+    .from("tabela_elektrykow")
+    .select("id, imie, nazwisko")
+    .limit(5);
 
   if (error) {
-    empty.textContent = 'Błąd pobierania danych: ' + error.message
-    empty.style.display = 'block'
-    return
+    document.getElementById("out").textContent =
+      "BŁĄD:\n" + JSON.stringify(error, null, 2);
+    return;
   }
 
-  if (!data || data.length === 0) {
-    empty.textContent = 'Brak wyników dla wybranego województwa i miasta'
-    empty.style.display = 'block'
-    return
-  }
-
-  data.forEach(e => {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
-      <td>${e.imie}</td>
-      <td>${e.nazwisko}</td>
-      <td>${e.email}</td>
-      <td>${e.telefon}</td>
-      <td class="stars">${'★'.repeat(e.gwiazdki || 0)}</td>
-    `
-    tbody.appendChild(tr)
-  })
-
-  empty.style.display = 'none'
-}
-
-// inicjalizacja
-loadWojewodztwa()
-window.szukaj = szukaj
-
+  document.getElementById("out").textContent =
+    "OK:\n" + JSON.stringify(data, null, 2);
+});
 </script>
+
 </body>
 </html>
