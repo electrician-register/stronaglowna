@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ogólnopolski Rejestr Elektryków</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase klasyczny -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
   <style>
     :root {
@@ -20,9 +21,9 @@
     body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
     header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
     .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-    .logo { width: 55px; display: block; }
-    .header-text h1 { margin:0; font-size:28px; }
-    .header-text p { margin:6px 0 0; opacity:0.9; }
+      .logo { width: 55px; display: block; }
+      .header-text h1 { margin:0; font-size:28px; }
+      .header-text p { margin:6px 0 0; opacity:0.9; }
 
     main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
     .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
@@ -68,7 +69,7 @@
         </select>
       </div>
       <div style="align-self:end;">
-        <button onclick="szukaj()">Szukaj</button>
+        <button id="szukajBtn">Szukaj</button>
       </div>
     </div>
   </div>
@@ -90,111 +91,103 @@
   </div>
 </main>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+<script>
+  // Klasyczny Supabase
+  const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const wojSelect = document.getElementById('wojewodztwo')
-const miastoSelect = document.getElementById('miasto')
-const tbody = document.querySelector('#wyniki tbody')
-const empty = document.getElementById('empty')
+  const wojSelect = document.getElementById('wojewodztwo');
+  const miastoSelect = document.getElementById('miasto');
+  const tbody = document.querySelector('#wyniki tbody');
+  const empty = document.getElementById('empty');
+  const szukajBtn = document.getElementById('szukajBtn');
 
-// Wczytaj województwa
-async function loadWojewodztwa() {
-  const { data, error } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa')
-  if (error) { console.error(error); return }
-  data.forEach(w => {
-    const option = document.createElement('option')
-    option.value = w.id
-    option.textContent = w.nazwa
-    wojSelect.appendChild(option)
-  })
-}
-
-// Wczytaj miasta po województwie
-wojSelect.addEventListener('change', async () => {
-  const wojId = Number(wojSelect.value)
-  console.log('Wybrano województwo ID:', wojId)
-  miastoSelect.innerHTML = '<option value="">-- wybierz --</option>'
-  miastoSelect.disabled = true
-  if (!wojId) return
-
-  const { data, error } = await supabase.from('miasta')
-    .select('id,nazwa')
-    .eq('wojewodztwo_id', wojId)
-    .order('nazwa')
-  if (error) { console.error(error); return }
-
-  data.forEach(m => {
-    const option = document.createElement('option')
-    option.value = Number(m.id)
-    option.textContent = m.nazwa
-    miastoSelect.appendChild(option)
-  })
-  miastoSelect.disabled = false
-  console.log('Załadowano miasta:', data)
-})
-
-// Mobilne przeglądarki: zapewniamy, że zmiana wartości jest odczytywana
-miastoSelect.addEventListener('input', () => {
-  console.log('Miasto zmienione:', miastoSelect.value)
-})
-
-async function szukaj() {
-  const wojId = Number(wojSelect.value)
-  const miastoId = Number(miastoSelect.value)
-  tbody.innerHTML = ''
-
-  console.log('Szukam dla województwa ID:', wojId, 'miasto ID:', miastoId)
-
-  if (!wojId || !miastoId) {
-    empty.textContent = 'Proszę wybrać województwo i miasto'
-    empty.style.display = 'block'
-    return
+  async function loadWojewodztwa() {
+    const { data, error } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa');
+    if (error) { console.error(error); return; }
+    data.forEach(w => {
+      const option = document.createElement('option');
+      option.value = w.id;
+      option.textContent = w.nazwa;
+      wojSelect.appendChild(option);
+    });
   }
 
-  const { data, error } = await supabase.from('tabela_elektrykow')
-    .select('imie,nazwisko,email,telefon,gwiazdki')
-    .eq('wojewodztwo', wojId)
-    .eq('miasto', miastoId)
+  wojSelect.addEventListener('change', async () => {
+    const wojId = wojSelect.value;
+    console.log('Wybrano województwo ID:', wojId);
+    miastoSelect.innerHTML = '<option value="">-- wybierz --</option>';
+    miastoSelect.disabled = true;
+    if (!wojId) return;
 
-  console.log('Wyniki z bazy:', data)
+    const { data, error } = await supabase.from('miasta')
+      .select('id,nazwa')
+      .eq('wojewodztwo_id', wojId)
+      .order('nazwa');
+    if (error) { console.error(error); return; }
 
-  if (error) {
-    empty.textContent = 'Błąd pobierania danych: ' + error.message
-    empty.style.display = 'block'
-    return
+    data.forEach(m => {
+      const option = document.createElement('option');
+      option.value = m.id;  // ID miasta
+      option.textContent = m.nazwa;
+      miastoSelect.appendChild(option);
+    });
+    miastoSelect.disabled = false;
+    console.log('Załadowano miasta:', data);
+  });
+
+  async function szukaj() {
+    const wojId = wojSelect.value;
+    const miastoId = miastoSelect.value;
+    tbody.innerHTML = '';
+    console.log('Szukam dla województwa ID:', wojId, 'miasto ID:', miastoId);
+
+    if (!wojId || !miastoId) {
+      empty.textContent = 'Proszę wybrać województwo i miasto';
+      empty.style.display = 'block';
+      return;
+    }
+
+    const { data, error } = await supabase.from('tabela_elektrykow')
+      .select('imie,nazwisko,email,telefon,gwiazdki')
+      .eq('wojewodztwo', wojId)
+      .eq('miasto', miastoId);
+
+    console.log('Wyniki z bazy:', data);
+
+    if (error) {
+      empty.textContent = 'Błąd pobierania danych: ' + error.message;
+      empty.style.display = 'block';
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      empty.textContent = 'Brak wyników dla wybranego województwa i miasta';
+      empty.style.display = 'block';
+      return;
+    }
+
+    data.forEach(e => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${e.imie}</td>
+        <td>${e.nazwisko}</td>
+        <td>${e.email}</td>
+        <td>${e.telefon}</td>
+        <td>${e.gwiazdki}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    empty.style.display = 'none';
   }
 
-  if (!data || data.length === 0) {
-    empty.textContent = 'Brak wyników dla wybranego województwa i miasta'
-    empty.style.display = 'block'
-    return
-  }
+  szukajBtn.addEventListener('click', szukaj);
 
-  data.forEach(e => {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
-      <td>${e.imie}</td>
-      <td>${e.nazwisko}</td>
-      <td>${e.email}</td>
-      <td>${e.telefon}</td>
-      <td class="stars">${'★'.repeat(e.gwiazdki || 0)}</td>
-    `
-    tbody.appendChild(tr)
-  })
-
-  empty.style.display = 'none'
-}
-
-// inicjalizacja
-loadWojewodztwa()
-window.szukaj = szukaj
-
+  // inicjalizacja
+  loadWojewodztwa();
 </script>
 </body>
 </html>
-
