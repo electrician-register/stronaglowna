@@ -3,31 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wyszukiwarka elektryków</title>
 
-<script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+<title>Ogólnopolski Rejestr Elektryków</title>
 
 <style>
-body { font-family: Arial; padding:20px; }
-select, button { width:100%; padding:10px; margin-top:10px; }
-.card { border:1px solid #ccc; padding:10px; margin-top:10px; border-radius:6px; }
+:root{
+  --primary:#0B5FA5;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#1c1c1e;
+  --muted:#6b7280;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* HEADER */
+header{
+  background:linear-gradient(135deg,#0B5FA5,#083f6b);
+  color:white;
+  padding:30px 20px;
+}
+.header-wrap{
+  max-width:1000px;
+  margin:auto;
+}
+h1{margin:0;font-size:26px}
+p{margin:5px 0 0;opacity:.9}
+
+/* SEARCH */
+main{
+  max-width:1000px;
+  margin:-30px auto 40px;
+  padding:0 15px;
+}
+
+.search-card{
+  background:var(--card);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+
+select,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+
+button{
+  background:var(--primary);
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+/* RESULTS */
+#results{
+  margin-top:20px;
+}
+
+.card{
+  background:white;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.name{
+  font-weight:bold;
+  font-size:17px;
+}
+.small{
+  color:var(--muted);
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Wyszukaj elektryka</h2>
+<header>
+  <div class="header-wrap">
+    <h1>Ogólnopolski Rejestr Elektryków</h1>
+    <p>Oficjalna wyszukiwarka certyfikowanych elektryków</p>
+  </div>
+</header>
 
-<select id="woj">
-  <option value="">Wybierz województwo</option>
-</select>
+<main>
+  <div class="search-card">
+    <select id="wojewodztwo">
+      <option value="">Wybierz województwo</option>
+    </select>
 
-<select id="miasto">
-  <option value="">Wybierz miasto</option>
-</select>
-<button id="szukaj">SzukaJ</button>
+    <select id="miasto">
+      <option value="">Wybierz miasto</option>
+    </select>
 
-<div id="wyniki"></div>
+    <button id="szukaj">Szukaj</button>
+  </div>
+
+  <div id="results"></div>
+</main>
 
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
@@ -37,37 +123,31 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
 )
 
-const wojSelect = document.getElementById("woj")
-const miastoSelect = document.getElementById("miasto")
-const wyniki = document.getElementById("wyniki")
+const woj = document.getElementById("wojewodztwo")
+const miasto = document.getElementById("miasto")
+const results = document.getElementById("results")
 
-// ------------------------------------
-// Województwa
-// ------------------------------------
-async function loadWoj() {
+// ---------- Województwa ----------
+async function loadWoj(){
   const { data } = await supabase
     .from("wojewodztwa")
     .select("id,nazwa")
     .order("nazwa")
 
-  data.forEach(w => {
-    const opt = document.createElement("option")
-    opt.value = w.id        // <<<< ID
-    opt.textContent = w.nazwa
-    wojSelect.appendChild(opt)
+  data.forEach(w=>{
+    const o = document.createElement("option")
+    o.value = w.id
+    o.textContent = w.nazwa
+    woj.appendChild(o)
   })
 }
-
 loadWoj()
 
-// ------------------------------------
-// Miasta po województwie
-// ------------------------------------
-wojSelect.addEventListener("change", async () => {
-  const wojId = wojSelect.value
-  miastoSelect.innerHTML = "<option value=''>Wybierz miasto</option>"
-
-  if (!wojId) return
+// ---------- Miasta ----------
+woj.addEventListener("change", async ()=>{
+  miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
+  const wojId = woj.value
+  if(!wojId) return
 
   const { data } = await supabase
     .from("miasta")
@@ -75,50 +155,42 @@ wojSelect.addEventListener("change", async () => {
     .eq("wojewodztwo_id", wojId)
     .order("nazwa")
 
-  data.forEach(m => {
-    const opt = document.createElement("option")
-    opt.value = m.id       // <<<< ID
-    opt.textContent = m.nazwa
-    miastoSelect.appendChild(opt)
+  data.forEach(m=>{
+    const o = document.createElement("option")
+    o.value = m.id
+    o.textContent = m.nazwa
+    miasto.appendChild(o)
   })
 })
 
-// ------------------------------------
-// Wyszukiwanie
-// ------------------------------------
-document.getElementById("szukaj").addEventListener("click", async () => {
-  wyniki.innerHTML = "Szukam..."
+// ---------- Szukanie ----------
+document.getElementById("szukaj").addEventListener("click", async ()=>{
+  results.innerHTML = "Szukam..."
 
-  const wojId = wojSelect.value
-  const miastoId = miastoSelect.value
+  const wojId = woj.value
+  const miastoId = miasto.value
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("tabela_elektrykow")
     .select("imie,nazwisko,email,telefon")
-    .eq("wojewodztwo", wojId)   // <<< INT
-    .eq("miasto", miastoId)    // <<< INT
+    .eq("wojewodztwo", wojId)
+    .eq("miasto", miastoId)
 
-  if (error) {
-    wyniki.innerHTML = "Błąd"
+  if(!data || data.length === 0){
+    results.innerHTML = "Brak wyników"
     return
   }
 
-  if (!data || data.length === 0) {
-    wyniki.innerHTML = "Brak wyników"
-    return
-  }
-
-  wyniki.innerHTML = ""
-
-  data.forEach(e => {
-    const div = document.createElement("div")
-    div.className = "card"
-    div.innerHTML = `
-      <b>${e.imie} ${e.nazwisko}</b><br>
-      ${e.email}<br>
-      ${e.telefon}
+  results.innerHTML = ""
+  data.forEach(e=>{
+    const d = document.createElement("div")
+    d.className = "card"
+    d.innerHTML = `
+      <div class="name">${e.imie} ${e.nazwisko}</div>
+      <div class="small">${e.email}</div>
+      <div class="small">${e.telefon}</div>
     `
-    wyniki.appendChild(div)
+    results.appendChild(d)
   })
 })
 </script>
