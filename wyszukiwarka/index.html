@@ -1,45 +1,43 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ogólnopolski Rejestr Elektryków</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ogólnopolski Rejestr Elektryków</title>
 
-  <!-- Supabase klasyczny -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
-  <style>
-    :root {
-      --primary: #0B5FA5;
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #1c1c1e;
-      --muted: #6b7280;
-    }
+<style>
+:root {
+  --primary: #0B5FA5;
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --text: #1c1c1e;
+  --muted: #6b7280;
+}
 
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
-    header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
-    .header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
-      .logo { width: 55px; display: block; }
-      .header-text h1 { margin:0; font-size:28px; }
-      .header-text p { margin:6px 0 0; opacity:0.9; }
-
-    main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
-    .search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
-    .search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
-    label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
-    select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
-    button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
-    button:hover { opacity:0.9; }
-    .results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:14px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
-    th { font-size:14px; color:var(--muted); }
-    .stars { color:#f5b301; font-size:16px; }
-    .empty { text-align:center; padding:30px; color:var(--muted); }
-    @media(max-width:600px) { .header-container { flex-direction:column; align-items:flex-start; } }
-  </style>
+* { box-sizing: border-box; }
+body { margin:0; font-family: Arial,sans-serif; background:var(--bg); color:var(--text);}
+header { background:linear-gradient(135deg,#0B5FA5,#083f6b); color:white; padding:40px 20px; }
+.header-container { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; }
+.logo { width: 55px; display:block; }
+.header-text h1 { margin:0; font-size:28px; }
+.header-text p { margin:6px 0 0; opacity:0.9; }
+main { max-width:1200px; margin:20px auto 40px; padding:0 20px; }
+.search-card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px; }
+.search-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
+select, button { width:100%; padding:12px; font-size:15px; border-radius:8px; border:1px solid #d1d5db; }
+button { background-color: var(--primary); color:white; border:none; cursor:pointer; font-weight:bold; }
+button:hover { opacity:0.9; }
+.results-card { background: var(--card); border-radius:12px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:14px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
+th { font-size:14px; color:var(--muted); }
+.stars { color:#f5b301; font-size:16px; }
+.empty { text-align:center; padding:30px; color:var(--muted); }
+@media(max-width:600px) { .header-container { flex-direction:column; align-items:flex-start; } }
+</style>
 </head>
 <body>
 
@@ -92,7 +90,8 @@
 </main>
 
 <script>
-  // Klasyczny Supabase
+document.addEventListener('DOMContentLoaded', function() {
+
   const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
@@ -109,14 +108,14 @@
     if (error) { console.error(error); return; }
     data.forEach(w => {
       const option = document.createElement('option');
-      option.value = w.id;
+      option.value = w.id; // liczba
       option.textContent = w.nazwa;
       wojSelect.appendChild(option);
     });
   }
 
   wojSelect.addEventListener('change', async () => {
-    const wojId = wojSelect.value;
+    const wojId = parseInt(wojSelect.value);
     console.log('Wybrano województwo ID:', wojId);
     miastoSelect.innerHTML = '<option value="">-- wybierz --</option>';
     miastoSelect.disabled = true;
@@ -126,11 +125,12 @@
       .select('id,nazwa')
       .eq('wojewodztwo_id', wojId)
       .order('nazwa');
+
     if (error) { console.error(error); return; }
 
     data.forEach(m => {
       const option = document.createElement('option');
-      option.value = m.id;  // ID miasta
+      option.value = m.id; // liczba
       option.textContent = m.nazwa;
       miastoSelect.appendChild(option);
     });
@@ -139,8 +139,8 @@
   });
 
   async function szukaj() {
-    const wojId = wojSelect.value;
-    const miastoId = miastoSelect.value;
+    const wojId = parseInt(wojSelect.value);
+    const miastoId = parseInt(miastoSelect.value);
     tbody.innerHTML = '';
     console.log('Szukam dla województwa ID:', wojId, 'miasto ID:', miastoId);
 
@@ -188,6 +188,8 @@
 
   // inicjalizacja
   loadWojewodztwa();
+
+});
 </script>
 </body>
 </html>
