@@ -1,206 +1,261 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ogólnopolski Rejestr Elektryków</title>
 
-  <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    :root {
+      --primary: #0B5FA5;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1c1c1e;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
     }
 
-    .form-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 600px;
+    header {
+      background: linear-gradient(135deg, #0B5FA5, #083f6b);
+      color: white;
+      padding: 40px 20px;
     }
 
-    /* AWATAR GRAFICZNY */
-    .avatar-btn {
-      display: none; /* ⬅️ ZMIANA: ukryty przed logowaniem */
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
       width: 64px;
       height: 64px;
       border-radius: 50%;
-      background: #2b6cb0;
-      color: #fff;
+      background: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 20px;
-      margin-bottom: 15px;
-      cursor: default;
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 22px;
     }
 
-    form {
-      background-color: #ffffff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
+    .header-text h1 { margin:0; font-size:28px; }
+    .header-text p { margin:6px 0 0; opacity:0.9; }
+
+    main { max-width:1200px; margin:-40px auto 40px; padding:0 20px; }
+
+    .search-card {
+      background: var(--card);
+      border-radius:12px;
+      padding:24px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom:30px;
     }
 
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
+    .search-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+      gap:20px;
     }
 
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      color: #555;
-      font-weight: 600;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    input[type="file"] {
-      margin-top: 10px;
+    label { display:block; font-size:14px; margin-bottom:6px; color:var(--muted); }
+    select, button {
+      width:100%;
+      padding:12px;
+      font-size:15px;
+      border-radius:8px;
+      border:1px solid #d1d5db;
     }
 
     button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      background-color: var(--primary);
+      color:white;
+      border:none;
+      cursor:pointer;
+      font-weight:bold;
     }
 
-    #result {
-      font-weight: bold;
-      padding: 10px;
-      margin-top: 15px;
-      text-align: center;
-      border-radius: 6px;
+    button:hover { opacity:0.9; }
+
+    .results-card {
+      background: var(--card);
+      border-radius:12px;
+      padding:20px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.06);
     }
 
-    #loading {
-      display: none;
-      text-align: center;
-      font-weight: bold;
-      margin-top: 10px;
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td {
+      padding:14px 10px;
+      text-align:left;
+      border-bottom:1px solid #e5e7eb;
+    }
+
+    th { font-size:14px; color:var(--muted); }
+    .stars { color:#f5b301; font-size:16px; }
+    .empty { text-align:center; padding:30px; color:var(--muted); }
+
+    @media(max-width:600px) {
+      .header-container { flex-direction:column; align-items:flex-start; }
     }
   </style>
 </head>
-
 <body>
 
-<div class="form-wrapper">
+<header>
+  <div class="header-container">
+    <div class="logo">ORE</div>
+    <div class="header-text">
+      <h1>Ogólnopolski Rejestr Elektryków</h1>
+      <p>Oficjalna wyszukiwarka certyfikowanych elektryków w Polsce</p>
+    </div>
+  </div>
+</header>
 
-  <!-- AWATAR -->
-  <button class="avatar-btn" id="avatarBtn">⚡</button>
+<main>
+  <div class="search-card">
+    <div class="search-grid">
+      <div>
+        <label>Województwo</label>
+        <select id="wojewodztwo">
+          <option value="">-- wybierz --</option>
+        </select>
+      </div>
+      <div>
+        <label>Miasto</label>
+        <select id="miasto">
+          <option value="">-- wybierz --</option>
+        </select>
+      </div>
+      <div style="align-self:end;">
+        <button onclick="szukaj()">Szukaj</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- FORMULARZ -->
-  <form id="register-form">
-    <h2>Rejestracja</h2>
+  <div class="results-card">
+    <table id="wyniki">
+      <thead>
+        <tr>
+          <th>Imię</th>
+          <th>Nazwisko</th>
+          <th>Email</th>
+          <th>Telefon</th>
+          <th>Ocena</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="empty" class="empty">Wybierz województwo i miasto, aby zobaczyć wyniki</div>
+  </div>
+</main>
 
-    <label for="imie">Imię:</label>
-    <input type="text" id="imie" required oninput="this.value=this.value.toUpperCase();">
+<script>
+  // <-- Wstaw tutaj swoje dane z Supabase -->
+  const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <label for="nazwisko">Nazwisko:</label>
-    <input type="text" id="nazwisko" required oninput="this.value=this.value.toUpperCase();">
+  const wojSelect = document.getElementById('wojewodztwo');
+  const miastoSelect = document.getElementById('miasto');
 
-    <label for="miasto">Miasto:</label>
-    <input type="text" id="miasto">
-
-    <label for="wojewodztwo">Województwo:</label>
-    <input type="text" id="wojewodztwo">
-
-    <label for="nrE">Nr uprawnień E:</label>
-    <textarea id="nrE"></textarea>
-
-    <label for="nrEPomiary">Nr uprawnień E z pomiarami:</label>
-    <textarea id="nrEPomiary"></textarea>
-
-    <label for="nrD">Nr uprawnień D:</label>
-    <textarea id="nrD"></textarea>
-
-    <label for="email">Email:</label>
-    <input type="email" id="email">
-
-    <label for="telefon">Telefon:</label>
-    <input type="tel" id="telefon">
-
-    <label for="zajmujeSie">Zajmuje się:</label>
-    <textarea id="zajmujeSie"></textarea>
-
-    <label for="plik">Załącz skan uprawnień:</label>
-    <input type="file" id="plik" multiple>
-
-    <button type="submit">Zarejestruj</button>
-
-    <p id="result"></p>
-    <p id="loading">Trwa rejestracja...</p>
-  </form>
-</div>
-
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-  const supabaseUrl = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-  const supabase = createClient(supabaseUrl, supabaseKey)
-
-  const avatarBtn = document.getElementById('avatarBtn')
-  const emailInput = document.getElementById('email')
-
-  // istniejąca logika awatara (NIERUSZONA)
-  emailInput.addEventListener('input', () => {
-    if (emailInput.value) {
-      avatarBtn.textContent = emailInput.value[0].toUpperCase()
+  // Pobierz listę województw z bazy
+  async function initFilters() {
+    let { data: woj, error } = await supabase.from('tabela_elektrykow').select('wojewodztwo').neq('wojewodztwo', '');
+    if (woj) {
+      const unikat = [...new Set(woj.map(e => e.wojewodztwo))];
+      unikat.forEach(w => {
+        const opt = document.createElement('option');
+        opt.value = w; opt.textContent = w;
+        wojSelect.appendChild(opt);
+      });
     }
-  })
-
-  /* ⬇️ JEDYNA LOGIKA DOTYCZĄCA ZADANIA */
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (session) {
-    avatarBtn.style.display = 'flex'
-    avatarBtn.textContent = session.user.email[0].toUpperCase()
-  } else {
-    avatarBtn.style.display = 'none'
   }
 
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      avatarBtn.style.display = 'flex'
-      avatarBtn.textContent = session.user.email[0].toUpperCase()
-    } else {
-      avatarBtn.style.display = 'none'
+  wojSelect.addEventListener('change', async () => {
+    const woj = wojSelect.value;
+    miastoSelect.innerHTML = '<option value="">-- wybierz --</option>';
+    if (!woj) return;
+
+    let { data: miasta } = await supabase
+      .from('tabela_elektrykow')
+      .select('miasto')
+      .eq('wojewodztwo', woj)
+      .neq('miasto', '');
+
+    const unikat = [...new Set(miasta.map(e => e.miasto))];
+    unikat.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      miastoSelect.appendChild(opt);
+    });
+  });
+
+  async function szukaj() {
+    const tbody = document.querySelector('#wyniki tbody');
+    const empty = document.getElementById('empty');
+    tbody.innerHTML = '';
+
+    const woj = wojSelect.value;
+    const miasto = miastoSelect.value;
+
+    if (!woj || !miasto) {
+      empty.textContent = 'Proszę wybrać województwo i miasto';
+      empty.style.display = 'block';
+      return;
     }
-  })
+
+    let { data, error } = await supabase
+      .from('tabela_elektrykow')
+      .select('imie, nazwisko, email, tel, gwiazdki')
+      .eq('wojewodztwo', woj)
+      .eq('miasto', miasto);
+
+    if (error) {
+      empty.textContent = 'Błąd pobierania danych';
+      empty.style.display = 'block';
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      empty.textContent = 'Brak wyników dla wybranego województwa i miasta';
+      empty.style.display = 'block';
+      return;
+    }
+
+    data.forEach(e => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${e.imie}</td>
+        <td>${e.nazwisko}</td>
+        <td>${e.email}</td>
+        <td>${e.tel}</td>
+        <td class="stars">${'★'.repeat(e.gwiazdki || 0)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    empty.style.display = 'none';
+  }
+
+  initFilters();
 </script>
 
 </body>
