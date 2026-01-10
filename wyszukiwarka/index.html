@@ -106,12 +106,43 @@ button{
 .stars{
   font-size:22px;
   color:#f5b400;
+  text-align:center;
 }
 
 .status{
   font-size:26px;
   color:#16a34a;
   text-align:center;
+}
+
+/* --- RESPONSYWNE GRIDY --- */
+@media (max-width: 700px) {
+  .table-header,
+  .card {
+    display: block;
+    grid-template-columns: none;
+  }
+
+  .table-header div,
+  .card div {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .card .person {
+    flex-direction: column;
+  }
+
+  .stars, .status {
+    margin-top: 5px;
+  }
+
+  .lp {
+    margin-bottom: 5px;
+    text-align: left;
+  }
 }
 </style>
 </head>
