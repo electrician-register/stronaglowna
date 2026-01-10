@@ -13,6 +13,7 @@
   --card:#ffffff;
   --text:#1c1c1e;
   --muted:#6b7280;
+  --line:#d1d5db;
 }
 
 *{box-sizing:border-box}
@@ -30,7 +31,7 @@ header{
   padding:30px 20px;
 }
 .header-wrap{
-  max-width:1000px;
+  max-width:1100px;
   margin:auto;
 }
 h1{margin:0;font-size:26px}
@@ -38,7 +39,7 @@ p{margin:5px 0 0;opacity:.9}
 
 /* SEARCH */
 main{
-  max-width:1000px;
+  max-width:1100px;
   margin:-30px auto 40px;
   padding:0 15px;
 }
@@ -66,26 +67,75 @@ button{
   cursor:pointer;
 }
 
-/* RESULTS */
-#results{
-  margin-top:20px;
-}
+/* ===== TABELA NA DIVACH ===== */
 
-.card{
-  background:white;
-  border-radius:10px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-
-.name{
+.table-header{
+  display:grid;
+  grid-template-columns: 70px 1fr 160px 120px;
+  background:#f1f5f9;
+  margin-top:25px;
+  border-radius:12px 12px 0 0;
+  border-bottom:2px solid var(--line);
   font-weight:bold;
-  font-size:17px;
 }
+
+.table-header div{
+  padding:14px;
+}
+
+/* results = body tabeli */
+#results{
+  background:white;
+  border-radius:0 0 12px 12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+  overflow:hidden;
+}
+
+/* każdy card = wiersz */
+.card{
+  display:grid;
+  grid-template-columns: 70px 1fr 160px 120px;
+  padding:14px;
+  border-bottom:1px solid var(--line);
+  margin:0;
+  border-radius:0;
+  box-shadow:none;
+}
+
+/* pierwszy element (imie nazwisko) udajemy jako lp */
+.card .name::before{
+  content: attr(data-lp);
+  display:inline-block;
+  width:70px;
+  font-weight:bold;
+}
+
+/* Dane personalne */
+.name{
+  grid-column:2;
+  font-weight:bold;
+  font-size:16px;
+}
+
 .small{
-  color:var(--muted);
+  grid-column:2;
   font-size:14px;
+  color:var(--muted);
+}
+
+/* gwiazdki */
+.card .small:nth-of-type(3){
+  grid-column:3;
+  font-size:22px;
+  color:#f5b400;
+}
+
+/* status */
+.card .small:nth-of-type(4){
+  grid-column:4;
+  font-size:26px;
+  color:#16a34a;
+  text-align:center;
 }
 </style>
 </head>
@@ -112,6 +162,14 @@ button{
     <button id="szukaj">Szukaj</button>
   </div>
 
+  <!-- Nagłówek tabeli -->
+  <div class="table-header">
+    <div>lp.</div>
+    <div>Dane personalne</div>
+    <div>Uprawnienia</div>
+    <div>Status</div>
+  </div>
+
   <div id="results"></div>
 </main>
 
@@ -127,13 +185,8 @@ const woj = document.getElementById("wojewodztwo")
 const miasto = document.getElementById("miasto")
 const results = document.getElementById("results")
 
-// ---------- Województwa ----------
 async function loadWoj(){
-  const { data } = await supabase
-    .from("wojewodztwa")
-    .select("id,nazwa")
-    .order("nazwa")
-
+  const { data } = await supabase.from("wojewodztwa").select("id,nazwa").order("nazwa")
   data.forEach(w=>{
     const o = document.createElement("option")
     o.value = w.id
@@ -143,18 +196,12 @@ async function loadWoj(){
 }
 loadWoj()
 
-// ---------- Miasta ----------
 woj.addEventListener("change", async ()=>{
   miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
   const wojId = woj.value
   if(!wojId) return
 
-  const { data } = await supabase
-    .from("miasta")
-    .select("id,nazwa")
-    .eq("wojewodztwo_id", wojId)
-    .order("nazwa")
-
+  const { data } = await supabase.from("miasta").select("id,nazwa").eq("wojewodztwo_id", wojId).order("nazwa")
   data.forEach(m=>{
     const o = document.createElement("option")
     o.value = m.id
@@ -163,18 +210,14 @@ woj.addEventListener("change", async ()=>{
   })
 })
 
-// ---------- Szukanie ----------
 document.getElementById("szukaj").addEventListener("click", async ()=>{
   results.innerHTML = "Szukam..."
-
-  const wojId = woj.value
-  const miastoId = miasto.value
 
   const { data } = await supabase
     .from("tabela_elektrykow")
     .select("imie,nazwisko,email,telefon,gwiazdki,status")
-    .eq("wojewodztwo", wojId)
-    .eq("miasto", miastoId)
+    .eq("wojewodztwo", woj.value)
+    .eq("miasto", miasto.value)
 
   if(!data || data.length === 0){
     results.innerHTML = "Brak wyników"
@@ -182,11 +225,11 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
   }
 
   results.innerHTML = ""
-  data.forEach(e=>{
+  data.forEach((e, i)=>{
     const d = document.createElement("div")
     d.className = "card"
     d.innerHTML = `
-      <div class="name">${e.imie} ${e.nazwisko}</div>
+      <div class="name" data-lp="${i+1}">${e.imie} ${e.nazwisko}</div>
       <div class="small">${e.email}</div>
       <div class="small">${e.telefon}</div>
       <div class="small">${e.gwiazdki}</div>
