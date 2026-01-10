@@ -207,26 +207,32 @@ const fields = [
   'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
 ]
 
-async function loadWojewodztwa() {
+// Funkcja ładowania województw z opcjonalnym ustawieniem wybranego
+async function loadWojewodztwa(selectedWoj = null) {
   const { data, error } = await supabase
     .from('wojewodztwa')
     .select('id, nazwa')
     .order('nazwa')
 
-  if (error) {
-    console.error('Błąd ładowania województw:', error)
-    return
-  }
+  if (error) { console.error('Błąd ładowania województw:', error); return }
 
   const wojSelect = document.getElementById('wojewodztwo')
+  wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
   data.forEach(w => {
     const option = document.createElement('option')
     option.value = w.id
     option.textContent = w.nazwa
     wojSelect.appendChild(option)
   })
+
+  if (selectedWoj) {
+    wojSelect.value = selectedWoj
+    // Wywołanie change, aby załadować miasta
+    wojSelect.dispatchEvent(new Event('change'))
+  }
 }
 
+// Event zmiany województwa -> ładowanie miast
 document.getElementById('wojewodztwo').addEventListener('change', async function() {
   const wojId = this.value
   const miastoSelect = document.getElementById('miasto')
@@ -243,10 +249,7 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
     .eq('wojewodztwo_id', wojId)
     .order('nazwa')
 
-  if (error) {
-    console.error('Błąd ładowania miast:', error)
-    return
-  }
+  if (error) { console.error('Błąd ładowania miast:', error); return }
 
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
   data.forEach(m => {
@@ -258,17 +261,15 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
   miastoSelect.disabled = false
 })
 
+// Zamknięcie formularza
 document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
+// DOMContentLoaded -> pobranie danych użytkownika i aktualizacja pól
 document.addEventListener('DOMContentLoaded', async () => {
-
-  loadWojewodztwa()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-
   currentUser = user
   email.value = user.email
 
@@ -284,31 +285,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
 
-    // --- Automatyczne załadowanie miast jeśli województwo jest wypełnione ---
+    // --- Ustawienie województwa i automatyczne załadowanie miast ---
     if (data.wojewodztwo) {
-      const miastoSelect = document.getElementById('miasto')
-      const { data: miasta } = await supabase
-        .from('miasta')
-        .select('id, nazwa')
-        .eq('wojewodztwo_id', data.wojewodztwo)
-        .order('nazwa')
+      await loadWojewodztwa(data.wojewodztwo)
 
-      miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-      miasta.forEach(m => {
-        const option = document.createElement('option')
-        option.value = m.id
-        option.textContent = m.nazwa
-        miastoSelect.appendChild(option)
-      })
-      miastoSelect.disabled = false
-
+      // Po załadowaniu miast ustawiamy miasto
       if (data.miasto) {
+        const miastoSelect = document.getElementById('miasto')
         miastoSelect.value = data.miasto
       }
     }
+  } else {
+    // Nowy użytkownik
+    loadWojewodztwa()
   }
 })
 
+// Obsługa submit
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
   loading.style.display = 'block'
