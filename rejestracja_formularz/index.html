@@ -118,11 +118,18 @@
       font-weight: bold;
     }
 
-    /* RODO checkbox styl */
+    /* Checkbox RODO */
     .rodo-label {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
       font-weight: normal;
       font-size: 14px;
-      margin-top: 15px;
+    }
+
+    .rodo-label input[type="checkbox"] {
+      margin-right: 10px;
+      accent-color: orange; /* Pomarańczowy ptaszek i obramowanie */
     }
   </style>
 </head>
@@ -172,11 +179,11 @@
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
 
-  <!-- ✅ Klauzula RODO -->
-  <label class="rodo-label" style="display:flex; align-items:center; margin-top:15px; font-weight:normal; font-size:14px;">
-  <input type="checkbox" id="rodo" required style="margin-right:10px; accent-color:orange;">
-  Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
-</label>
+  <!-- ✅ Checkbox RODO -->
+  <label class="rodo-label">
+    <input type="checkbox" id="rodo" required>
+    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
+  </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
 
@@ -248,7 +255,6 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
     option.textContent = m.nazwa
     miastoSelect.appendChild(option)
   })
-
   miastoSelect.disabled = false
 })
 
@@ -257,6 +263,7 @@ document.getElementById('close-btn').addEventListener('click', () => {
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
+
   loadWojewodztwa()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -274,7 +281,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (data) {
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
+
     fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
+
+    // --- Automatyczne załadowanie miast jeśli województwo jest wypełnione ---
+    if (data.wojewodztwo) {
+      const miastoSelect = document.getElementById('miasto')
+      const { data: miasta } = await supabase
+        .from('miasta')
+        .select('id, nazwa')
+        .eq('wojewodztwo_id', data.wojewodztwo)
+        .order('nazwa')
+
+      miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+      miasta.forEach(m => {
+        const option = document.createElement('option')
+        option.value = m.id
+        option.textContent = m.nazwa
+        miastoSelect.appendChild(option)
+      })
+      miastoSelect.disabled = false
+
+      if (data.miasto) {
+        miastoSelect.value = data.miasto
+      }
+    }
   }
 })
 
@@ -283,14 +314,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   loading.style.display = 'block'
   result.textContent = ''
   result.className = ''
-
-  // ✅ Sprawdzenie RODO
-  if (!document.getElementById('rodo').checked) {
-    loading.style.display = 'none'
-    result.textContent = 'Musisz wyrazić zgodę na przetwarzanie danych (RODO).'
-    result.className = 'error'
-    return
-  }
 
   if (nrE.value && nrEPomiary.value) {
     loading.style.display = 'none'
