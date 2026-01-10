@@ -61,32 +61,19 @@ button{
   cursor:pointer;
 }
 
-/* TABLE */
-.table-header{
-  display:grid;
-  grid-template-columns: 70px 1fr 160px 120px;
-  margin-top:25px;
-  background:#f1f5f9;
-  font-weight:bold;
-  border-radius:12px 12px 0 0;
-}
-.table-header div{
-  padding:14px;
-  border-bottom:2px solid var(--line);
-}
-
+/* RESULTS CARDS */
 #results{
-  background:white;
-  border-radius:0 0 12px 12px;
-  overflow:hidden;
-  box-shadow:0 6px 20px rgba(0,0,0,.08);
+  margin-top:20px;
 }
 
 .card{
   display:grid;
   grid-template-columns: 70px 1fr 160px 120px;
   padding:14px;
-  border-bottom:1px solid var(--line);
+  margin-bottom:12px;
+  border-radius:10px;
+  background:white;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 
 .lp{
@@ -117,18 +104,16 @@ button{
 
 /* --- RESPONSYWNE GRIDY --- */
 @media (max-width: 700px) {
-  .table-header,
   .card {
     display: block;
     grid-template-columns: none;
   }
 
-  .table-header div,
   .card div {
     display: flex;
     justify-content: space-between;
     padding: 8px 12px;
-    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
   }
 
   .card .person {
@@ -165,13 +150,6 @@ button{
       <option value="">Wybierz miasto</option>
     </select>
     <button id="szukaj">Szukaj</button>
-  </div>
-
-  <div class="table-header">
-    <div>lp.</div>
-    <div>Dane personalne</div>
-    <div>Uprawnienia</div>
-    <div>Status</div>
   </div>
 
   <div id="results"></div>
