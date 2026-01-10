@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Ogólnopolski Rejestr Elektryków</title>
 
 <style>
@@ -19,9 +18,8 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:var(--bg);
-  color:var(--text);
 }
 
 /* HEADER */
@@ -34,8 +32,6 @@ header{
   max-width:1100px;
   margin:auto;
 }
-h1{margin:0;font-size:26px}
-p{margin:5px 0 0;opacity:.9}
 
 /* SEARCH */
 main{
@@ -43,9 +39,8 @@ main{
   margin:-30px auto 40px;
   padding:0 15px;
 }
-
 .search-card{
-  background:var(--card);
+  background:white;
   border-radius:12px;
   padding:20px;
   box-shadow:0 10px 25px rgba(0,0,0,.1);
@@ -57,82 +52,62 @@ select,button{
   margin-top:10px;
   border-radius:8px;
   border:1px solid #ccc;
-  font-size:16px;
 }
 
 button{
   background:var(--primary);
   color:white;
   border:none;
-  cursor:pointer;
 }
 
-/* ===== TABELA NA DIVACH ===== */
-
+/* TABLE */
 .table-header{
   display:grid;
   grid-template-columns: 70px 1fr 160px 120px;
-  background:#f1f5f9;
   margin-top:25px;
-  border-radius:12px 12px 0 0;
-  border-bottom:2px solid var(--line);
+  background:#f1f5f9;
   font-weight:bold;
+  border-radius:12px 12px 0 0;
 }
-
 .table-header div{
   padding:14px;
+  border-bottom:2px solid var(--line);
 }
 
-/* results = body tabeli */
 #results{
   background:white;
   border-radius:0 0 12px 12px;
-  box-shadow:0 6px 20px rgba(0,0,0,.08);
   overflow:hidden;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
 }
 
-/* każdy card = wiersz */
 .card{
   display:grid;
   grid-template-columns: 70px 1fr 160px 120px;
   padding:14px;
   border-bottom:1px solid var(--line);
-  margin:0;
-  border-radius:0;
-  box-shadow:none;
 }
 
-/* pierwszy element (imie nazwisko) udajemy jako lp */
-.card .name::before{
-  content: attr(data-lp);
-  display:inline-block;
-  width:70px;
+.lp{
   font-weight:bold;
+  text-align:center;
 }
 
-/* Dane personalne */
-.name{
-  grid-column:2;
+.person .name{
   font-weight:bold;
   font-size:16px;
 }
-
-.small{
-  grid-column:2;
+.person .small{
   font-size:14px;
   color:var(--muted);
 }
 
-/* gwiazdki */
-.card .small:nth-of-type(3){
-  grid-column:3;
+.stars{
   font-size:22px;
   color:#f5b400;
 }
 
-/* status */
-.card .small:nth-of-type(4){
-  grid-column:4;
+.status{
   font-size:26px;
   color:#16a34a;
   text-align:center;
@@ -154,15 +129,12 @@ button{
     <select id="wojewodztwo">
       <option value="">Wybierz województwo</option>
     </select>
-
     <select id="miasto">
       <option value="">Wybierz miasto</option>
     </select>
-
     <button id="szukaj">Szukaj</button>
   </div>
 
-  <!-- Nagłówek tabeli -->
   <div class="table-header">
     <div>lp.</div>
     <div>Dane personalne</div>
@@ -198,10 +170,9 @@ loadWoj()
 
 woj.addEventListener("change", async ()=>{
   miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
-  const wojId = woj.value
-  if(!wojId) return
+  if(!woj.value) return
 
-  const { data } = await supabase.from("miasta").select("id,nazwa").eq("wojewodztwo_id", wojId).order("nazwa")
+  const { data } = await supabase.from("miasta").select("id,nazwa").eq("wojewodztwo_id", woj.value)
   data.forEach(m=>{
     const o = document.createElement("option")
     o.value = m.id
@@ -213,11 +184,16 @@ woj.addEventListener("change", async ()=>{
 document.getElementById("szukaj").addEventListener("click", async ()=>{
   results.innerHTML = "Szukam..."
 
-  const { data } = await supabase
+  let query = supabase
     .from("tabela_elektrykow")
     .select("imie,nazwisko,email,telefon,gwiazdki,status")
     .eq("wojewodztwo", woj.value)
-    .eq("miasto", miasto.value)
+
+  if(miasto.value){
+    query = query.eq("miasto", miasto.value)
+  }
+
+  const { data } = await query
 
   if(!data || data.length === 0){
     results.innerHTML = "Brak wyników"
@@ -225,15 +201,18 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
   }
 
   results.innerHTML = ""
-  data.forEach((e, i)=>{
+  data.forEach((e,i)=>{
     const d = document.createElement("div")
-    d.className = "card"
+    d.className="card"
     d.innerHTML = `
-      <div class="name" data-lp="${i+1}">${e.imie} ${e.nazwisko}</div>
-      <div class="small">${e.email}</div>
-      <div class="small">${e.telefon}</div>
-      <div class="small">${e.gwiazdki}</div>
-      <div class="small">${e.status}</div>
+      <div class="lp">${i+1}</div>
+      <div class="person">
+        <div class="name">${e.imie} ${e.nazwisko}</div>
+        <div class="small">${e.email}</div>
+        <div class="small">${e.telefon}</div>
+      </div>
+      <div class="stars">${"⭐".repeat(e.gwiazdki||0)}</div>
+      <div class="status">✔</div>
     `
     results.appendChild(d)
   })
