@@ -58,6 +58,7 @@ button{
   background:var(--primary);
   color:white;
   border:none;
+  cursor:pointer;
 }
 
 /* TABLE */
@@ -157,6 +158,7 @@ const woj = document.getElementById("wojewodztwo")
 const miasto = document.getElementById("miasto")
 const results = document.getElementById("results")
 
+// --- Ładowanie województw ---
 async function loadWoj(){
   const { data } = await supabase.from("wojewodztwa").select("id,nazwa").order("nazwa")
   data.forEach(w=>{
@@ -168,6 +170,7 @@ async function loadWoj(){
 }
 loadWoj()
 
+// --- Ładowanie miast ---
 woj.addEventListener("change", async ()=>{
   miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
   if(!woj.value) return
@@ -185,6 +188,7 @@ woj.addEventListener("change", async ()=>{
   })
 })
 
+// --- Szukanie ---
 document.getElementById("szukaj").addEventListener("click", async ()=>{
   results.innerHTML = "Szukam..."
 
@@ -197,7 +201,12 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
     query = query.eq("miasto", miasto.value)
   }
 
-  const { data } = await query
+  const { data, error } = await query
+  if(error){
+    results.innerHTML = "Błąd pobierania danych"
+    console.error(error)
+    return
+  }
 
   if(!data || data.length === 0){
     results.innerHTML = "Brak wyników"
@@ -215,9 +224,9 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
         <div class="small">${e.email}</div>
         <div class="small">${e.telefon}</div>
       </div>
-       <div class="small">${e.gwiazdki}</div>
+      <div class="small">${e.gwiazdki}</div>
       </div>
-      <div class="status">✔</div>
+      <div class="status">${e.status}</div>
     `
     results.appendChild(d)
   })
