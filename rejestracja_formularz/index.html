@@ -1,137 +1,131 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
 
-    .form-wrapper {
-      width: 100%;
-      max-width: 600px;
-    }
+.form-wrapper {
+  width: 100%;
+  max-width: 600px;
+}
 
-    form {
-      position: relative;
-      background-color: #fff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+form {
+  position: relative;
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    label {
-      margin-top: 15px;
-      display: block;
-      font-weight: 600;
-    }
+label {
+  margin-top: 15px;
+  display: block;
+  font-weight: 600;
+}
 
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box;
-      background-color: #fff;
-      color: #000;
-    }
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: #000;
+}
 
-    select:disabled {
-      background-color: #f4f6f8;
-      color: #555;
-      cursor: not-allowed;
-    }
+select:disabled {
+  background-color: #f4f6f8;
+  color: #555;
+  cursor: not-allowed;
+}
 
-    select:not(:disabled) {
-      background-color: #fff;
-      color: #000;
-    }
+select:not(:disabled) {
+  background-color: #fff;
+  color: #000;
+}
 
-    textarea {
-      min-height: 80px;
-    }
+textarea { min-height: 80px; }
 
-    button[type="submit"] {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background: #4CAF50;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+button[type="submit"] {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-    button[type="submit"]:hover {
-      background: #45a049;
-    }
+button[type="submit"]:hover { background: #45a049; }
 
-    #close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #666;
-      line-height: 1;
-    }
+#close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 26px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+}
 
-    #close-btn:hover {
-      color: #000;
-    }
+#close-btn:hover { color: #000; }
 
-    #result {
-      margin-top: 15px;
-      padding: 10px;
-      text-align: center;
-      font-weight: bold;
-    }
+#result {
+  margin-top: 15px;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+}
 
-    .error {
-      background: #f44336;
-      color: #fff;
-    }
+.error {
+  background: #f44336;
+  color: #fff;
+}
 
-    #loading {
-      display: none;
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
-    }
+#loading {
+  display: none;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
 
-    /* Checkbox RODO */
-    .rodo-label {
-      display: flex;
-      align-items: center;
-      margin-top: 15px;
-      font-weight: normal;
-      font-size: 14px;
-    }
+/* Checkbox RODO */
+.rodo-label {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  font-weight: normal;
+  font-size: 14px;
+}
 
-    .rodo-label input[type="checkbox"] {
-      margin-right: 10px;
-      accent-color: orange; /* Pomarańczowy ptaszek i obramowanie */
-    }
-  </style>
+.rodo-label input[type="checkbox"] {
+  margin-right: 10px;
+  accent-color: orange;
+}
+</style>
 </head>
 
 <body>
@@ -179,7 +173,6 @@
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
 
-  <!-- ✅ Checkbox RODO -->
   <label class="rodo-label">
     <input type="checkbox" id="rodo" required>
     Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
@@ -197,23 +190,18 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://tfbqqduxtsacvwfigsvt.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+  'YOUR_ANON_KEY'
 )
 
 let currentUser = null
+const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
 
-const fields = [
-  'imie','nazwisko','miasto','wojewodztwo',
-  'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
-]
-
-// Funkcja ładowania województw z opcjonalnym ustawieniem wybranego
-async function loadWojewodztwa(selectedWoj = null) {
+// Funkcja ładowania województw i miasta przy aktualizacji
+async function loadWojewodztwa(selectedWoj = null, selectedMiasto = null) {
   const { data, error } = await supabase
     .from('wojewodztwa')
     .select('id, nazwa')
     .order('nazwa')
-
   if (error) { console.error('Błąd ładowania województw:', error); return }
 
   const wojSelect = document.getElementById('wojewodztwo')
@@ -227,12 +215,30 @@ async function loadWojewodztwa(selectedWoj = null) {
 
   if (selectedWoj) {
     wojSelect.value = selectedWoj
-    // Wywołanie change, aby załadować miasta
-    wojSelect.dispatchEvent(new Event('change'))
+
+    // Ładujemy miasta i ustawiamy wybrane
+    const miastoSelect = document.getElementById('miasto')
+    const { data: miastaData, error: miastaError } = await supabase
+      .from('miasta')
+      .select('id, nazwa')
+      .eq('wojewodztwo_id', selectedWoj)
+      .order('nazwa')
+    if (miastaError) { console.error('Błąd ładowania miast:', miastaError); return }
+
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+    miastaData.forEach(m => {
+      const option = document.createElement('option')
+      option.value = m.id
+      option.textContent = m.nazwa
+      miastoSelect.appendChild(option)
+    })
+    miastoSelect.disabled = false
+
+    if (selectedMiasto) miastoSelect.value = selectedMiasto
   }
 }
 
-// Event zmiany województwa -> ładowanie miast
+// Zmiana województwa -> dynamiczne miasta
 document.getElementById('wojewodztwo').addEventListener('change', async function() {
   const wojId = this.value
   const miastoSelect = document.getElementById('miasto')
@@ -248,7 +254,6 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
     .select('id, nazwa')
     .eq('wojewodztwo_id', wojId)
     .order('nazwa')
-
   if (error) { console.error('Błąd ładowania miast:', error); return }
 
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
@@ -266,7 +271,7 @@ document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
-// DOMContentLoaded -> pobranie danych użytkownika i aktualizacja pól
+// DOMContentLoaded -> aktualizacja pól
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -285,23 +290,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
 
-    // --- Ustawienie województwa i automatyczne załadowanie miast ---
     if (data.wojewodztwo) {
-      await loadWojewodztwa(data.wojewodztwo)
-
-      // Po załadowaniu miast ustawiamy miasto
-      if (data.miasto) {
-        const miastoSelect = document.getElementById('miasto')
-        miastoSelect.value = data.miasto
-      }
+      await loadWojewodztwa(data.wojewodztwo, data.miasto)
     }
   } else {
-    // Nowy użytkownik
     loadWojewodztwa()
   }
 })
 
-// Obsługa submit
+// Submit formularza
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
   loading.style.display = 'block'
