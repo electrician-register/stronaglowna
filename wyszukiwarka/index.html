@@ -161,7 +161,7 @@ async function loadWoj(){
   const { data } = await supabase.from("wojewodztwa").select("id,nazwa").order("nazwa")
   data.forEach(w=>{
     const o = document.createElement("option")
-    o.value = w.id
+    o.value = String(w.id)
     o.textContent = w.nazwa
     woj.appendChild(o)
   })
@@ -172,10 +172,14 @@ woj.addEventListener("change", async ()=>{
   miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
   if(!woj.value) return
 
-  const { data } = await supabase.from("miasta").select("id,nazwa").eq("wojewodztwo_id", woj.value)
+  const { data } = await supabase
+    .from("miasta")
+    .select("id,nazwa")
+    .eq("wojewodztwo_id", woj.value)
+
   data.forEach(m=>{
     const o = document.createElement("option")
-    o.value = m.id
+    o.value = String(m.id)
     o.textContent = m.nazwa
     miasto.appendChild(o)
   })
@@ -211,7 +215,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
         <div class="small">${e.email}</div>
         <div class="small">${e.telefon}</div>
       </div>
-      <div class="small">${e.gwiazdki}</div>
+       <div class="small">${e.gwiazdki}</div>
       </div>
       <div class="status">✔</div>
     `
