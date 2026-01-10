@@ -40,26 +40,23 @@
       font-weight: 600;
     }
 
-    /* Uniwersalny styl dla wszystkich pól formularza */
     input, textarea, select {
-      width: 100%;           /* pełna szerokość formularza */
-      padding: 10px;         /* identyczny padding */
-      border-radius: 6px;    /* zaokrąglone rogi */
-      border: 1px solid #ccc;/* spójny border */
-      font-size: 16px;       /* dopasowany font do reszty */
-      box-sizing: border-box;/* uwzględnia padding w szerokości */
-      background-color: #fff;/* białe tło jak reszta pól */
-      color: #000;           /* kolor tekstu */
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+      background-color: #fff;
+      color: #000;
     }
 
-    /* Pole select, gdy jest disabled, wygląd spójny */
     select:disabled {
-      background-color: #f4f6f8; /* lekko szare tło */
-      color: #555;                /* ciemniejszy tekst, czytelny */
-      cursor: not-allowed;        /* wskaźnik niedostępności */
+      background-color: #f4f6f8;
+      color: #555;
+      cursor: not-allowed;
     }
 
-    /* Po aktywowaniu select wygląda normalnie */
     select:not(:disabled) {
       background-color: #fff;
       color: #000;
@@ -120,6 +117,13 @@
       margin-top: 10px;
       font-weight: bold;
     }
+
+    /* RODO checkbox styl */
+    .rodo-label {
+      font-weight: normal;
+      font-size: 14px;
+      margin-top: 15px;
+    }
   </style>
 </head>
 
@@ -167,6 +171,12 @@
 
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
+
+  <!-- ✅ Klauzula RODO -->
+  <label class="rodo-label">
+    <input type="checkbox" id="rodo" required>
+    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
+  </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
 
@@ -247,7 +257,6 @@ document.getElementById('close-btn').addEventListener('click', () => {
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
-
   loadWojewodztwa()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -274,6 +283,14 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   loading.style.display = 'block'
   result.textContent = ''
   result.className = ''
+
+  // ✅ Sprawdzenie RODO
+  if (!document.getElementById('rodo').checked) {
+    loading.style.display = 'none'
+    result.textContent = 'Musisz wyrazić zgodę na przetwarzanie danych (RODO).'
+    result.className = 'error'
+    return
+  }
 
   if (nrE.value && nrEPomiary.value) {
     loading.style.display = 'none'
