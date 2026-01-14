@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /logowanie
+Disallow: /rejestracja
+Disallow: /panel
+Disallow: /profil
+Disallow: /admin
+Disallow: /api
+Disallow: /supabase
+Disallow: /_next
+Disallow: /private
+Allow: /
