@@ -61,6 +61,16 @@ button{
   cursor:pointer;
 }
 
+sup a {
+  text-decoration: none;
+  font-size: 0.7em;
+  color: #0077ff;
+}
+
+sup a:hover {
+  text-decoration: underline;
+}
+
 /* RESULTS CARDS */
 #results{
   margin-top:20px;
@@ -229,7 +239,8 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
     d.innerHTML = `
       <div class="lp">${i+1}</div>
       <div class="person">
-        <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki}</div>
+        <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki}<sup><a href="#p1">1</a></sup>
+</div>
         <div class="small">${e.email}</div>
         <div class="small">${e.telefon}</div>
       </div>
@@ -241,12 +252,8 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
   })
 })
 </script>
-<footer>
-  &copy; 2025 Ogólnopolski Rejestr Elektryków<br />
-
-  <div class="header-wrap">
-    <span class="white">OREP</span><span class="red">.pl</span>
-  </div>
-</footer>
+<p id="p1">
+  <sup>1</sup> Dane są weryfikowane na podstawie numeru uprawnień.
+</p>
 </body>
 </html>
