@@ -328,6 +328,8 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   if (error) {
     result.textContent = error.message
     result.className = 'error'
+    const { data: { user } } = await supabase.auth.getUser()
+console.log('USER:', user)
   } else {
     // --- WYŚLIJ MAGIC EMAIL ---
     await wyslijMagicEmail(currentUser.email)
