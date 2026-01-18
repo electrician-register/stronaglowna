@@ -7,13 +7,10 @@
 <style>
 body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; color:#333; }
 header { background: linear-gradient(135deg,#1f2933,#111827); color:#fff; text-align:center; padding:70px 20px; }
-#stars { display:flex; justify-content:center; gap:5px; margin-bottom:10px; }
-.star { width:28px; height:28px; display:inline-block; }
-.star svg { width:100%; height:100%; }
 header h1 { font-size:2.6rem; margin:0 0 10px; }
 header p { font-size:1.2rem; max-width:700px; margin:0 auto 25px; opacity:0.9; }
 header input { padding:14px; width:320px; max-width:90%; border-radius:8px; border:none; font-size:16px; }
-section { max-width:900px; margin:60px auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); }
+section { max-width:900px; margin:60px auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); text-align:center; }
 .badge { display:inline-block; padding:6px 14px; background:#16a34a; color:#fff; border-radius:20px; font-weight:600; margin-bottom:20px; }
 .hidden { display:none; }
 </style>
@@ -21,11 +18,6 @@ section { max-width:900px; margin:60px auto; background:#fff; padding:40px; bord
 <body>
 
 <header>
-  <div id="stars">
-    <div class="star"><svg viewBox="0 0 24 24"><path fill="#ccc" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
-    <div class="star"><svg viewBox="0 0 24 24"><path fill="#ccc" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
-    <div class="star"><svg viewBox="0 0 24 24"><path fill="#ccc" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
-  </div>
   <h1 id="heroName">Profil elektryka</h1>
   <p id="heroDesc">Zweryfikowany profil w Centralnym Rejestrze Elektryków</p>
   <input id="search" placeholder="Np. Jan Kowalski">
@@ -33,13 +25,7 @@ section { max-width:900px; margin:60px auto; background:#fff; padding:40px; bord
 
 <section id="profil" class="hidden">
   <span id="status" class="badge"></span>
-  <h2 id="name"></h2>
   <p id="opis"></p>
-  <p><strong>Miasto:</strong> <span id="miasto"></span></p>
-  <p><strong>Województwo:</strong> <span id="wojewodztwo"></span></p>
-  <p><strong>Zakres prac:</strong> <span id="zajmuje"></span></p>
-  <p><strong>Telefon:</strong> <span id="telefon"></span></p>
-  <p><strong>Email:</strong> <span id="email"></span></p>
 </section>
 
 <section id="brak" class="hidden">
@@ -57,15 +43,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const search = document.getElementById("search");
 const profil = document.getElementById("profil");
 const brak = document.getElementById("brak");
-const starsEl = document.getElementById("stars");
 
 search.addEventListener("input", async () => {
   const q = search.value.trim();
   if(q.length < 3){
     profil.classList.add("hidden");
     brak.classList.add("hidden");
-    // Reset gwiazdek
-    starsEl.querySelectorAll("path").forEach(p => p.setAttribute("fill","#ccc"));
     return;
   }
 
@@ -82,30 +65,12 @@ search.addEventListener("input", async () => {
   if(error || !data){
     profil.classList.add("hidden");
     brak.classList.remove("hidden");
-    starsEl.querySelectorAll("path").forEach(p => p.setAttribute("fill","#ccc"));
     return;
   }
 
-  // GWIAZDKI MAX 3
-  let starsValue = Number(data.gwiazdki);
-  if(isNaN(starsValue)) starsValue = 0;
-  starsValue = Math.max(0, Math.min(3, starsValue));
+  // Wyświetlamy tylko imię, nazwisko, status i opis (zajmujeSie)
 
-  // Kolory gwiazdek
-  starsEl.querySelectorAll("path").forEach((p,i)=>{
-    p.setAttribute("fill", i<starsValue ? "#fbbf24" : "#ccc");
-  });
-
-  // Dane profilu
-  document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko} – Elektryk`;
-  document.getElementById("name").textContent = `${data.imie} ${data.nazwisko}`;
   document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
-  document.getElementById("miasto").textContent = data.miasto || "-";
-  document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
-  document.getElementById("zajmuje").textContent = data.zajmujeSie || "-";
-  document.getElementById("telefon").textContent = data.telefon || "-";
-  document.getElementById("email").textContent = data.email || "-";
-  document.getElementById("status").textContent = data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
 
   profil.classList.remove("hidden");
   brak.classList.add("hidden");
