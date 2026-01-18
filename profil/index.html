@@ -5,95 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil Elektryka</title>
 
-<link rel="icon" href="data:,">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_KEY = "TWOJ_ANON_KEY";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+window.supabase = supabase; // do debugu, opcjonalnie
+</script>
 
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f6f8;
-  color: #333;
-}
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; color: #333; }
 
 /* HERO */
-header {
-  background: linear-gradient(135deg, #1f2933, #111827);
-  color: #fff;
-  text-align: center;
-  padding: 70px 20px;
-}
-
-#stars {
-  font-size: 28px;
-  margin-bottom: 10px;
-  color: #fbbf24;
-}
-
-header h1 {
-  font-size: 2.6rem;
-  margin: 0 0 10px;
-}
-
-header p {
-  font-size: 1.2rem;
-  max-width: 700px;
-  margin: 0 auto 25px;
-  opacity: 0.9;
-}
-
-header input {
-  padding: 14px;
-  width: 320px;
-  max-width: 90%;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-}
+header { background: linear-gradient(135deg, #1f2933, #111827); color: #fff; text-align: center; padding: 70px 20px; }
+#stars { font-size: 28px; margin-bottom: 10px; color: #fbbf24; }
+header h1 { font-size: 2.6rem; margin: 0 0 10px; }
+header p { font-size: 1.2rem; max-width: 700px; margin: 0 auto 25px; opacity: 0.9; }
+header input { padding: 14px; width: 320px; max-width: 90%; border-radius: 8px; border: none; font-size: 16px; }
 
 /* PROFIL */
-section {
-  max-width: 900px;
-  margin: 60px auto;
-  background: #fff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-.badge {
-  display: inline-block;
-  padding: 6px 14px;
-  background: #16a34a;
-  color: #fff;
-  border-radius: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.hidden {
-  display: none;
-}
+section { max-width: 900px; margin: 60px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+.badge { display: inline-block; padding: 6px 14px; background: #16a34a; color: #fff; border-radius: 20px; font-weight: 600; margin-bottom: 20px; }
+.hidden { display: none; }
 </style>
 </head>
-
 <body>
 
 <header>
-  <!-- GWIAZDKI NAD TYTUŁEM -->
   <div id="stars">☆☆☆</div>
-
   <h1 id="heroName">Profil elektryka</h1>
-  <p id="heroDesc">Wyszukaj elektryka po imieniu i nazwisku</p>
+  <p id="heroDesc">Zweryfikowany profil w Centralnym Rejestrze Elektryków</p>
   <input id="search" placeholder="Np. Jan Kowalski">
 </header>
 
 <section id="profil" class="hidden">
   <span id="status" class="badge"></span>
-
   <h2 id="name"></h2>
   <p id="opis"></p>
-
   <p><strong>Miasto:</strong> <span id="miasto"></span></p>
   <p><strong>Województwo:</strong> <span id="wojewodztwo"></span></p>
   <p><strong>Zakres prac:</strong> <span id="zajmuje"></span></p>
@@ -106,11 +56,11 @@ section {
   <p>Nie znaleziono elektryka.</p>
 </section>
 
-<script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const search = document.getElementById("search");
 const profil = document.getElementById("profil");
@@ -119,58 +69,45 @@ const starsEl = document.getElementById("stars");
 
 search.addEventListener("input", async () => {
   const q = search.value.trim();
-
-  if (q.length < 3) {
+  if(q.length < 3){
     profil.classList.add("hidden");
     brak.classList.add("hidden");
     starsEl.textContent = "☆☆☆";
     return;
   }
 
-  const { data } = await db
-    .from("tabela_elektrykow")
-    .select("*")
+  const { data, error } = await supabase
+    .from('tabela_elektrykow')
+    .select('*')
     .or(`imie.ilike.%${q}%,nazwisko.ilike.%${q}%`)
     .limit(1)
     .maybeSingle();
 
-  if (!data) {
+  if(error || !data){
     profil.classList.add("hidden");
     brak.classList.remove("hidden");
     starsEl.textContent = "☆☆☆";
     return;
   }
 
-  /* ===== GWIAZDKI Z BAZY (0–3) ===== */
-  const starsValue = Math.max(0, Math.min(3, Number(data.gwiazdki) || 0));
-  starsEl.textContent =
-    "★".repeat(starsValue) + "☆".repeat(3 - starsValue);
+  // GWIAZDKI MAX 3
+  let starsValue = Number(data.gwiazdki) || 0;
+  if(starsValue < 0) starsValue = 0;
+  if(starsValue > 3) starsValue = 3;
+  starsEl.textContent = "★".repeat(starsValue) + "☆".repeat(3 - starsValue);
 
-  document.getElementById("heroName").textContent =
-    `${data.imie} ${data.nazwisko} – Elektryk`;
-
-  document.getElementById("heroDesc").textContent =
-    "Profesjonalne usługi elektryczne – instalacje, naprawy, pomiary i serwis";
-
-  document.getElementById("name").textContent =
-    `${data.imie} ${data.nazwisko}`;
-
-  document.getElementById("opis").textContent =
-    data.zajmujeSie || "Usługi elektryczne";
-
+  document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko} – Elektryk`;
+  document.getElementById("name").textContent = `${data.imie} ${data.nazwisko}`;
+  document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
   document.getElementById("miasto").textContent = data.miasto || "-";
   document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
   document.getElementById("zajmuje").textContent = data.zajmujeSie || "-";
   document.getElementById("telefon").textContent = data.telefon || "-";
   document.getElementById("email").textContent = data.email || "-";
+  document.getElementById("status").textContent = data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
 
-  document.getElementById("status").textContent =
-    data.status === "✅"
-      ? "Zweryfikowany w OREP"
-      : "W trakcie weryfikacji";
-
-  brak.classList.add("hidden");
   profil.classList.remove("hidden");
+  brak.classList.add("hidden");
 });
 </script>
 
