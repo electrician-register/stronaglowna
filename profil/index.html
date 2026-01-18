@@ -4,31 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil Elektryka</title>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "TWOJ_ANON_KEY";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-window.supabase = supabase; // do debugu, opcjonalnie
-</script>
-
 <style>
-body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; color: #333; }
-
-/* HERO */
-header { background: linear-gradient(135deg, #1f2933, #111827); color: #fff; text-align: center; padding: 70px 20px; }
-#stars { font-size: 28px; margin-bottom: 10px; color: #fbbf24; }
-header h1 { font-size: 2.6rem; margin: 0 0 10px; }
-header p { font-size: 1.2rem; max-width: 700px; margin: 0 auto 25px; opacity: 0.9; }
-header input { padding: 14px; width: 320px; max-width: 90%; border-radius: 8px; border: none; font-size: 16px; }
-
-/* PROFIL */
-section { max-width: 900px; margin: 60px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-.badge { display: inline-block; padding: 6px 14px; background: #16a34a; color: #fff; border-radius: 20px; font-weight: 600; margin-bottom: 20px; }
-.hidden { display: none; }
+body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; color:#333; }
+header { background: linear-gradient(135deg,#1f2933,#111827); color:#fff; text-align:center; padding:70px 20px; }
+#stars { font-size:28px; margin-bottom:10px; color:#fbbf24; }
+header h1 { font-size:2.6rem; margin:0 0 10px; }
+header p { font-size:1.2rem; max-width:700px; margin:0 auto 25px; opacity:0.9; }
+header input { padding:14px; width:320px; max-width:90%; border-radius:8px; border:none; font-size:16px; }
+section { max-width:900px; margin:60px auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); }
+.badge { display:inline-block; padding:6px 14px; background:#16a34a; color:#fff; border-radius:20px; font-weight:600; margin-bottom:20px; }
+.hidden { display:none; }
 </style>
 </head>
 <body>
@@ -58,6 +43,7 @@ section { max-width: 900px; margin: 60px auto; background: #fff; padding: 40px; 
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -76,12 +62,18 @@ search.addEventListener("input", async () => {
     return;
   }
 
+  // Supabase nie ma natywnego concat search, więc używamy `select('*').filter(...)` z oryginalnym SQL
   const { data, error } = await supabase
     .from('tabela_elektrykow')
     .select('*')
-    .or(`imie.ilike.%${q}%,nazwisko.ilike.%${q}%`)
+    .textSearch('full_name', q, {
+      type: 'plain'
+    })
     .limit(1)
     .maybeSingle();
+
+  // Jeśli kolumna 'full_name' nie istnieje, możemy użyć SQL filter:
+  // const { data, error } = await supabase.rpc('search_elektryk', { term: q });
 
   if(error || !data){
     profil.classList.add("hidden");
@@ -92,8 +84,7 @@ search.addEventListener("input", async () => {
 
   // GWIAZDKI MAX 3
   let starsValue = Number(data.gwiazdki) || 0;
-  if(starsValue < 0) starsValue = 0;
-  if(starsValue > 3) starsValue = 3;
+  starsValue = Math.max(0, Math.min(3, starsValue));
   starsEl.textContent = "★".repeat(starsValue) + "☆".repeat(3 - starsValue);
 
   document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko} – Elektryk`;
