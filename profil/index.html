@@ -12,36 +12,55 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
   color: #333;
 }
 
+/* HERO */
 header {
-  background: #111827;
+  background: linear-gradient(135deg, #1f2933, #111827);
   color: #fff;
   text-align: center;
-  padding: 50px 20px;
+  padding: 80px 20px;
 }
-
+header h1 {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+}
+header p {
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto 30px;
+  opacity: 0.9;
+}
 header input {
-  padding: 12px;
-  width: 280px;
+  padding: 14px;
+  width: 320px;
+  max-width: 90%;
   border-radius: 8px;
   border: none;
   font-size: 16px;
 }
 
+/* PROFIL */
 section {
   max-width: 900px;
-  margin: 40px auto;
+  margin: 60px auto;
   background: #fff;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
-
-.hidden { display: none; }
+section h2 {
+  margin-top: 0;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+section p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
 
 .badge {
   display: inline-block;
@@ -49,6 +68,11 @@ section {
   background: #16a34a;
   color: #fff;
   border-radius: 20px;
+  font-weight: 600;
+}
+
+.hidden {
+  display: none;
 }
 </style>
 </head>
@@ -56,30 +80,32 @@ section {
 <body>
 
 <header>
-  <h1>Wyszukaj elektryka</h1>
-  <input id="search" placeholder="Imię lub nazwisko">
+  <h1 id="heroName">Profil elektryka</h1>
+  <p id="heroDesc">Wyszukaj elektryka po imieniu lub nazwisku</p>
+  <input id="search" placeholder="Np. Jan Kowalski">
 </header>
 
 <section id="profil" class="hidden">
+  <span id="status" class="badge"></span>
   <h2 id="name"></h2>
-  <p id="desc"></p>
+  <p id="opis"></p>
+
   <p><strong>Miasto:</strong> <span id="miasto"></span></p>
   <p><strong>Województwo:</strong> <span id="wojewodztwo"></span></p>
-  <p><strong>Zakres:</strong> <span id="zajmuje"></span></p>
+  <p><strong>Zakres prac:</strong> <span id="zajmuje"></span></p>
   <p><strong>Telefon:</strong> <span id="telefon"></span></p>
   <p><strong>Email:</strong> <span id="email"></span></p>
-  <div id="status" class="badge"></div>
 </section>
 
 <section id="brak" class="hidden">
-  <h3>Brak wyników</h3>
+  <h2>Brak wyników</h2>
+  <p>Nie znaleziono elektryka o podanym imieniu lub nazwisku.</p>
 </section>
 
 <script>
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-/* 🔧 POPRAWKA: klient = db */
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const search = document.getElementById("search");
@@ -108,11 +134,17 @@ search.addEventListener("input", async () => {
     return;
   }
 
+  document.getElementById("heroName").textContent =
+    `${data.imie} ${data.nazwisko} – Elektryk`;
+
+  document.getElementById("heroDesc").textContent =
+    "Profesjonalne usługi elektryczne – instalacje, naprawy, pomiary i serwis";
+
   document.getElementById("name").textContent =
     `${data.imie} ${data.nazwisko}`;
 
-  document.getElementById("desc").textContent =
-    `Profesjonalne usługi elektryczne – ${data.zajmujeSie || ""}`;
+  document.getElementById("opis").textContent =
+    `Zajmuje się: ${data.zajmujeSie || "usługami elektrycznymi"}.`;
 
   document.getElementById("miasto").textContent = data.miasto || "-";
   document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
@@ -121,7 +153,7 @@ search.addEventListener("input", async () => {
   document.getElementById("email").textContent = data.email || "-";
 
   document.getElementById("status").textContent =
-    data.status === "✅" ? "Zweryfikowany" : "W trakcie weryfikacji";
+    data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
 
   brak.classList.add("hidden");
   profil.classList.remove("hidden");
