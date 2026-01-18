@@ -7,7 +7,9 @@
 <style>
 body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; color:#333; }
 header { background: linear-gradient(135deg,#1f2933,#111827); color:#fff; text-align:center; padding:70px 20px; }
-#stars { font-size:28px; margin-bottom:10px; color:#fbbf24; }
+#stars { display:flex; justify-content:center; gap:5px; margin-bottom:10px; }
+.star { width:28px; height:28px; display:inline-block; }
+.star svg { width:100%; height:100%; }
 header h1 { font-size:2.6rem; margin:0 0 10px; }
 header p { font-size:1.2rem; max-width:700px; margin:0 auto 25px; opacity:0.9; }
 header input { padding:14px; width:320px; max-width:90%; border-radius:8px; border:none; font-size:16px; }
@@ -19,7 +21,11 @@ section { max-width:900px; margin:60px auto; background:#fff; padding:40px; bord
 <body>
 
 <header>
-  <div id="stars">☆☆☆</div>
+  <div id="stars">
+    <div class="star"><svg viewBox="0 0 24 24"><path fill="#ccc" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+    <div class="star"><svg viewBox="0 0 24 24"><path fill="#ccc" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+    <div class="star"><svg viewBox="0 0 24 24"><path fill="#ccc" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+  </div>
   <h1 id="heroName">Profil elektryka</h1>
   <p id="heroDesc">Zweryfikowany profil w Centralnym Rejestrze Elektryków</p>
   <input id="search" placeholder="Np. Jan Kowalski">
@@ -45,7 +51,7 @@ section { max-width:900px; margin:60px auto; background:#fff; padding:40px; bord
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"; // <-- wklej swój anon key
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"; // <-- Twój anon key
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const search = document.getElementById("search");
@@ -58,14 +64,12 @@ search.addEventListener("input", async () => {
   if(q.length < 3){
     profil.classList.add("hidden");
     brak.classList.add("hidden");
-    starsEl.textContent = "☆☆☆";
+    // Reset gwiazdek
+    starsEl.querySelectorAll("path").forEach(p => p.setAttribute("fill","#ccc"));
     return;
   }
 
-  // Podział wpisanej frazy na części
-  const parts = q.split(" ").filter(p => p.length > 0);
-
-  // Budujemy warunek or() dla każdej części imienia/nazwiska
+  const parts = q.split(" ").filter(p => p.length>0);
   const filters = parts.map(p => `imie.ilike.%${p}%,nazwisko.ilike.%${p}%`).join(",");
 
   const { data, error } = await supabase
@@ -78,16 +82,21 @@ search.addEventListener("input", async () => {
   if(error || !data){
     profil.classList.add("hidden");
     brak.classList.remove("hidden");
-    starsEl.textContent = "☆☆☆";
+    starsEl.querySelectorAll("path").forEach(p => p.setAttribute("fill","#ccc"));
     return;
   }
 
   // GWIAZDKI MAX 3
-  let starsValue = Number(data.gwiazdki) || 0;
+  let starsValue = Number(data.gwiazdki);
+  if(isNaN(starsValue)) starsValue = 0;
   starsValue = Math.max(0, Math.min(3, starsValue));
-  starsEl.textContent = "★".repeat(starsValue) + "☆".repeat(3 - starsValue);
 
-  // Wypełnienie danych profilu
+  // Kolory gwiazdek
+  starsEl.querySelectorAll("path").forEach((p,i)=>{
+    p.setAttribute("fill", i<starsValue ? "#fbbf24" : "#ccc");
+  });
+
+  // Dane profilu
   document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko} – Elektryk`;
   document.getElementById("name").textContent = `${data.imie} ${data.nazwisko}`;
   document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
@@ -105,4 +114,3 @@ search.addEventListener("input", async () => {
 
 </body>
 </html>
-
