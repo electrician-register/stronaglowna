@@ -107,8 +107,13 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  // --- ZAPIS DO TABELI ---
-  const { error } = await supabase.from('kontakt').insert([{ name, email, subject, message }]);
+  // --- ZAPIS DO TABELI 'kontakt' ---
+  const { error } = await supabase.from('kontakt').insert([{
+    imie: name,
+    email: email,
+    temat: subject,
+    wiadomosc: message
+  }]);
 
   loading.style.display = 'none';
 
