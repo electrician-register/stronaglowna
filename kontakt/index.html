@@ -70,9 +70,6 @@ button[type="submit"]:hover { background: #45a049; }
     <label>Treść wiadomości</label>
     <textarea id="message" required></textarea>
 
-    <label>Załącz plik (opcjonalnie)</label>
-    <input type="file" id="attachment">
-
     <button type="submit">Wyślij</button>
     <div id="loading">Wysyłanie...</div>
     <div id="result"></div>
@@ -90,7 +87,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const form = document.getElementById('contact-form');
 const loading = document.getElementById('loading');
 const result = document.getElementById('result');
-const attachmentInput = document.getElementById('attachment');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -111,44 +107,8 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  let fileUrl = null;
-  if (attachmentInput.files.length > 0) {
-    const file = attachmentInput.files[0];
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-      loading.style.display = 'none';
-      result.textContent = 'Nieprawidłowy typ pliku. Dozwolone: PDF, JPG, PNG';
-      result.className = 'error';
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      loading.style.display = 'none';
-      result.textContent = 'Plik zbyt duży. Maks. 5 MB.';
-      result.className = 'error';
-      return;
-    }
-
-    const path = `kontakt/${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage.from('kontakt').upload(path, file, { upsert: true });
-    if (uploadError) {
-      loading.style.display = 'none';
-      result.textContent = 'Błąd wysyłania pliku: ' + uploadError.message;
-      result.className = 'error';
-      return;
-    }
-
-    const { data: urlData, error: urlError } = await supabase.storage.from('kontakt').createSignedUrl(path, 3600);
-    if (urlError) {
-      loading.style.display = 'none';
-      result.textContent = 'Błąd generowania linku do pliku';
-      result.className = 'error';
-      return;
-    }
-    fileUrl = urlData.signedUrl;
-  }
-
-  // --- ZAPIS DO TABELI (opcjonalnie) ---
-  const { error } = await supabase.from('kontakt').insert([{ name, email, subject, message, file: fileUrl }]);
+  // --- ZAPIS DO TABELI ---
+  const { error } = await supabase.from('kontakt').insert([{ name, email, subject, message }]);
 
   loading.style.display = 'none';
 
