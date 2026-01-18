@@ -1,1 +1,117 @@
-kontakt
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Formularz kontaktowy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+}
+.form-container {
+  max-width: 500px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+h2 {
+  text-align: center;
+}
+input, textarea, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+}
+textarea {
+  resize: vertical;
+}
+button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background: #004999;
+}
+.status {
+  margin-top: 15px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="form-container">
+  <h2>Skontaktuj się z nami</h2>
+
+  <form id="contactForm">
+    <input type="text" id="name" placeholder="Imię i nazwisko" required />
+    <input type="email" id="email" placeholder="Adres e-mail" required />
+    <textarea id="message" placeholder="Twoja wiadomość" rows="5" required></textarea>
+    <button type="submit">Wyślij wiadomość</button>
+  </form>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = supabase.createClient(
+  "https://TWOJ-PROJEKT.supabase.co",
+  "PUBLIC_ANON_KEY"
+);
+
+document.getElementById("contactForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = name.value.trim();
+  const email = document.getElementById("email").value.trim();
+  const message = document.getElementById("message").value.trim();
+  const status = document.getElementById("status");
+
+  const safeEmail = email.replace(/[@.]/g, "_");
+  const filename = `${Date.now()}_${safeEmail}.json`;
+
+  const content = {
+    name,
+    email,
+    message,
+    created_at: new Date().toISOString()
+  };
+
+  const { error } = await supabase.storage
+    .from("kontakt")
+    .upload(filename, new Blob(
+      [JSON.stringify(content, null, 2)],
+      { type: "application/json" }
+    ));
+
+  if (error) {
+    status.innerHTML = "❌ Błąd wysyłania wiadomości";
+    return;
+  }
+
+  /* wysyłka maila zwrotnego */
+  await fetch("https://TWOJ-PROJEKT.supabase.co/functions/v1/kontakt-mail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer PUBLIC_ANON_KEY"
+    },
+    body: JSON.stringify({ email, name })
+  });
+
+  status.innerHTML = "✅ Dziękujemy! Odpowiemy najszybciej jak to możliwe.";
+  e.target.reset();
+});
+</script>
+
+</body>
+</html>
+
