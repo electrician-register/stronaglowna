@@ -1,117 +1,166 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<title>Formularz kontaktowy</title>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Formularz Kontaktowy</title>
+<link rel="icon" href="/favicon.png">
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
 }
-.form-container {
-  max-width: 500px;
-  margin: 60px auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+.form-wrapper {
+  width: 100%;
+  max-width: 600px;
 }
-h2 {
-  text-align: center;
+form {
+  position: relative;
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-input, textarea, button {
+h2 { text-align: center; margin-bottom: 20px; }
+label { margin-top: 15px; display: block; font-weight: 600; }
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+textarea { min-height: 100px; }
+button[type="submit"] {
+  margin-top: 20px;
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-}
-textarea {
-  resize: vertical;
-}
-button {
-  background: #0066cc;
-  color: white;
+  background: #4CAF50;
+  color: #fff;
   border: none;
+  border-radius: 6px;
+  font-size: 16px;
   cursor: pointer;
 }
-button:hover {
-  background: #004999;
-}
-.status {
-  margin-top: 15px;
-  text-align: center;
-}
+button[type="submit"]:hover { background: #45a049; }
+#result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
+.error { background: #f44336; color: #fff; }
+#loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
 </style>
 </head>
-
 <body>
 
-<div class="form-container">
-  <h2>Skontaktuj się z nami</h2>
+<div class="form-wrapper">
+  <form id="contact-form">
+    <h2>Formularz Kontaktowy</h2>
 
-  <form id="contactForm">
-    <input type="text" id="name" placeholder="Imię i nazwisko" required />
-    <input type="email" id="email" placeholder="Adres e-mail" required />
-    <textarea id="message" placeholder="Twoja wiadomość" rows="5" required></textarea>
-    <button type="submit">Wyślij wiadomość</button>
+    <label>Imię i nazwisko</label>
+    <input id="name" required>
+
+    <label>Email</label>
+    <input id="email" type="email" required>
+
+    <label>Temat</label>
+    <input id="subject" required>
+
+    <label>Treść wiadomości</label>
+    <textarea id="message" required></textarea>
+
+    <label>Załącz plik (opcjonalnie)</label>
+    <input type="file" id="attachment">
+
+    <button type="submit">Wyślij</button>
+    <div id="loading">Wysyłanie...</div>
+    <div id="result"></div>
   </form>
-
-  <div class="status" id="status"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const supabase = supabase.createClient(
-  "https://TWOJ-PROJEKT.supabase.co",
-  "PUBLIC_ANON_KEY"
-);
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-document.getElementById("contactForm").addEventListener("submit", async (e) => {
+// --- SUPABASE ---
+const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co';
+const SUPABASE_ANON_KEY = 'TWOJ_ANON_KEY';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const form = document.getElementById('contact-form');
+const loading = document.getElementById('loading');
+const result = document.getElementById('result');
+const attachmentInput = document.getElementById('attachment');
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  loading.style.display = 'block';
+  result.textContent = '';
+  result.className = '';
 
-  const name = name.value.trim();
-  const email = document.getElementById("email").value.trim();
-  const message = document.getElementById("message").value.trim();
-  const status = document.getElementById("status");
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
 
-  const safeEmail = email.replace(/[@.]/g, "_");
-  const filename = `${Date.now()}_${safeEmail}.json`;
-
-  const content = {
-    name,
-    email,
-    message,
-    created_at: new Date().toISOString()
-  };
-
-  const { error } = await supabase.storage
-    .from("kontakt")
-    .upload(filename, new Blob(
-      [JSON.stringify(content, null, 2)],
-      { type: "application/json" }
-    ));
-
-  if (error) {
-    status.innerHTML = "❌ Błąd wysyłania wiadomości";
+  // --- WALIDACJA ---
+  if (!name || !email || !subject || !message) {
+    loading.style.display = 'none';
+    result.textContent = 'Proszę wypełnić wszystkie pola.';
+    result.className = 'error';
     return;
   }
 
-  /* wysyłka maila zwrotnego */
-  await fetch("https://TWOJ-PROJEKT.supabase.co/functions/v1/kontakt-mail", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer PUBLIC_ANON_KEY"
-    },
-    body: JSON.stringify({ email, name })
-  });
+  let fileUrl = null;
+  if (attachmentInput.files.length > 0) {
+    const file = attachmentInput.files[0];
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      loading.style.display = 'none';
+      result.textContent = 'Nieprawidłowy typ pliku. Dozwolone: PDF, JPG, PNG';
+      result.className = 'error';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      loading.style.display = 'none';
+      result.textContent = 'Plik zbyt duży. Maks. 5 MB.';
+      result.className = 'error';
+      return;
+    }
 
-  status.innerHTML = "✅ Dziękujemy! Odpowiemy najszybciej jak to możliwe.";
-  e.target.reset();
+    const path = `kontakt/${Date.now()}_${file.name}`;
+    const { error: uploadError } = await supabase.storage.from('kontakt').upload(path, file, { upsert: true });
+    if (uploadError) {
+      loading.style.display = 'none';
+      result.textContent = 'Błąd wysyłania pliku: ' + uploadError.message;
+      result.className = 'error';
+      return;
+    }
+
+    const { data: urlData, error: urlError } = await supabase.storage.from('kontakt').createSignedUrl(path, 3600);
+    if (urlError) {
+      loading.style.display = 'none';
+      result.textContent = 'Błąd generowania linku do pliku';
+      result.className = 'error';
+      return;
+    }
+    fileUrl = urlData.signedUrl;
+  }
+
+  // --- ZAPIS DO TABELI (opcjonalnie) ---
+  const { error } = await supabase.from('kontakt').insert([{ name, email, subject, message, file: fileUrl }]);
+
+  loading.style.display = 'none';
+
+  if (error) {
+    result.textContent = 'Błąd zapisu: ' + error.message;
+    result.className = 'error';
+  } else {
+    result.textContent = 'Dziękujemy za Twoją wiadomość! Skontaktujemy się wkrótce.';
+    result.className = '';
+    form.reset();
+  }
 });
 </script>
-
 </body>
 </html>
-
