@@ -3,157 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elektryk Profi – Usługi Elektryczne</title>
+<title>Profil Elektryka</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    color: #333;
-    line-height: 1.6;
-  }
-  header {
-    background: #222;
-    color: white;
-    text-align: center;
-    padding: 60px 20px;
-  }
-  header h1 {
-    margin: 0;
-    font-size: 2.8rem;
-  }
-  header p {
-    font-size: 1.2rem;
-  }
-  header .btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 24px;
-    background: #f57c00;
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 4px;
-  }
-  section {
-    padding: 60px 20px;
-    max-width: 1200px;
-    margin: auto;
-  }
-  .services, .portfolio {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
-  }
-  .card {
-    flex: 1 1 250px;
-    border: 1px solid #ddd;
-    padding: 20px;
-    background: #fafafa;
-    border-radius: 6px;
-    text-align: center;
-  }
-  .card img {
-    max-width: 100%;
-    border-radius: 6px;
-  }
-  .contact-form input, .contact-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  .contact-form button {
-    margin-top: 10px;
-    padding: 12px;
-    background: #f57c00;
-    color: white;
-    border: none;
-    width: 100%;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  footer {
-    text-align: center;
-    padding: 20px;
-    background: #222;
-    color: white;
-  }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+/* HERO */
+header {
+  background: linear-gradient(135deg, #1f2933, #111827);
+  color: #fff;
+  text-align: center;
+  padding: 80px 20px;
+}
+header h1 {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+}
+header p {
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto 30px;
+  opacity: 0.9;
+}
+header a {
+  display: inline-block;
+  padding: 14px 28px;
+  background: #f59e0b;
+  color: #000;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+header a:hover {
+  background: #d97706;
+}
+
+/* O MNIE */
+section {
+  max-width: 900px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+section h2 {
+  margin-top: 0;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+section p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
 </style>
 </head>
 <body>
 
-<!-- Hero -->
 <header>
   <h1>Jan Kowalski – Elektryk z Doświadczeniem</h1>
   <p>Profesjonalne usługi elektryczne – instalacje, naprawy, pomiary i serwis</p>
-  <a href="#kontakt" class="btn">Zamów serwis</a>
+  <a href="#o-mnie">Zamów serwis</a>
 </header>
 
-<!-- O mnie -->
 <section id="o-mnie">
   <h2>O mnie</h2>
-  <p>Cześć! Nazywam się Jan Kowalski – jestem elektrykiem z ponad 10-letnim doświadczeniem w instalacjach elektrycznych, naprawach oraz pomiarach. Posiadam wszystkie niezbędne uprawnienia SEP i pracuję zarówno z klientami indywidualnymi, jak i firmami.</p>
-  <p>Moją misją jest bezpieczeństwo i pełne zadowolenie klienta – dlatego stawiam na jakość, terminowość i uczciwe ceny.</p>
+  <p>
+    Cześć! Nazywam się Jan Kowalski – jestem elektrykiem z ponad 10-letnim doświadczeniem
+    w instalacjach elektrycznych, naprawach oraz pomiarach. Posiadam wszystkie niezbędne
+    uprawnienia SEP i pracuję zarówno z klientami indywidualnymi, jak i firmami.
+  </p>
+  <p>
+    Moją misją jest bezpieczeństwo i pełne zadowolenie klienta – dlatego stawiam na jakość,
+    terminowość i uczciwe ceny.
+  </p>
 </section>
-
-<!-- Usługi -->
-<section id="uslugi">
-  <h2>Moje usługi</h2>
-  <div class="services">
-    <div class="card">
-      <h3>Instalacje elektryczne</h3>
-      <p>Kompleksowe wykonanie instalacji w domach i firmach.</p>
-    </div>
-    <div class="card">
-      <h3>Pomiary i odbiory</h3>
-      <p>Profesjonalne pomiary elektryczne i odbiory instalacji.</p>
-    </div>
-    <div class="card">
-      <h3>Naprawy i serwis</h3>
-      <p>Szybkie usuwanie usterek i awarii elektrycznych.</p>
-    </div>
-    <div class="card">
-      <h3>Modernizacje instalacji</h3>
-      <p>Unowocześnianie i rozbudowa instalacji.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Portfolio -->
-<section id="portfolio">
-  <h2>Realizacje</h2>
-  <div class="portfolio">
-    <div class="card"><img src="https://via.placeholder.com/300x200" alt="Realizacja 1"><p>Instalacja w domu jednorodzinnym</p></div>
-    <div class="card"><img src="https://via.placeholder.com/300x200" alt="Realizacja 2"><p>Nowa rozdzielnia elektryczna</p></div>
-    <div class="card"><img src="https://via.placeholder.com/300x200" alt="Realizacja 3"><p>Pomiary elektryczne</p></div>
-  </div>
-</section>
-
-<!-- Opinie -->
-<section id="opinie">
-  <h2>Opinie klientów</h2>
-  <div class="card"><p>⭐⭐⭐⭐⭐ „Profesjonalne podejście i szybka realizacja!” – Anna K.</p></div>
-  <div class="card"><p>⭐⭐⭐⭐⭐ „Polecam – wszystko wykonane solidnie.” – Piotr S.</p></div>
-</section>
-
-<!-- Kontakt -->
-<section id="kontakt">
-  <h2>Kontakt</h2>
-  <form class="contact-form">
-    <input type="text" placeholder="Imię i nazwisko" required>
-    <input type="email" placeholder="Twój email" required>
-    <textarea rows="5" placeholder="Wiadomość" required></textarea>
-    <button type="submit">Wyślij zapytanie</button>
-  </form>
-  <p>📞 500 600 700 • 📧 kontakt@elektrykprofi.pl</p>
-</section>
-
-<!-- Footer -->
-<footer>
-  © 2026 Elektryk Profi – Wszystkie prawa zastrzeżone
-</footer>
 
 </body>
 </html>
