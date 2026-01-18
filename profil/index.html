@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil Elektryka</title>
 
+<link rel="icon" href="data:,">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -15,7 +17,6 @@ body {
   color: #333;
 }
 
-/* HEADER */
 header {
   background: #111827;
   color: #fff;
@@ -23,20 +24,14 @@ header {
   padding: 50px 20px;
 }
 
-header h1 {
-  margin-bottom: 10px;
-}
-
 header input {
   padding: 12px;
   width: 280px;
-  max-width: 90%;
   border-radius: 8px;
   border: none;
   font-size: 16px;
 }
 
-/* PROFIL */
 section {
   max-width: 900px;
   margin: 40px auto;
@@ -46,9 +41,7 @@ section {
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 .badge {
   display: inline-block;
@@ -56,8 +49,6 @@ section {
   background: #16a34a;
   color: #fff;
   border-radius: 20px;
-  font-size: 14px;
-  margin-top: 10px;
 }
 </style>
 </head>
@@ -66,11 +57,7 @@ section {
 
 <header>
   <h1>Wyszukaj elektryka</h1>
-  <input
-    type="text"
-    id="search"
-    placeholder="Wpisz imię lub nazwisko..."
-  >
+  <input id="search" placeholder="Imię lub nazwisko">
 </header>
 
 <section id="profil" class="hidden">
@@ -78,7 +65,7 @@ section {
   <p id="desc"></p>
   <p><strong>Miasto:</strong> <span id="miasto"></span></p>
   <p><strong>Województwo:</strong> <span id="wojewodztwo"></span></p>
-  <p><strong>Zakres prac:</strong> <span id="zajmuje"></span></p>
+  <p><strong>Zakres:</strong> <span id="zajmuje"></span></p>
   <p><strong>Telefon:</strong> <span id="telefon"></span></p>
   <p><strong>Email:</strong> <span id="email"></span></p>
   <div id="status" class="badge"></div>
@@ -86,21 +73,21 @@ section {
 
 <section id="brak" class="hidden">
   <h3>Brak wyników</h3>
-  <p>Nie znaleziono elektryka o podanych danych.</p>
 </section>
 
 <script>
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* 🔧 POPRAWKA: klient = db */
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const searchInput = document.getElementById("search");
+const search = document.getElementById("search");
 const profil = document.getElementById("profil");
 const brak = document.getElementById("brak");
 
-searchInput.addEventListener("input", async () => {
-  const q = searchInput.value.trim();
+search.addEventListener("input", async () => {
+  const q = search.value.trim();
 
   if (q.length < 2) {
     profil.classList.add("hidden");
@@ -108,12 +95,12 @@ searchInput.addEventListener("input", async () => {
     return;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("tabela_elektrykow")
     .select("*")
     .or(`imie.ilike.%${q}%,nazwisko.ilike.%${q}%`)
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     profil.classList.add("hidden");
@@ -125,7 +112,7 @@ searchInput.addEventListener("input", async () => {
     `${data.imie} ${data.nazwisko}`;
 
   document.getElementById("desc").textContent =
-    `Profesjonalne usługi elektryczne – ${data.zajmujeSie || "brak opisu"}`;
+    `Profesjonalne usługi elektryczne – ${data.zajmujeSie || ""}`;
 
   document.getElementById("miasto").textContent = data.miasto || "-";
   document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
