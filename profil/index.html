@@ -58,6 +58,14 @@ section {
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
+
+.stars {
+  text-align: center;
+  font-size: 1.6rem;
+  color: #f59e0b;
+  margin-bottom: 10px;
+}
+
 section h2 {
   margin-top: 0;
   font-size: 2rem;
@@ -83,7 +91,6 @@ section p {
 
 <body>
 
-<!-- 🔍 WYSZUKIWARKA NA SAMEJ GÓRZE -->
 <div class="top-search">
   <input id="search" placeholder="Wpisz imię i nazwisko (np. Jan Kowalski)">
 </div>
@@ -94,6 +101,10 @@ section p {
 </header>
 
 <section id="profil" class="hidden">
+
+  <!-- ⭐ GWIAZDKI -->
+  <div id="stars" class="stars"></div>
+
   <span id="status" class="badge"></span>
   <h2 id="name"></h2>
   <p id="opis"></p>
@@ -148,6 +159,10 @@ search.addEventListener("input", async () => {
     brak.classList.remove("hidden");
     return;
   }
+
+  /* ⭐ GWIAZDKI */
+  const starsCount = Math.max(0, Math.min(5, data.gwiazdki || 0));
+  document.getElementById("stars").textContent = "★".repeat(starsCount);
 
   document.getElementById("heroName").textContent =
     `${data.imie} ${data.nazwisko} – Elektryk`;
