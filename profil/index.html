@@ -6,7 +6,6 @@
 <title>Profil Elektryka</title>
 
 <link rel="icon" href="data:,">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -17,12 +16,27 @@ body {
   color: #333;
 }
 
+/* SEARCH BAR TOP */
+.top-search {
+  background: #0f172a;
+  padding: 15px;
+  text-align: center;
+}
+.top-search input {
+  padding: 14px;
+  width: 360px;
+  max-width: 95%;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
+
 /* HERO */
 header {
   background: linear-gradient(135deg, #1f2933, #111827);
   color: #fff;
   text-align: center;
-  padding: 80px 20px;
+  padding: 70px 20px;
 }
 header h1 {
   font-size: 2.6rem;
@@ -31,16 +45,8 @@ header h1 {
 header p {
   font-size: 1.2rem;
   max-width: 700px;
-  margin: 0 auto 30px;
+  margin: 0 auto;
   opacity: 0.9;
-}
-header input {
-  padding: 14px;
-  width: 320px;
-  max-width: 90%;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
 }
 
 /* PROFIL */
@@ -71,18 +77,20 @@ section p {
   font-weight: 600;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 </style>
 </head>
 
 <body>
 
+<!-- 🔍 WYSZUKIWARKA NA SAMEJ GÓRZE -->
+<div class="top-search">
+  <input id="search" placeholder="Wpisz imię i nazwisko (np. Jan Kowalski)">
+</div>
+
 <header>
   <h1 id="heroName">Profil elektryka</h1>
-  <p id="heroDesc">Wyszukaj elektryka po imieniu lub nazwisku</p>
-  <input id="search" placeholder="Np. Jan Kowalski">
+  <p id="heroDesc">Zweryfikowany profil w Centralnym Rejestrze Elektryków</p>
 </header>
 
 <section id="profil" class="hidden">
@@ -99,7 +107,7 @@ section p {
 
 <section id="brak" class="hidden">
   <h2>Brak wyników</h2>
-  <p>Nie znaleziono elektryka o podanym imieniu lub nazwisku.</p>
+  <p>Nie znaleziono elektryka o podanych danych.</p>
 </section>
 
 <script>
@@ -114,19 +122,26 @@ const brak = document.getElementById("brak");
 
 search.addEventListener("input", async () => {
   const q = search.value.trim();
-
   if (q.length < 2) {
     profil.classList.add("hidden");
     brak.classList.add("hidden");
     return;
   }
 
-  const { data, error } = await db
-    .from("tabela_elektrykow")
-    .select("*")
-    .or(`imie.ilike.%${q}%,nazwisko.ilike.%${q}%`)
-    .limit(1)
-    .maybeSingle();
+  const parts = q.split(" ").filter(Boolean);
+  let query = db.from("tabela_elektrykow").select("*");
+
+  if (parts.length >= 2) {
+    query = query
+      .ilike("imie", `%${parts[0]}%`)
+      .ilike("nazwisko", `%${parts[1]}%`);
+  } else {
+    query = query.or(
+      `imie.ilike.%${parts[0]}%,nazwisko.ilike.%${parts[0]}%`
+    );
+  }
+
+  const { data, error } = await query.limit(1).maybeSingle();
 
   if (error || !data) {
     profil.classList.add("hidden");
@@ -137,14 +152,11 @@ search.addEventListener("input", async () => {
   document.getElementById("heroName").textContent =
     `${data.imie} ${data.nazwisko} – Elektryk`;
 
-  document.getElementById("heroDesc").textContent =
-    "Profesjonalne usługi elektryczne – instalacje, naprawy, pomiary i serwis";
-
   document.getElementById("name").textContent =
     `${data.imie} ${data.nazwisko}`;
 
   document.getElementById("opis").textContent =
-    `Zajmuje się: ${data.zajmujeSie || "usługami elektrycznymi"}.`;
+    `Profesjonalne usługi elektryczne – ${data.zajmujeSie || "instalacje i serwis"}`;
 
   document.getElementById("miasto").textContent = data.miasto || "-";
   document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
@@ -153,7 +165,9 @@ search.addEventListener("input", async () => {
   document.getElementById("email").textContent = data.email || "-";
 
   document.getElementById("status").textContent =
-    data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
+    data.status === "✅"
+      ? "Zweryfikowany w OREP"
+      : "W trakcie weryfikacji";
 
   brak.classList.add("hidden");
   profil.classList.remove("hidden");
