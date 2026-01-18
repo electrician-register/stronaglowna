@@ -62,17 +62,13 @@ search.addEventListener("input", async () => {
     return;
   }
 
-  // Dzielimy wpisane imię i nazwisko na części
-  const parts = q.split(" ").filter(p => p.length > 0);
-
-  let query = supabase.from('tabela_elektrykow').select('*').limit(1);
-
-  // budujemy warunek dla każdej części
-  parts.forEach(part => {
-    query = query.or(`imie.ilike.%${part}%,nazwisko.ilike.%${part}%`);
-  });
-
-  const { data, error } = await query.maybeSingle();
+  // Wyszukiwanie po imieniu lub nazwisku
+  const { data, error } = await supabase
+    .from('tabela_elektrykow')
+    .select('*')
+    .or(`imie.ilike.%${q}%,nazwisko.ilike.%${q}%`)
+    .limit(1)
+    .maybeSingle();
 
   if(error || !data){
     profil.classList.add("hidden");
@@ -81,25 +77,9 @@ search.addEventListener("input", async () => {
     return;
   }
 
-  // GWIAZDKI MAX 3
+  // GWIAZDKI - pobierane z bazy, max 3
   let starsValue = Number(data.gwiazdki) || 0;
   starsValue = Math.max(0, Math.min(3, starsValue));
   starsEl.textContent = "★".repeat(starsValue) + "☆".repeat(3 - starsValue);
 
-  document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko} – Elektryk`;
-  document.getElementById("name").textContent = `${data.imie} ${data.nazwisko}`;
-  document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
-  document.getElementById("miasto").textContent = data.miasto || "-";
-  document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
-  document.getElementById("zajmuje").textContent = data.zajmujeSie || "-";
-  document.getElementById("telefon").textContent = data.telefon || "-";
-  document.getElementById("email").textContent = data.email || "-";
-  document.getElementById("status").textContent = data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
-
-  profil.classList.remove("hidden");
-  brak.classList.add("hidden");
-});
-</script>
-
-</body>
-</html>
+  document.getElementById("heroName").tex
