@@ -1,185 +1,159 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta name="robots" content="noindex, nofollow">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profil – Piotr Janukowicz</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #1c1c1e;
-      color: #000;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background-color: #e5e5e5;
-      padding-bottom: 40px;
-    }
-
-    .cover-photo {
-      width: 100%;
-      height: 300px;
-      background-image: url('zdjprofil.jpg');
-      background-size: cover;
-      background-position: center;
-      position: relative;
-    }
-
-    .profile-picture {
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      border: 5px solid #e5e5e5;
-      position: absolute;
-      bottom: -80px;
-      left: 30px;
-      background-color: white;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .profile-picture svg {
-      width: 80%;
-      height: 80%;
-    }
-
-    .profile-header {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      padding: 100px 30px 20px;
-    }
-
-    .profile-info {
-      margin-left: 200px;
-    }
-
-    .profile-info h1 {
-      margin: 0;
-      font-size: 28px;
-    }
-
-    .profile-info p {
-      margin: 5px 0;
-      color: #444;
-    }
-
-    .edit-cover {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background-color: white;
-      padding: 6px 10px;
-      border-radius: 5px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .section {
-      margin-top: 30px;
-      padding: 0 30px;
-      font-size: 22px;
-    }
-
-    @media (max-width: 768px) {
-      .profile-picture {
-        width: 100px;
-        height: 100px;
-        bottom: -50px;
-        left: 20px;
-      }
-
-      .profile-header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 70px 20px 20px;
-      }
-
-      .profile-info {
-        margin-left: 0;
-        margin-top: 60px;
-      }
-
-      .profile-info h1 {
-        font-size: 22px;
-      }
-
-      .section {
-        font-size: 18px;
-        padding: 0 20px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elektryk Profi – Usługi Elektryczne</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #333;
+    line-height: 1.6;
+  }
+  header {
+    background: #222;
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2.8rem;
+  }
+  header p {
+    font-size: 1.2rem;
+  }
+  header .btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: #f57c00;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+  }
+  section {
+    padding: 60px 20px;
+    max-width: 1200px;
+    margin: auto;
+  }
+  .services, .portfolio {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  .card {
+    flex: 1 1 250px;
+    border: 1px solid #ddd;
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .card img {
+    max-width: 100%;
+    border-radius: 6px;
+  }
+  .contact-form input, .contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .contact-form button {
+    margin-top: 10px;
+    padding: 12px;
+    background: #f57c00;
+    color: white;
+    border: none;
+    width: 100%;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  footer {
+    text-align: center;
+    padding: 20px;
+    background: #222;
+    color: white;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="cover-photo">
-      <div class="profile-picture">
-        <!-- SVG napis sep -->
-        <svg xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 300 120"
-     preserveAspectRatio="xMidYMid meet">
 
-  <!-- S -->
-  <path
-    d="M60 25
-       C30 25, 30 55, 60 55
-       C90 55, 90 85, 60 85
-       C30 85, 30 115, 60 115"
-    fill="none"
-    stroke="#0B5FA5"
-    stroke-width="18"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+<!-- Hero -->
+<header>
+  <h1>Jan Kowalski – Elektryk z Doświadczeniem</h1>
+  <p>Profesjonalne usługi elektryczne – instalacje, naprawy, pomiary i serwis</p>
+  <a href="#kontakt" class="btn">Zamów serwis</a>
+</header>
 
-  <!-- E -->
-  <path
-    d="M130 25
-       L130 115
-       M130 25 L180 25
-       M130 60 L170 60
-       M130 115 L180 115"
-    fill="none"
-    stroke="#0B5FA5"
-    stroke-width="18"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+<!-- O mnie -->
+<section id="o-mnie">
+  <h2>O mnie</h2>
+  <p>Cześć! Nazywam się Jan Kowalski – jestem elektrykiem z ponad 10-letnim doświadczeniem w instalacjach elektrycznych, naprawach oraz pomiarach. Posiadam wszystkie niezbędne uprawnienia SEP i pracuję zarówno z klientami indywidualnymi, jak i firmami.</p>
+  <p>Moją misją jest bezpieczeństwo i pełne zadowolenie klienta – dlatego stawiam na jakość, terminowość i uczciwe ceny.</p>
+</section>
 
-  <!-- P -->
-  <path
-    d="M210 115
-       L210 25
-       M210 25
-       C260 25, 260 70, 210 70"
-    fill="none"
-    stroke="#0B5FA5"
-    stroke-width="18"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-
-</svg>
-      </div>
+<!-- Usługi -->
+<section id="uslugi">
+  <h2>Moje usługi</h2>
+  <div class="services">
+    <div class="card">
+      <h3>Instalacje elektryczne</h3>
+      <p>Kompleksowe wykonanie instalacji w domach i firmach.</p>
     </div>
-
-    <div class="profile-header">
-      <div class="profile-info">
-        <h1>Piotr Janukowicz</h1>
-        <p>190 pozytywnych opini</p>
-      </div>
+    <div class="card">
+      <h3>Pomiary i odbiory</h3>
+      <p>Profesjonalne pomiary elektryczne i odbiory instalacji.</p>
     </div>
-
-    <div class="section">
-      <p><strong>Województwo :</strong></p>
+    <div class="card">
+      <h3>Naprawy i serwis</h3>
+      <p>Szybkie usuwanie usterek i awarii elektrycznych.</p>
+    </div>
+    <div class="card">
+      <h3>Modernizacje instalacji</h3>
+      <p>Unowocześnianie i rozbudowa instalacji.</p>
     </div>
   </div>
+</section>
+
+<!-- Portfolio -->
+<section id="portfolio">
+  <h2>Realizacje</h2>
+  <div class="portfolio">
+    <div class="card"><img src="https://via.placeholder.com/300x200" alt="Realizacja 1"><p>Instalacja w domu jednorodzinnym</p></div>
+    <div class="card"><img src="https://via.placeholder.com/300x200" alt="Realizacja 2"><p>Nowa rozdzielnia elektryczna</p></div>
+    <div class="card"><img src="https://via.placeholder.com/300x200" alt="Realizacja 3"><p>Pomiary elektryczne</p></div>
+  </div>
+</section>
+
+<!-- Opinie -->
+<section id="opinie">
+  <h2>Opinie klientów</h2>
+  <div class="card"><p>⭐⭐⭐⭐⭐ „Profesjonalne podejście i szybka realizacja!” – Anna K.</p></div>
+  <div class="card"><p>⭐⭐⭐⭐⭐ „Polecam – wszystko wykonane solidnie.” – Piotr S.</p></div>
+</section>
+
+<!-- Kontakt -->
+<section id="kontakt">
+  <h2>Kontakt</h2>
+  <form class="contact-form">
+    <input type="text" placeholder="Imię i nazwisko" required>
+    <input type="email" placeholder="Twój email" required>
+    <textarea rows="5" placeholder="Wiadomość" required></textarea>
+    <button type="submit">Wyślij zapytanie</button>
+  </form>
+  <p>📞 500 600 700 • 📧 kontakt@elektrykprofi.pl</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  © 2026 Elektryk Profi – Wszystkie prawa zastrzeżone
+</footer>
+
 </body>
 </html>
