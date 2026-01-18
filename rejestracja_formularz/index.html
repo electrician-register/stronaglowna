@@ -299,8 +299,8 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   let plikUrls = []
   for (let i = 0; i < plik.files.length; i++) {
     const file = plik.files[i]
-   const safeEmail = currentUser.email.replace(/[@.]/g, '_')
-  const path = `${safeEmail}/${Date.now()}_${file.name}`
+  const path = `${currentUser.id}/${Date.now()}_${file.name}`
+
     const { error: uploadError } = await supabase.storage.from('attachments').upload(path, file, { upsert: true })
     if (uploadError) {
       loading.style.display = 'none'
