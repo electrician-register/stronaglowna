@@ -61,9 +61,10 @@ section {
 
 .stars {
   text-align: center;
-  font-size: 1.6rem;
+  font-size: 1.9rem;
   color: #f59e0b;
-  margin-bottom: 10px;
+  letter-spacing: 6px;
+  margin-bottom: 14px;
 }
 
 section h2 {
@@ -102,7 +103,7 @@ section p {
 
 <section id="profil" class="hidden">
 
-  <!-- ⭐ GWIAZDKI -->
+  <!-- ⭐⭐⭐ GWIAZDKI -->
   <div id="stars" class="stars"></div>
 
   <span id="status" class="badge"></span>
@@ -130,6 +131,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const search = document.getElementById("search");
 const profil = document.getElementById("profil");
 const brak = document.getElementById("brak");
+const starsEl = document.getElementById("stars");
 
 search.addEventListener("input", async () => {
   const q = search.value.trim();
@@ -160,9 +162,14 @@ search.addEventListener("input", async () => {
     return;
   }
 
-  /* ⭐ GWIAZDKI */
-  const starsCount = Math.max(0, Math.min(5, data.gwiazdki || 0));
-  document.getElementById("stars").textContent = "★".repeat(starsCount);
+  /* ⭐⭐⭐ GWIAZDKI MAX 3 */
+  let starsValue = Number(data.gwiazdki);
+  if (isNaN(starsValue) || starsValue < 0) starsValue = 0;
+  if (starsValue > 3) starsValue = 3;
+
+  const fullStars = "★".repeat(starsValue);
+  const emptyStars = "☆".repeat(3 - starsValue);
+  starsEl.textContent = fullStars + emptyStars;
 
   document.getElementById("heroName").textContent =
     `${data.imie} ${data.nazwisko} – Elektryk`;
