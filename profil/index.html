@@ -16,21 +16,6 @@ body {
   color: #333;
 }
 
-/* SEARCH BAR TOP */
-.top-search {
-  background: #0f172a;
-  padding: 15px;
-  text-align: center;
-}
-.top-search input {
-  padding: 14px;
-  width: 360px;
-  max-width: 95%;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-}
-
 /* HERO */
 header {
   background: linear-gradient(135deg, #1f2933, #111827);
@@ -38,15 +23,32 @@ header {
   text-align: center;
   padding: 70px 20px;
 }
+
+#stars {
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: #fbbf24;
+}
+
 header h1 {
   font-size: 2.6rem;
-  margin-bottom: 10px;
+  margin: 0 0 10px;
 }
+
 header p {
   font-size: 1.2rem;
   max-width: 700px;
-  margin: 0 auto;
+  margin: 0 auto 25px;
   opacity: 0.9;
+}
+
+header input {
+  padding: 14px;
+  width: 320px;
+  max-width: 90%;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
 }
 
 /* PROFIL */
@@ -59,24 +61,6 @@ section {
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
-.stars {
-  text-align: center;
-  font-size: 1.9rem;
-  color: #f59e0b;
-  letter-spacing: 6px;
-  margin-bottom: 14px;
-}
-
-section h2 {
-  margin-top: 0;
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-section p {
-  font-size: 1.05rem;
-  line-height: 1.7;
-}
-
 .badge {
   display: inline-block;
   padding: 6px 14px;
@@ -84,29 +68,29 @@ section p {
   color: #fff;
   border-radius: 20px;
   font-weight: 600;
+  margin-bottom: 20px;
 }
 
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
 </style>
 </head>
 
 <body>
 
-<div class="top-search">
-  <input id="search" placeholder="Wpisz imię i nazwisko (np. Jan Kowalski)">
-</div>
-
 <header>
+  <!-- GWIAZDKI NAD TYTUŁEM -->
+  <div id="stars">☆☆☆</div>
+
   <h1 id="heroName">Profil elektryka</h1>
-  <p id="heroDesc">Zweryfikowany profil w Centralnym Rejestrze Elektryków</p>
+  <p id="heroDesc">Wyszukaj elektryka po imieniu i nazwisku</p>
+  <input id="search" placeholder="Np. Jan Kowalski">
 </header>
 
 <section id="profil" class="hidden">
-
-  <!-- ⭐⭐⭐ GWIAZDKI -->
-  <div id="stars" class="stars"></div>
-
   <span id="status" class="badge"></span>
+
   <h2 id="name"></h2>
   <p id="opis"></p>
 
@@ -119,7 +103,7 @@ section p {
 
 <section id="brak" class="hidden">
   <h2>Brak wyników</h2>
-  <p>Nie znaleziono elektryka o podanych danych.</p>
+  <p>Nie znaleziono elektryka.</p>
 </section>
 
 <script>
@@ -135,50 +119,44 @@ const starsEl = document.getElementById("stars");
 
 search.addEventListener("input", async () => {
   const q = search.value.trim();
-  if (q.length < 2) {
+
+  if (q.length < 3) {
     profil.classList.add("hidden");
     brak.classList.add("hidden");
+    starsEl.textContent = "☆☆☆";
     return;
   }
 
-  const parts = q.split(" ").filter(Boolean);
-  let query = db.from("tabela_elektrykow").select("*");
+  const { data } = await db
+    .from("tabela_elektrykow")
+    .select("*")
+    .or(`imie.ilike.%${q}%,nazwisko.ilike.%${q}%`)
+    .limit(1)
+    .maybeSingle();
 
-  if (parts.length >= 2) {
-    query = query
-      .ilike("imie", `%${parts[0]}%`)
-      .ilike("nazwisko", `%${parts[1]}%`);
-  } else {
-    query = query.or(
-      `imie.ilike.%${parts[0]}%,nazwisko.ilike.%${parts[0]}%`
-    );
-  }
-
-  const { data, error } = await query.limit(1).maybeSingle();
-
-  if (error || !data) {
+  if (!data) {
     profil.classList.add("hidden");
     brak.classList.remove("hidden");
+    starsEl.textContent = "☆☆☆";
     return;
   }
 
-  /* ⭐⭐⭐ GWIAZDKI MAX 3 */
-  let starsValue = Number(data.gwiazdki);
-  if (isNaN(starsValue) || starsValue < 0) starsValue = 0;
-  if (starsValue > 3) starsValue = 3;
-
-  const fullStars = "★".repeat(starsValue);
-  const emptyStars = "☆".repeat(3 - starsValue);
-  starsEl.textContent = fullStars + emptyStars;
+  /* ===== GWIAZDKI Z BAZY (0–3) ===== */
+  const starsValue = Math.max(0, Math.min(3, Number(data.gwiazdki) || 0));
+  starsEl.textContent =
+    "★".repeat(starsValue) + "☆".repeat(3 - starsValue);
 
   document.getElementById("heroName").textContent =
     `${data.imie} ${data.nazwisko} – Elektryk`;
+
+  document.getElementById("heroDesc").textContent =
+    "Profesjonalne usługi elektryczne – instalacje, naprawy, pomiary i serwis";
 
   document.getElementById("name").textContent =
     `${data.imie} ${data.nazwisko}`;
 
   document.getElementById("opis").textContent =
-    `Profesjonalne usługi elektryczne – ${data.zajmujeSie || "instalacje i serwis"}`;
+    data.zajmujeSie || "Usługi elektryczne";
 
   document.getElementById("miasto").textContent = data.miasto || "-";
   document.getElementById("wojewodztwo").textContent = data.wojewodztwo || "-";
