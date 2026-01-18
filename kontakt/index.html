@@ -47,6 +47,22 @@ button[type="submit"] {
   cursor: pointer;
 }
 button[type="submit"]:hover { background: #45a049; }
+
+.back-home {
+  margin-top: 15px;
+  display: block;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  background: #e0e0e0;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-home:hover {
+  background: #d5d5d5;
+}
+
 #result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
 .error { background: #f44336; color: #fff; }
 #loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
@@ -71,8 +87,12 @@ button[type="submit"]:hover { background: #45a049; }
     <textarea id="message" required></textarea>
 
     <button type="submit">Wyślij</button>
+
     <div id="loading">Wysyłanie...</div>
     <div id="result"></div>
+
+    <!-- POWRÓT DO STRONY GŁÓWNEJ -->
+    <a href="/" class="back-home">← Powrót do strony głównej</a>
   </form>
 </div>
 
@@ -99,7 +119,6 @@ form.addEventListener('submit', async (e) => {
   const subject = document.getElementById('subject').value.trim();
   const message = document.getElementById('message').value.trim();
 
-  // --- WALIDACJA ---
   if (!name || !email || !subject || !message) {
     loading.style.display = 'none';
     result.textContent = 'Proszę wypełnić wszystkie pola.';
@@ -107,7 +126,6 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  // --- ZAPIS DO TABELI 'kontakt' ---
   const { error } = await supabase.from('kontakt').insert([{
     imie: name,
     email: email,
