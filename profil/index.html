@@ -45,7 +45,7 @@ section { max-width:900px; margin:60px auto; background:#fff; padding:40px; bord
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"; // <-- wklej swój anon key
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const search = document.getElementById("search");
@@ -62,18 +62,17 @@ search.addEventListener("input", async () => {
     return;
   }
 
-  // Supabase nie ma natywnego concat search, więc używamy `select('*').filter(...)` z oryginalnym SQL
-  const { data, error } = await supabase
-    .from('tabela_elektrykow')
-    .select('*')
-    .textSearch('full_name', q, {
-      type: 'plain'
-    })
-    .limit(1)
-    .maybeSingle();
+  // Dzielimy wpisane imię i nazwisko na części
+  const parts = q.split(" ").filter(p => p.length > 0);
 
-  // Jeśli kolumna 'full_name' nie istnieje, możemy użyć SQL filter:
-  // const { data, error } = await supabase.rpc('search_elektryk', { term: q });
+  let query = supabase.from('tabela_elektrykow').select('*').limit(1);
+
+  // budujemy warunek dla każdej części
+  parts.forEach(part => {
+    query = query.or(`imie.ilike.%${part}%,nazwisko.ilike.%${part}%`);
+  });
+
+  const { data, error } = await query.maybeSingle();
 
   if(error || !data){
     profil.classList.add("hidden");
