@@ -301,14 +301,14 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     const file = plik.files[i]
   const path = `${currentUser.id}/${Date.now()}_${file.name}`
 
-    const { error: uploadError } = await supabase.storage.from('attachments').upload(path, file, { upsert: true })
+    const { error: uploadError } = await supabase.storage.from('uprawnienia').upload(path, file, { upsert: true })
     if (uploadError) {
       loading.style.display = 'none'
       result.textContent = 'Błąd wysyłania pliku: ' + uploadError.message
       result.className = 'error'
       return
     }
-    const { data: urlData, error: urlError } = await supabase.storage.from('attachments').createSignedUrl(path, 3600)
+    const { data: urlData, error: urlError } = await supabase.storage.from('uprawnienia').createSignedUrl(path, 3600)
     if (urlError) {
       loading.style.display = 'none'
       result.textContent = 'Błąd generowania linku do pliku'
