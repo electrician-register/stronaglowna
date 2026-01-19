@@ -4,22 +4,79 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil Elektryka</title>
+
 <style>
-body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; color:#333; }
-header { background: linear-gradient(135deg,#1f2933,#111827); color:#fff; text-align:center; padding:70px 20px; }
-header h1 { font-size:2.6rem; margin:0 0 10px; }
-header p { font-size:1.2rem; max-width:700px; margin:0 auto 25px; opacity:0.9; }
-header input { padding:14px; width:320px; max-width:90%; border-radius:8px; border:none; font-size:16px; }
-section { max-width:900px; margin:60px auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); text-align:center; }
-.badge { display:inline-block; padding:6px 14px; background:#16a34a; color:#fff; border-radius:20px; font-weight:600; margin-bottom:20px; }
-.hidden { display:none; }
+body {
+  margin:0;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background:#f4f6f8;
+  color:#333;
+}
+
+header {
+  background: linear-gradient(135deg,#1f2933,#111827);
+  color:#fff;
+  text-align:center;
+  padding:70px 20px;
+}
+
+header h1 {
+  font-size:2.6rem;
+  margin:0 0 10px;
+}
+
+header p {
+  font-size:1.2rem;
+  max-width:700px;
+  margin:0 auto 25px;
+  opacity:0.9;
+}
+
+header input {
+  padding:14px;
+  width:320px;
+  max-width:90%;
+  border-radius:8px;
+  border:none;
+  font-size:16px;
+}
+
+section {
+  max-width:900px;
+  margin:60px auto;
+  background:#fff;
+  padding:40px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  text-align:center;
+}
+
+/* STATUS */
+.badge {
+  display:inline-block;
+  padding:6px 14px;
+  color:#fff;
+  border-radius:20px;
+  font-weight:600;
+  margin-bottom:20px;
+}
+
+/* KOLORY STATUSÓW */
+.status-ok { background:#16a34a; }   /* ✅ */
+.status-wait { background:#f59e0b; } /* ⌛ */
+.status-no { background:#dc2626; }   /* ❌ */
+
+.hidden {
+  display:none;
+}
 </style>
 </head>
+
 <body>
 
 <header>
   <h1 id="heroName">Profil elektryka</h1>
-  <p id="heroDesc">Zweryfikowany profil w Centralnym Rejestrze Elektryków</p>
+  <p id="heroDesc">Profil w Centralnym Rejestrze Elektryków</p>
   <input id="search" placeholder="Np. Jan Kowalski">
 </header>
 
@@ -37,39 +94,54 @@ section { max-width:900px; margin:60px auto; background:#fff; padding:40px; bord
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"; // <-- Twój anon key
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const search = document.getElementById("search");
 const profil = document.getElementById("profil");
 const brak = document.getElementById("brak");
+const statusEl = document.getElementById("status");
+
+const statusMap = {
+  "✅": { text: "Zweryfikowany w OREP", class: "status-ok" },
+  "⌛": { text: "W trakcie weryfikacji", class: "status-wait" },
+  "❌": { text: "Niezweryfikowany", class: "status-no" }
+};
 
 search.addEventListener("input", async () => {
   const q = search.value.trim();
-  if(q.length < 3){
+
+  if (q.length < 3) {
     profil.classList.add("hidden");
     brak.classList.add("hidden");
     return;
   }
 
-  // Szukamy po pełnym imieniu + nazwisku w jednej frazie
   const { data, error } = await supabase
     .from("tabela_elektrykow")
     .select("*")
-    .ilike('imie || \' \' || nazwisko', `%${q}%`)
+    .ilike("imie || ' ' || nazwisko", `%${q}%`)
     .limit(1)
     .maybeSingle();
 
-  if(error || !data){
+  if (error || !data) {
     profil.classList.add("hidden");
     brak.classList.remove("hidden");
     return;
   }
 
-  // Wyświetlamy imię, nazwisko, status i opis
   document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
-  document.getElementById("status").textContent = data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
   document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
+
+  // reset statusu
+  statusEl.className = "badge";
+
+  if (statusMap[data.status]) {
+    statusEl.textContent = statusMap[data.status].text;
+    statusEl.classList.add(statusMap[data.status].class);
+  } else {
+    statusEl.textContent = "";
+  }
 
   profil.classList.remove("hidden");
   brak.classList.add("hidden");
