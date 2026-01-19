@@ -84,13 +84,27 @@ button[type="submit"]:hover { background: #45a049; }
 
 .rodo-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* wyrównanie checkboxa z tekstem */
+  gap: 10px;
   margin-top: 15px;
   font-weight: normal;
   font-size: 14px;
+  line-height: 1.4;
 }
-.rodo-label input[type="checkbox"] { margin-right: 10px; accent-color: orange; }
-.rodo-label a { text-decoration: underline; color: #0B5FA5; margin-left: 2px; }
+
+.rodo-label input[type="checkbox"] {
+  margin-top: 3px; /* wyrównanie z pierwszą linią tekstu */
+  accent-color: orange;
+  width: 18px;
+  height: 18px;
+}
+
+.rodo-label a {
+  text-decoration: underline;
+  color: #0B5FA5;
+  margin-left: 2px;
+  word-break: break-word; /* link nie wychodzi poza ekran */
+}
 </style>
 </head>
 
@@ -271,7 +285,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   result.textContent = ''
   result.className = ''
 
-  // --- WALIDACJA CHECKBOX RODO ---
   if (!document.getElementById('rodo').checked) {
     loading.style.display = 'none';
     result.textContent = 'Musisz zaakceptować regulamin i politykę prywatności';
@@ -279,7 +292,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     return;
   }
 
-  // --- WALIDACJA nrE / nrEPomiary / nrD ---
   if (nrE.value && nrEPomiary.value) {
     loading.style.display = 'none'
     result.textContent = 'Wybierz tylko jeden rodzaj eksploatacji'
@@ -293,7 +305,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     return
   }
 
-  // --- WALIDACJA PLIKU ---
   const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
   const maxSize = 5 * 1024 * 1024
   for (let i = 0; i < plik.files.length; i++) {
@@ -312,7 +323,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     }
   }
 
-  // --- UPLOAD PLIKÓW ---
   let plikUrls = []
   for (let i = 0; i < plik.files.length; i++) {
     const file = plik.files[i]
@@ -334,7 +344,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     plikUrls.push(urlData.signedUrl)
   }
 
-  // --- PRZYGOTOWANIE DANYCH DO BAZY ---
   const payload = { email: currentUser.email }
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
   if (plikUrls.length) payload.plik = plikUrls.join(',')
