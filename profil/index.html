@@ -41,6 +41,13 @@ header input {
   font-size:16px;
 }
 
+/* 🔶 PROSTA POMARAŃCZOWA LINIA */
+.header-line {
+  width:100%;
+  height:6px;
+  background:#f59e0b;
+}
+
 section {
   max-width:900px;
   margin:60px auto;
@@ -80,6 +87,9 @@ section {
   <input id="search" placeholder="Np. Jan Kowalski">
 </header>
 
+<!-- 🔶 LINIA POD HEADEREM -->
+<div class="header-line"></div>
+
 <section id="profil" class="hidden">
   <span id="status" class="badge"></span>
   <p id="opis"></p>
@@ -95,6 +105,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const search = document.getElementById("search");
@@ -133,7 +144,6 @@ search.addEventListener("input", async () => {
   document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
   document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
 
-  // reset statusu
   statusEl.className = "badge";
 
   if (statusMap[data.status]) {
