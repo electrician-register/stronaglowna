@@ -84,27 +84,12 @@ button[type="submit"]:hover { background: #45a049; }
 
 .rodo-label {
   display: flex;
-  align-items: flex-start; /* wyrównanie checkboxa z tekstem */
-  gap: 10px;
+  align-items: center;
   margin-top: 15px;
   font-weight: normal;
   font-size: 14px;
-  line-height: 1.4;
 }
-
-.rodo-label input[type="checkbox"] {
-  margin-top: 3px; /* wyrównanie z pierwszą linią tekstu */
-  accent-color: orange;
-  width: 18px;
-  height: 18px;
-}
-
-.rodo-label a {
-  text-decoration: underline;
-  color: #0B5FA5;
-  margin-left: 2px;
-  word-break: break-word; /* link nie wychodzi poza ekran */
-}
+.rodo-label input[type="checkbox"] { margin-right: 10px; accent-color: orange; }
 </style>
 </head>
 
@@ -155,7 +140,7 @@ button[type="submit"]:hover { background: #45a049; }
 
   <label class="rodo-label">
     <input type="checkbox" id="rodo" required>
-    Wyrażam zgodę na <a href="/regulamin" target="_blank">Regulamin Platformy</a> oraz <a href="/polityka-prywatnosci" target="_blank">Politykę prywatności</a>. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
+    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
   </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
@@ -179,17 +164,6 @@ const fields = [
   'imie','nazwisko','miasto','wojewodztwo',
   'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
 ]
-
-// --- BLOKADA NUMERU TELEFONU I EMAIL W POLACH INNYCH NIŻ PRZEZNACZONE ---
-const zabronionePattern = /[0-9@]/g;
-fields.forEach(f => {
-  if(f !== 'telefon' && f !== 'email') {
-    const el = document.getElementById(f)
-    el.addEventListener('input', () => {
-      el.value = el.value.replace(zabronionePattern, '');
-    })
-  }
-})
 
 async function loadWojewodztwa(selectedWoj = null) {
   const { data, error } = await supabase
@@ -240,6 +214,7 @@ document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
+// --- Pobranie bieżącego użytkownika i wstępne wypełnienie formularza ---
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -263,6 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 })
 
+// --- FUNKCJA WYSYŁAJĄCA MAGIC EMAIL ---
 async function wyslijMagicEmail(email) {
   try {
     const res = await fetch('https://orep.pl/api/magic-mail', {
@@ -279,19 +255,14 @@ async function wyslijMagicEmail(email) {
   }
 }
 
+// --- OBSŁUGA SUBMIT FORMULARZA ---
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
   loading.style.display = 'block'
   result.textContent = ''
   result.className = ''
 
-  if (!document.getElementById('rodo').checked) {
-    loading.style.display = 'none';
-    result.textContent = 'Musisz zaakceptować regulamin i politykę prywatności';
-    result.className = 'error';
-    return;
-  }
-
+  // --- WALIDACJA nrE / nrEPomiary / nrD ---
   if (nrE.value && nrEPomiary.value) {
     loading.style.display = 'none'
     result.textContent = 'Wybierz tylko jeden rodzaj eksploatacji'
@@ -305,8 +276,9 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     return
   }
 
+  // --- WALIDACJA PLIKU ---
   const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
-  const maxSize = 5 * 1024 * 1024
+  const maxSize = 5 * 1024 * 1024 // 5MB
   for (let i = 0; i < plik.files.length; i++) {
     const file = plik.files[i]
     if (!allowedTypes.includes(file.type)) {
@@ -323,10 +295,12 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     }
   }
 
+  // --- UPLOAD PLIKÓW ---
   let plikUrls = []
   for (let i = 0; i < plik.files.length; i++) {
     const file = plik.files[i]
-    const path = `${currentUser.id}/${Date.now()}_${file.name}`
+  const path = `${currentUser.id}/${Date.now()}_${file.name}`
+
     const { error: uploadError } = await supabase.storage.from('uprawnienia').upload(path, file, { upsert: true })
     if (uploadError) {
       loading.style.display = 'none'
@@ -344,10 +318,10 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     plikUrls.push(urlData.signedUrl)
   }
 
+  // --- PRZYGOTOWANIE DANYCH DO BAZY ---
   const payload = { email: currentUser.email }
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
   if (plikUrls.length) payload.plik = plikUrls.join(',')
-  payload.rodo_accepted_at = new Date().toISOString()
 
   const { error } = await supabase.from('tabela_elektrykow').upsert(payload, { onConflict: 'email' })
 
@@ -356,8 +330,13 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   if (error) {
     result.textContent = error.message
     result.className = 'error'
+    const { data: { user } } = await supabase.auth.getUser()
+console.log('USER:', user)
   } else {
+    // --- WYŚLIJ MAGIC EMAIL ---
     await wyslijMagicEmail(currentUser.email)
+
+    // --- PRZEKIEROWANIE po sukcesie ---
     window.location.href = 'https://orep.pl/logowanie';
   }
 })
