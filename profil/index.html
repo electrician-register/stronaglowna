@@ -108,7 +108,6 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const search = document.getElementById("search");
 const profil = document.getElementById("profil");
 const brak = document.getElementById("brak");
 const statusEl = document.getElementById("status");
@@ -119,43 +118,39 @@ const statusMap = {
   "❌": { text: "Status ELEKTRYKA - aktualnie brak weryfikacji", class: "status-no" }
 };
 
-search.addEventListener("input", async () => {
-  const q = search.value.trim();
+// Pobranie ID z URL
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get('id');
 
-  if (q.length < 3) {
-    profil.classList.add("hidden");
-    brak.classList.add("hidden");
-    return;
+if(id){
+  const loadProfile = async () => {
+    const { data, error } = await supabase
+      .from("tabela_elektrykow")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if(error || !data){
+      profil.classList.add("hidden");
+      brak.classList.remove("hidden");
+    } else {
+      document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
+      document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
+
+      statusEl.className = "badge";
+      if (statusMap[data.status]) {
+        statusEl.textContent = statusMap[data.status].text;
+        statusEl.classList.add(statusMap[data.status].class);
+      } else {
+        statusEl.textContent = "";
+      }
+
+      profil.classList.remove("hidden");
+      brak.classList.add("hidden");
+    }
   }
-
-  const { data, error } = await supabase
-    .from("tabela_elektrykow")
-    .select("*")
-    .ilike("imie || ' ' || nazwisko", `%${q}%`)
-    .limit(1)
-    .maybeSingle();
-
-  if (error || !data) {
-    profil.classList.add("hidden");
-    brak.classList.remove("hidden");
-    return;
-  }
-
-  document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
-  document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
-
-  statusEl.className = "badge";
-
-  if (statusMap[data.status]) {
-    statusEl.textContent = statusMap[data.status].text;
-    statusEl.classList.add(statusMap[data.status].class);
-  } else {
-    statusEl.textContent = "";
-  }
-
-  profil.classList.remove("hidden");
-  brak.classList.add("hidden");
-});
+  loadProfile();
+}
 </script>
 
 </body>
