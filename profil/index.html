@@ -52,13 +52,11 @@ search.addEventListener("input", async () => {
     return;
   }
 
-  const parts = q.split(" ").filter(p => p.length>0);
-  const filters = parts.map(p => `imie.ilike.%${p}%,nazwisko.ilike.%${p}%`).join(",");
-
+  // Szukamy po pełnym imieniu + nazwisku w jednej frazie
   const { data, error } = await supabase
     .from("tabela_elektrykow")
     .select("*")
-    .or(filters)
+    .ilike('imie || \' \' || nazwisko', `%${q}%`)
     .limit(1)
     .maybeSingle();
 
@@ -68,8 +66,9 @@ search.addEventListener("input", async () => {
     return;
   }
 
-  // Wyświetlamy tylko imię, nazwisko, status i opis (zajmujeSie)
-
+  // Wyświetlamy imię, nazwisko, status i opis
+  document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
+  document.getElementById("status").textContent = data.status === "✅" ? "Zweryfikowany w OREP" : "W trakcie weryfikacji";
   document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
 
   profil.classList.remove("hidden");
