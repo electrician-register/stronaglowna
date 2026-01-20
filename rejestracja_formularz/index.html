@@ -7,6 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -149,24 +151,30 @@ button[type="submit"]:hover { background: #45a049; }
 </div>
 
 <script type="module">
-// --- ZMIENNE GLOBALNE ---
-let currentUser = { email: 'test@example.com', id: 'guest' } // tymczasowo do testów
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+  'https://tfbqqduxtsacvwfigsvt.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+)
+
+let currentUser = null
+
 const fields = [
   'imie','nazwisko','miasto','wojewodztwo',
   'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
 ]
 
-// --- Ładowanie województw i miast ---
-// Tu możesz podpiąć swoje API/publiczny odczyt Supabase lub JSON
 async function loadWojewodztwa(selectedWoj = null) {
-  // przykładowe dane
-  const wojewodztwa = [
-    { id: 1, nazwa: 'Dolnośląskie' },
-    { id: 2, nazwa: 'Mazowieckie' }
-  ]
+  const { data, error } = await supabase
+    .from('wojewodztwa')
+    .select('id, nazwa')
+    .order('nazwa')
+  if (error) { console.error('Błąd ładowania województw:', error); return }
+
   const wojSelect = document.getElementById('wojewodztwo')
   wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
-  wojewodztwa.forEach(w => {
+  data.forEach(w => {
     const option = document.createElement('option')
     option.value = w.id
     option.textContent = w.nazwa
@@ -186,13 +194,14 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
     miastoSelect.disabled = true
     return
   }
-  // przykładowe miasta
-  const miasta = {
-    1: [{ id: 1, nazwa: 'Wrocław' }, { id: 2, nazwa: 'Legnica' }],
-    2: [{ id: 3, nazwa: 'Warszawa' }, { id: 4, nazwa: 'Radom' }]
-  }
+  const { data, error } = await supabase
+    .from('miasta')
+    .select('id, nazwa')
+    .eq('wojewodztwo_id', wojId)
+    .order('nazwa')
+  if (error) { console.error('Błąd ładowania miast:', error); return }
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-  (miasta[wojId] || []).forEach(m => {
+  data.forEach(m => {
     const option = document.createElement('option')
     option.value = m.id
     option.textContent = m.nazwa
@@ -201,26 +210,59 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
   miastoSelect.disabled = false
 })
 
-// --- Zamknij formularz ---
 document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
-// --- Obsługa formularza ---
+// --- Pobranie bieżącego użytkownika i wstępne wypełnienie formularza ---
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  currentUser = user
+  email.value = user.email
+
+  const { data } = await supabase
+    .from('tabela_elektrykow')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+
+  if (data) {
+    document.getElementById('form-title').textContent = 'Aktualizacja danych'
+    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
+    fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
+    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
+    if (data.miasto) document.getElementById('miasto').value = data.miasto
+  } else {
+    loadWojewodztwa()
+  }
+})
+
+// --- FUNKCJA WYSYŁAJĄCA MAGIC EMAIL ---
+async function wyslijMagicEmail(email) {
+  try {
+    const res = await fetch('https://orep.pl/api/magic-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      console.error('Błąd wysyłki magic email:', data.error || 'Nieznany błąd');
+    }
+  } catch(err) {
+    console.error('Błąd połączenia z serwerem przy wysyłce magic email:', err);
+  }
+}
+
+// --- OBSŁUGA SUBMIT FORMULARZA ---
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
-  const loading = document.getElementById('loading')
-  const result = document.getElementById('result')
   loading.style.display = 'block'
   result.textContent = ''
   result.className = ''
 
-  // WALIDACJE nrE / nrEPomiary / nrD
-  const nrE = document.getElementById('nrE')
-  const nrEPomiary = document.getElementById('nrEPomiary')
-  const nrD = document.getElementById('nrD')
-  const plik = document.getElementById('plik')
-
+  // --- WALIDACJA nrE / nrEPomiary / nrD ---
   if (nrE.value && nrEPomiary.value) {
     loading.style.display = 'none'
     result.textContent = 'Wybierz tylko jeden rodzaj eksploatacji'
@@ -234,51 +276,68 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     return
   }
 
-  // WALIDACJA PLIKU
+  // --- WALIDACJA PLIKU ---
   const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
-  const maxSize = 5 * 1024 * 1024
-  let filesPayload = []
+  const maxSize = 5 * 1024 * 1024 // 5MB
   for (let i = 0; i < plik.files.length; i++) {
     const file = plik.files[i]
-    if (!allowedTypes.includes(file.type) || file.size > maxSize) {
+    if (!allowedTypes.includes(file.type)) {
       loading.style.display = 'none'
-      result.textContent = 'Nieprawidłowy typ lub rozmiar pliku'
+      result.textContent = 'Nieprawidłowy typ pliku. Dozwolone: PDF, JPG, PNG'
       result.className = 'error'
       return
     }
-    const arrayBuffer = await file.arrayBuffer()
-    filesPayload.push({
-      name: file.name,
-      type: file.type,
-      content: btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-    })
+    if (file.size > maxSize) {
+      loading.style.display = 'none'
+      result.textContent = 'Plik zbyt duży. Maksymalny rozmiar: 5 MB'
+      result.className = 'error'
+      return
+    }
   }
 
-  // PRZYGOTOWANIE DANYCH
+  // --- UPLOAD PLIKÓW ---
+  let plikUrls = []
+  for (let i = 0; i < plik.files.length; i++) {
+    const file = plik.files[i]
+  const path = `${currentUser.id}/${Date.now()}_${file.name}`
+
+    const { error: uploadError } = await supabase.storage.from('uprawnienia').upload(path, file, { upsert: true })
+    if (uploadError) {
+      loading.style.display = 'none'
+      result.textContent = 'Błąd wysyłania pliku: ' + uploadError.message
+      result.className = 'error'
+      return
+    }
+    const { data: urlData, error: urlError } = await supabase.storage.from('uprawnienia').createSignedUrl(path, 3600)
+    if (urlError) {
+      loading.style.display = 'none'
+      result.textContent = 'Błąd generowania linku do pliku'
+      result.className = 'error'
+      return
+    }
+    plikUrls.push(urlData.signedUrl)
+  }
+
+  // --- PRZYGOTOWANIE DANYCH DO BAZY ---
   const payload = { email: currentUser.email }
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
-  if (filesPayload.length) payload.files = filesPayload
+  if (plikUrls.length) payload.plik = plikUrls.join(',')
 
-  // WYSYŁKA DO EDGE FUNCTION
-  try {
-    const res = await fetch('/api/rejestruj', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    const data = await res.json()
-    loading.style.display = 'none'
-    if (data.ok) {
-      window.location.href = 'https://orep.pl/logowanie'
-    } else {
-      result.textContent = data.error
-      result.className = 'error'
-    }
-  } catch (err) {
-    loading.style.display = 'none'
-    result.textContent = 'Błąd połączenia z serwerem'
+  const { error } = await supabase.from('tabela_elektrykow').upsert(payload, { onConflict: 'email' })
+
+  loading.style.display = 'none'
+
+  if (error) {
+    result.textContent = error.message
     result.className = 'error'
-    console.error(err)
+    const { data: { user } } = await supabase.auth.getUser()
+console.log('USER:', user)
+  } else {
+    // --- WYŚLIJ MAGIC EMAIL ---
+    await wyslijMagicEmail(currentUser.email)
+
+    // --- PRZEKIEROWANIE po sukcesie ---
+    window.location.href = 'https://orep.pl/logowanie';
   }
 })
 </script>
