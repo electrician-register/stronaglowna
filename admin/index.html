@@ -1,22 +1,121 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TEST JS</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel admina</title>
+<meta name="robots" content="noindex, nofollow">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
+button { padding:8px 12px; background:#2ecc71; color:#fff; border:0; cursor:pointer; }
+input { width:100%; margin-bottom:10px; padding:6px; }
+
+#logBox {
+  background:#000;
+  color:#0f0;
+  padding:10px;
+  font-family:monospace;
+  font-size:12px;
+  height:160px;
+  overflow:auto;
+  margin-top:15px;
+}
+</style>
 </head>
+
 <body>
 
-<h1>TEST PRZYCISKU</h1>
+<!-- LOGOWANIE -->
+<div id="loginBox" style="max-width:360px;margin:auto;background:#fff;padding:20px">
+  <h2>Logowanie admin</h2>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Hasło">
+  <button onclick="login()">Zaloguj</button>
+  <div id="logBox"></div>
+</div>
 
-<button onclick="test()">Kliknij mnie</button>
-
-<div id="out"></div>
+<!-- PANEL -->
+<div id="adminPanel" style="display:none">
+  <h1>Panel admina</h1>
+</div>
 
 <script>
-function test() {
-  document.getElementById("out").innerText = "JS DZIAŁA";
-  alert("JS DZIAŁA");
+/* ========= LOGI ========= */
+function log(msg) {
+  const box = document.getElementById("logBox");
+  box.innerHTML += msg + "<br>";
+  box.scrollTop = box.scrollHeight;
+}
+
+log("JS uruchomiony");
+
+/* ========= SUPABASE ========= */
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+
+log("Tworzenie klienta Supabase...");
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+log("Supabase OK");
+
+/* ========= LOGIN ========= */
+async function login() {
+  log("Kliknięto ZALOGUJ");
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  log("Email: " + email);
+
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      log("BŁĄD LOGOWANIA: " + error.message);
+      return;
+    }
+
+    log("Zalogowano poprawnie");
+    checkSession();
+
+  } catch (e) {
+    log("EXCEPTION: " + e.message);
+  }
+}
+
+/* ========= SESJA ========= */
+async function checkSession() {
+  log("Sprawdzanie sesji...");
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (!data.session) {
+    log("Brak sesji");
+    return;
+  }
+
+  log("Sesja OK: " + data.session.user.email);
+
+  if (data.session.user.email !== "piotr8040@gmail.com") {
+    log("BRAK UPRAWNIEŃ ADMINA");
+    await supabaseClient.auth.signOut();
+    return;
+  }
+
+  log("ADMIN POTWIERDZONY");
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
 }
 </script>
 
