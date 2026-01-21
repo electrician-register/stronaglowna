@@ -9,75 +9,65 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
-input { width:100%; padding:5px; }
-button { padding:6px 10px; cursor:pointer; background:#2ecc71; color:#fff; border:0; }
-
-table { width:100%; border-collapse:collapse; background:#fff; margin-top:15px; }
-th, td { border:1px solid #ddd; padding:6px; font-size:12px; }
-th { background:#222; color:#fff; }
-
+body { font-family: Arial; background:#f4f6f8; padding:20px }
 #logBox {
   background:#000;
   color:#0f0;
   padding:10px;
-  font-family:monospace;
   font-size:12px;
   height:160px;
   overflow:auto;
-  margin-top:15px;
+  margin-bottom:15px;
 }
+input, button { width:100%; padding:8px; margin:5px 0 }
+button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
+table { width:100%; border-collapse:collapse; background:#fff }
+th, td { border:1px solid #ccc; padding:6px; font-size:12px }
+th { background:#222; color:#fff }
 </style>
 </head>
 
 <body>
 
-<!-- LOGOWANIE -->
-<div id="loginBox" style="max-width:360px;margin:auto;background:#fff;padding:20px">
+<h2>Logi systemowe</h2>
+<div id="logBox"></div>
+
+<div id="loginBox">
   <h2>Logowanie admin</h2>
   <input id="email" type="email" placeholder="Email">
   <input id="password" type="password" placeholder="Hasło">
-  <button onclick="login()">Zaloguj</button>
-  <div id="logBox"></div>
+  <button id="loginBtn">Zaloguj</button>
 </div>
 
-<!-- PANEL -->
 <div id="adminPanel" style="display:none">
-  <h1>Panel admina – tabela_elektrykow</h1>
-
+  <h2>Panel admina – tabela_elektrykow</h2>
   <table>
     <thead>
       <tr>
         <th>LP</th>
         <th>Imię</th>
         <th>Nazwisko</th>
-        <th>Miasto</th>
-        <th>Woj.</th>
-        <th>Email</th>
         <th>Telefon</th>
+        <th>Email</th>
         <th>Pokaż kontakt</th>
         <th>Zapisz</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
-
-  <div id="logBoxAdmin"></div>
 </div>
 
 <script>
-/* ===== LOGI ===== */
-function log(msg) {
+/* ===== LOGI NA EKRANIE ===== */
+function log(txt) {
   const box = document.getElementById("logBox");
-  if (box) box.innerHTML += msg + "<br>";
-}
-function logAdmin(msg) {
-  const box = document.getElementById("logBoxAdmin");
-  box.innerHTML += msg + "<br>";
+  box.innerHTML += txt + "<br>";
   box.scrollTop = box.scrollHeight;
 }
 
 /* ===== SUPABASE ===== */
+log("Start JS");
+
 const supabaseClient = supabase.createClient(
   "https://tfbqqduxtsacvwfigsvt.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
@@ -85,68 +75,84 @@ const supabaseClient = supabase.createClient(
 
 log("Supabase OK");
 
-/* ===== LOGIN ===== */
+/* ===== LOGOWANIE ===== */
+document.getElementById("loginBtn").addEventListener("click", login);
+
 async function login() {
   log("Klik ZALOGUJ");
 
-  const email = emailInput.value;
-  const password = passwordInput.value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  log("Email: " + email);
+  log("Hasło wpisane: " + (password.length > 0));
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error) {
-    log("BŁĄD: " + error.message);
+    log("BŁĄD LOGOWANIA: " + error.message);
     return;
   }
 
+  log("Zalogowano OK");
   checkSession();
 }
 
-/* ===== SESJA ===== */
+/* ===== SPRAWDZENIE ADMINA ===== */
 async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
-  if (!data.session) return;
 
-  if (data.session.user.email !== "piotr8040@gmail.com") {
-    alert("Brak uprawnień admina");
+  if (!data.session) {
+    log("Brak sesji");
+    return;
+  }
+
+  const adminEmail = "piotr8040@gmail.com";
+
+  if (data.session.user.email !== adminEmail) {
+    log("Brak uprawnień admin");
     await supabaseClient.auth.signOut();
     return;
   }
 
-  loginBox.style.display = "none";
-  adminPanel.style.display = "block";
+  log("Admin potwierdzony");
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
 
   loadData();
 }
 
-/* ===== DANE ===== */
+/* ===== WCZYTANIE TABELI ===== */
 async function loadData() {
-  logAdmin("Ładowanie danych...");
+  log("Pobieram dane...");
 
   const { data, error } = await supabaseClient
     .from("tabela_elektrykow")
-    .select("id, lp, imie, nazwisko, miasto, wojewodztwo, email, telefon, show_contact")
+    .select("id, lp, imie, nazwisko, telefon, email, show_contact")
     .order("lp");
 
   if (error) {
-    logAdmin("BŁĄD: " + error.message);
+    log("BŁĄD BAZY: " + error.message);
     return;
   }
+
+  log("Rekordów: " + data.length);
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
   data.forEach(row => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
-      <td><input value="${row.lp || ''}"></td>
-      <td><input value="${row.imie || ''}"></td>
-      <td><input value="${row.nazwisko || ''}"></td>
-      <td><input value="${row.miasto || ''}"></td>
-      <td><input value="${row.wojewodztwo || ''}"></td>
-      <td><input value="${row.email || ''}"></td>
-      <td><input value="${row.telefon || ''}"></td>
+      <td><input value="${row.lp || ""}"></td>
+      <td><input value="${row.imie || ""}"></td>
+      <td><input value="${row.nazwisko || ""}"></td>
+      <td><input value="${row.telefon || ""}"></td>
+      <td><input value="${row.email || ""}"></td>
       <td style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
@@ -160,11 +166,9 @@ async function loadData() {
         lp: i[0].value,
         imie: i[1].value,
         nazwisko: i[2].value,
-        miasto: i[3].value,
-        wojewodztwo: i[4].value,
-        email: i[5].value,
-        telefon: i[6].value,
-        show_contact: i[7].checked
+        telefon: i[3].value,
+        email: i[4].value,
+        show_contact: i[5].checked
       };
 
       const { error } = await supabaseClient
@@ -172,16 +176,15 @@ async function loadData() {
         .update(payload)
         .eq("id", row.id);
 
-      if (error) logAdmin("❌ Błąd zapisu");
-      else logAdmin("✅ Zapisano ID: " + row.id);
+      if (error) log("Błąd zapisu");
+      else log("Zapisano ID: " + row.id);
     };
 
     tbody.appendChild(tr);
   });
-
-  logAdmin("Dane załadowane: " + data.length);
 }
 
+/* ===== AUTO CHECK ===== */
 checkSession();
 </script>
 
