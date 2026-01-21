@@ -8,12 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
-    table { width:100%; border-collapse:collapse; background:#fff; }
+    table { width:100%; border-collapse:collapse; background:#fff; margin-bottom:20px; }
     th, td { border:1px solid #ddd; padding:8px; font-size:13px; }
     th { background:#222; color:#fff; }
     input, select { width:100%; box-sizing:border-box; }
     button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; color:#fff; }
-    #loginBox { max-width:360px;margin:80px auto;padding:20px;background:#fff;border:1px solid #ddd; }
+    #loginBox { max-width:360px;margin:20px auto;padding:20px;background:#fff;border:1px solid #ddd; }
+    #logBox { max-width:800px;margin:20px auto;padding:10px;background:#000;color:#0f0;font-family:monospace;height:150px;overflow-y:auto; border:1px solid #333; }
   </style>
 </head>
 <body>
@@ -53,7 +54,20 @@
   </table>
 </div>
 
+<!-- PANEL LOGÓW -->
+<div id="logBox"></div>
+
 <script>
+  // --- FUNKCJA POMOCNICZA DO LOGÓW NA STRONIE ---
+  function log(message, type="log") {
+    const logBox = document.getElementById("logBox");
+    const span = document.createElement("div");
+    span.style.color = type === "error" ? "#f00" : "#0f0";
+    span.textContent = message;
+    logBox.appendChild(span);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
   // --- INICJALIZACJA SUPABASE ---
   const supabase = supabaseJs.createClient(
     "https://tfbqqduxtsacvwfigsvt.supabase.co",
@@ -64,23 +78,23 @@
 
   // --- FUNKCJA LOGOWANIA ---
   async function login() {
-    console.log("Kliknięto login");
+    log("Kliknięto login");
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    console.log("Email:", email, "Hasło:", password);
+    log(`Email: ${email} | Hasło: ${"*".repeat(password.length)}`);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        console.error("Błąd logowania:", error);
+        log("Błąd logowania: " + JSON.stringify(error), "error");
         document.getElementById('loginError').innerText = 'Błędne dane logowania';
       } else {
-        console.log("Zalogowano:", data);
+        log("Zalogowano pomyślnie");
         checkSession();
       }
     } catch(e) {
-      console.error("Wyjątek podczas logowania:", e);
+      log("Wyjątek podczas logowania: " + e, "error");
     }
   }
 
@@ -88,7 +102,7 @@
   async function checkSession() {
     try {
       const { data } = await supabase.auth.getSession();
-      console.log("Sesja:", data);
+      log("Sesja: " + JSON.stringify(data));
 
       if (!data.session) return;
 
@@ -103,7 +117,7 @@
 
       loadData();
     } catch(e) {
-      console.error("Błąd checkSession:", e);
+      log("Błąd checkSession: " + e, "error");
     }
   }
 
@@ -116,7 +130,7 @@
         .order("lp.");
 
       if (error) { 
-        console.error("Błąd loadData:", error); 
+        log("Błąd loadData: " + JSON.stringify(error), "error"); 
         return; 
       }
 
@@ -165,17 +179,23 @@
             .update(payload)
             .eq("id", row.id);
 
-          if (error) alert("Błąd zapisu"); else alert("Zapisano");
+          if (error) {
+            alert("Błąd zapisu");
+            log("Błąd zapisu: " + JSON.stringify(error), "error");
+          } else {
+            alert("Zapisano");
+            log("Zapisano rekord: " + row.id);
+          }
         };
 
         tbody.appendChild(tr);
       });
     } catch(e) {
-      console.error("Wyjątek loadData:", e);
+      log("Wyjątek loadData: " + e, "error");
     }
   }
 
-  // --- AUTOMATYCZNE SPRAWDZENIE SESJI PO ZAŁADOWANIU ---
+  // --- SPRAWDZENIE SESJI PRZY ŁADOWANIU STRONY ---
   checkSession();
 </script>
 
