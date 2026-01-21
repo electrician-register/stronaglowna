@@ -222,7 +222,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
 
   let query = supabase
     .from("tabela_elektrykow")
-    .select("id,imie,nazwisko,email,telefon,gwiazdki,status")
+    .select("id,imie,nazwisko,gwiazdki,status")
     .eq("wojewodztwo", woj.value)
 
   if(miasto.value){
@@ -249,10 +249,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
       <div class="lp">${i+1}</div>
       <div class="person">
         <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki}</div>
-        <div class="small">${e.email}</div>
-        <div class="small">${e.telefon}</div>
-      </div>
-      <div class="small">Status: ${e.status}</div>
+        <div class="small">Status: ${e.status}</div>
       <div>
         <button onclick="window.location.href='/profil/index.html?id=${e.id}'">
           Zobacz profil
