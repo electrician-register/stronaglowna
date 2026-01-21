@@ -19,7 +19,6 @@ button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; colo
 </head>
 <body>
 
-<!-- LOGOWANIE ADMIN -->
 <div id="loginBox">
   <h2>Logowanie admin</h2>
   <input id="email" type="email" placeholder="Email" style="margin-bottom:10px">
@@ -28,7 +27,6 @@ button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; colo
   <p id="loginError" style="color:red"></p>
 </div>
 
-<!-- PANEL ADMINA -->
 <div id="adminPanel" style="display:none">
 <h1>Panel admina – tabela_elektrykow</h1>
 <table>
@@ -54,11 +52,10 @@ button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; colo
 </table>
 </div>
 
-<!-- LOGI -->
 <div id="logBox"></div>
 
 <script>
-// --- FUNKCJA LOGÓW ---
+// --- LOGI ---
 function log(msg, type="log") {
   const logBox = document.getElementById("logBox");
   const div = document.createElement("div");
@@ -70,26 +67,21 @@ function log(msg, type="log") {
 
 // --- INICJALIZACJA SUPABASE ---
 log("Inicjalizacja Supabase...");
-let supabase;
-try {
-  supabase = supabase.createClient(
-    "https://tfbqqduxtsacvwfigsvt.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
-  );
-  log("Supabase zainicjalizowany");
-} catch(e) {
-  log("Błąd inicjalizacji Supabase: " + e, "error");
-}
+const supabase = supabase.createClient(
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+);
+log("Supabase gotowy");
 
 // --- KONFIG ---
 const adminEmail = "piotr8040@gmail.com";
 
 // --- LOGIN ---
 async function login() {
-  log("Kliknięto przycisk Zaloguj");
+  log("Kliknięto Zaloguj");
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  log(`Podany email: ${email}, hasło: ${"*".repeat(password.length)}`);
+  log(`Email: ${email}, Hasło: ${"*".repeat(password.length)}`);
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -98,7 +90,7 @@ async function login() {
       document.getElementById("loginError").innerText = "Błędne dane logowania";
       return;
     }
-    log("Zalogowano pomyślnie. Dane sesji: " + JSON.stringify(data));
+    log("Logowanie OK. Dane sesji: " + JSON.stringify(data));
     checkSession();
   } catch(e) {
     log("Wyjątek podczas logowania: " + e, "error");
@@ -134,28 +126,23 @@ async function checkSession() {
 
     loadData();
   } catch(e) {
-    log("Błąd checkSession: " + e, "error");
+    log("Wyjątek checkSession: " + e, "error");
   }
 }
 
 // --- ŁADOWANIE DANYCH ---
 async function loadData() {
-  log("Ładowanie danych z tabela_elektrykow...");
+  log("Ładowanie danych...");
   try {
     const { data, error } = await supabase
       .from("tabela_elektrykow")
       .select("id, \"lp.\", imie, nazwisko, miasto, wojewodztwo, nrE, nrEPomiary, nrD, status, gwiazdki, telefon, email, show_contact")
       .order("lp.");
-
-    if(error) {
-      log("Błąd loadData: " + JSON.stringify(error), "error");
-      return;
-    }
+    if(error) { log("Błąd loadData: " + JSON.stringify(error), "error"); return; }
     log("Pobrano rekordy: " + data.length);
 
     const tbody = document.getElementById("tbody");
     tbody.innerHTML = "";
-
     data.forEach(row => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -175,7 +162,7 @@ async function loadData() {
         <td><button>Zapisz</button></td>
       `;
       tr.querySelector("button").onclick = async () => {
-        log("Kliknięto Zapisz dla id: " + row.id);
+        log("Kliknięto Zapisz id=" + row.id);
         const i = tr.querySelectorAll("input");
         const payload = {
           "lp.": i[0].value,
@@ -197,23 +184,13 @@ async function loadData() {
             .from("tabela_elektrykow")
             .update(payload)
             .eq("id", row.id);
-          if(error) {
-            log("Błąd zapisu: " + JSON.stringify(error), "error");
-            alert("Błąd zapisu");
-          } else {
-            log("Zapisano rekord: " + row.id);
-            alert("Zapisano");
-          }
-        } catch(e) {
-          log("Wyjątek przy zapisie: " + e, "error");
-        }
+          if(error) { log("Błąd zapisu: " + JSON.stringify(error), "error"); alert("Błąd zapisu"); }
+          else { log("Zapisano rekord: " + row.id); alert("Zapisano"); }
+        } catch(e) { log("Wyjątek przy zapisie: " + e, "error"); }
       };
       tbody.appendChild(tr);
     });
-
-  } catch(e) {
-    log("Wyjątek loadData: " + e, "error");
-  }
+  } catch(e) { log("Wyjątek loadData: " + e, "error"); }
 }
 
 // --- PRZYPISANIE PRZYCISKU ---
@@ -222,6 +199,5 @@ document.getElementById("loginBtn").addEventListener("click", login);
 // --- SPRAWDZENIE SESJI PRZY ŁADOWANIU ---
 checkSession();
 </script>
-
 </body>
 </html>
