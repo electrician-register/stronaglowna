@@ -56,6 +56,8 @@ button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; colo
 <div id="logBox"></div>
 
 <script>
+let supabase; // global
+
 // --- FUNKCJA LOGÓW ---
 function log(msg, type="log") {
   const logBox = document.getElementById("logBox");
@@ -67,17 +69,21 @@ function log(msg, type="log") {
 }
 
 // --- INICJALIZACJA SUPABASE ---
-log("Inicjalizacja Supabase...");
-const supabase = supabase.createClient(
-  "https://tfbqqduxtsacvwfigsvt.supabase.co",   // Twój URL Supabase
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"                               // Twój ANON KEY
-);
-log("Supabase gotowy");
-
-// --- KONFIG ---
-const adminEmail = "piotr8040@gmail.com";
+function initSupabase() {
+  try {
+    log("Inicjalizacja Supabase...");
+    supabase = Supabase.createClient(
+      "https://tfbqqduxtsacvwfigsvt.supabase.co", // Twój URL Supabase
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8" // Twój ANON KEY
+    );
+    log("Supabase gotowy");
+  } catch(e) {
+    log("Błąd inicjalizacji Supabase: " + e, "error");
+  }
+}
 
 // --- LOGIN ---
+const adminEmail = "piotr8040@gmail.com";
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -85,16 +91,14 @@ async function login() {
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error) {
+    if(error) { 
       log("Błąd logowania: " + JSON.stringify(error), "error");
       document.getElementById("loginError").innerText = "Błędne dane logowania";
       return;
     }
     log("Logowanie OK. Dane sesji: " + JSON.stringify(data));
     checkSession();
-  } catch(e) {
-    log("Wyjątek podczas logowania: " + e, "error");
-  }
+  } catch(e) { log("Wyjątek przy logowaniu: " + e, "error"); }
 }
 
 // --- SPRAWDZENIE SESJI ---
@@ -102,16 +106,10 @@ async function checkSession() {
   log("Sprawdzanie sesji...");
   try {
     const { data, error } = await supabase.auth.getSession();
-    if(error) {
-      log("Błąd getSession: " + JSON.stringify(error), "error");
-      return;
-    }
+    if(error) { log("Błąd getSession: " + JSON.stringify(error), "error"); return; }
     log("Dane sesji: " + JSON.stringify(data));
 
-    if(!data.session) {
-      log("Brak aktywnej sesji");
-      return;
-    }
+    if(!data.session) { log("Brak aktywnej sesji"); return; }
 
     if(data.session.user.email !== adminEmail) {
       alert("Brak uprawnień administratora");
@@ -125,12 +123,10 @@ async function checkSession() {
     document.getElementById("adminPanel").style.display = "block";
 
     loadData();
-  } catch(e) {
-    log("Wyjątek checkSession: " + e, "error");
-  }
+  } catch(e) { log("Wyjątek checkSession: " + e, "error"); }
 }
 
-// --- ŁADOWANIE DANYCH Z SUPABASE ---
+// --- ŁADOWANIE DANYCH ---
 async function loadData() {
   log("Ładowanie danych z Supabase...");
   try {
@@ -197,10 +193,9 @@ async function loadData() {
   } catch(e) { log("Wyjątek loadData: " + e, "error"); }
 }
 
-// --- PRZYPISANIE PRZYCISKU ---
+// --- START ---
+initSupabase();
 document.getElementById("loginBtn").addEventListener("click", login);
-
-// --- SPRAWDZENIE SESJI PRZY ŁADOWANIU ---
 checkSession();
 </script>
 
