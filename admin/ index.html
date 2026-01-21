@@ -2,7 +2,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel admina – Elektrycy</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+  <title>Panel admina – Elektrycy</title>
+  <meta name="robots" content="noindex, nofollow">  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
     body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
     table { width:100%; border-collapse:collapse; background:#fff; }
     th, td { border:1px solid #ddd; padding:8px; font-size:13px; }
@@ -40,7 +41,7 @@
     const { data, error } = await supabase
       .from("tabela_elektrykow")
       .select("id, \"lp.\", imie, nazwisko, miasto, wojewodztwo, nrE, nrEPomiary, nrD, status, gwiazdki, telefon, email, show_contact")
-      .order(lp);
+      .order("lp.");
 
     if (error) { console.error(error); return; }
 
@@ -50,7 +51,7 @@
     data.forEach(row => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><input value="${row.lp || ''}"></td>
+        <td><input value="${row['lp.'] || ''}"></td>
         <td><input value="${row.imie || ''}"></td>
         <td><input value="${row.nazwisko || ''}"></td>
         <td><input value="${row.miasto || ''}"></td>
@@ -69,7 +70,7 @@
       tr.querySelector("button").onclick = async () => {
         const i = tr.querySelectorAll("input");
         const payload = {
-          lp: i[0].value,
+          "lp.": i[0].value,
           imie: i[1].value,
           nazwisko: i[2].value,
           miasto: i[3].value,
