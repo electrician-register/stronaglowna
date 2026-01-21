@@ -11,7 +11,13 @@
     input, select { width:100%; box-sizing:border-box; }
     button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; color:#fff; }
   </style></head>
-<body><h1>Panel admina – tabela_elektrykow</h1><table>
+<body><!-- LOGOWANIE ADMIN --><div id="loginBox" style="max-width:360px;margin:80px auto;padding:20px;background:#fff;border:1px solid #ddd">
+  <h2>Logowanie admin</h2>
+  <input id="email" type="email" placeholder="Email" style="margin-bottom:10px" />
+  <input id="password" type="password" placeholder="Hasło" style="margin-bottom:10px" />
+  <button onclick="login()">Zaloguj</button>
+  <p id="loginError" style="color:red"></p>
+</div><div id="adminPanel" style="display:none"><h1>Panel admina – tabela_elektrykow</h1><table>
   <thead>
     <tr>
       <th>LP</th>
@@ -31,7 +37,41 @@
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
-</table><script>
+</table>
+</div><script>
+
+async function login() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    document.getElementById('loginError').innerText = 'Błędne dane logowania';
+  } else {
+    checkSession();
+  }
+}
+
+async function checkSession() {
+  const { data } = await supabase.auth.getSession();
+
+  if (!data.session) return;
+
+  const adminEmail = "ADMIN_EMAIL@DOMENA.PL";
+
+  if (data.session.user.email !== adminEmail) {
+    alert('Brak uprawnień administratora');
+    await supabase.auth.signOut();
+    return;
+  }
+
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'block';
+
+  loadData();
+}
+
   const supabase = supabaseJs.createClient(
     "https://TWOJ_PROJECT.supabase.co",
     "TWOJ_ANON_KEY"
@@ -97,6 +137,6 @@
     });
   }
 
-  loadData();
+  checkSession();
 </script></body>
 </html>
