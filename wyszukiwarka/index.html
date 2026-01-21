@@ -222,7 +222,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
 
   let query = supabase
     .from("tabela_elektrykow")
-    .select("id,imie,nazwisko,miasto,wojewodztwo,gwiazdki,status")
+    .select("id,imie,nazwisko,gwiazdki,status")
     .eq("wojewodztwo", woj.value)
 
   if(miasto.value){
