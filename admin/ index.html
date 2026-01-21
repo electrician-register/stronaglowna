@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel admina – Elektrycy</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
+    table { width:100%; border-collapse:collapse; background:#fff; }
+    th, td { border:1px solid #ddd; padding:8px; font-size:13px; }
+    th { background:#222; color:#fff; }
+    input, select { width:100%; box-sizing:border-box; }
+    button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; color:#fff; }
+  </style></head>
+<body><h1>Panel admina – tabela_elektrykow</h1><table>
+  <thead>
+    <tr>
+      <th>LP</th>
+      <th>Imię</th>
+      <th>Nazwisko</th>
+      <th>Miasto</th>
+      <th>Woj.</th>
+      <th>nr E</th>
+      <th>nr E + Pomiary</th>
+      <th>nr D</th>
+      <th>Status</th>
+      <th>Gwiazdki</th>
+      <th>Telefon</th>
+      <th>Email</th>
+      <th>Pokaż kontakt</th>
+      <th>Zapisz</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table><script>
+  const supabase = supabaseJs.createClient(
+    "https://TWOJ_PROJECT.supabase.co",
+    "TWOJ_ANON_KEY"
+  );
+
+  async function loadData() {
+    const { data, error } = await supabase
+      .from("tabela_elektrykow")
+      .select("id, \"lp.\", imie, nazwisko, miasto, wojewodztwo, nrE, nrEPomiary, nrD, status, gwiazdki, telefon, email, show_contact")
+      .order(lp);
+
+    if (error) { console.error(error); return; }
+
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input value="${row.lp || ''}"></td>
+        <td><input value="${row.imie || ''}"></td>
+        <td><input value="${row.nazwisko || ''}"></td>
+        <td><input value="${row.miasto || ''}"></td>
+        <td><input value="${row.wojewodztwo || ''}"></td>
+        <td><input value="${row.nrE || ''}"></td>
+        <td><input value="${row.nrEPomiary || ''}"></td>
+        <td><input value="${row.nrD || ''}"></td>
+        <td><input value="${row.status || ''}"></td>
+        <td><input value="${row.gwiazdki || ''}"></td>
+        <td><input value="${row.telefon || ''}"></td>
+        <td><input value="${row.email || ''}"></td>
+        <td style="text-align:center"><input type="checkbox" ${row.show_contact ? 'checked' : ''}></td>
+        <td><button>Zapisz</button></td>
+      `;
+
+      tr.querySelector("button").onclick = async () => {
+        const i = tr.querySelectorAll("input");
+        const payload = {
+          lp: i[0].value,
+          imie: i[1].value,
+          nazwisko: i[2].value,
+          miasto: i[3].value,
+          wojewodztwo: i[4].value,
+          nrE: i[5].value,
+          nrEPomiary: i[6].value,
+          nrD: i[7].value,
+          status: i[8].value,
+          gwiazdki: i[9].value,
+          telefon: i[10].value,
+          email: i[11].value,
+          show_contact: i[12].checked
+        };
+
+        const { error } = await supabase
+          .from("tabela_elektrykow")
+          .update(payload)
+          .eq("id", row.id);
+
+        if (error) alert("Błąd zapisu"); else alert("Zapisano");
+      };
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  loadData();
+</script></body>
+</html>
