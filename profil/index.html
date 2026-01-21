@@ -99,6 +99,10 @@ section {
 <section id="profil" class="hidden">
   <span id="status" class="badge"></span>
   <p id="opis"></p>
+
+  <!-- DODANE: EMAIL + TELEFON -->
+  <p><strong>Email:</strong> <span id="email"></span></p>
+  <p><strong>Telefon:</strong> <span id="telefon"></span></p>
 </section>
 
 <section id="brak" class="hidden">
@@ -124,6 +128,19 @@ const statusMap = {
   "⌛": { text: "Status ELEKTRYKA - w trakcie weryfikacji", class: "status-wait" },
   "❌": { text: "Status ELEKTRYKA - aktualnie brak weryfikacji", class: "status-no" }
 };
+
+/* === DODANE FUNKCJE MASKUJĄCE === */
+function maskEmail(email) {
+  if (!email) return "";
+  const [name, domain] = email.split("@");
+  if (!domain) return "******";
+  return name[0] + "*****@" + domain;
+}
+
+function maskPhone(phone) {
+  if (!phone) return "";
+  return phone.slice(0, 2) + "******" + phone.slice(-2);
+}
 
 // ID z URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -154,6 +171,18 @@ if (id) {
         statusEl.classList.add(statusMap[data.status].class);
       } else {
         statusEl.textContent = "";
+      }
+
+      // === DODANA LOGIKA show_contact ===
+      const emailEl = document.getElementById("email");
+      const telEl = document.getElementById("telefon");
+
+      if (data.show_contact === true) {
+        emailEl.textContent = data.email || "";
+        telEl.textContent = data.telefon || "";
+      } else {
+        emailEl.textContent = maskEmail(data.email);
+        telEl.textContent = maskPhone(data.telefon);
       }
 
       profil.classList.remove("hidden");
