@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel admina – Elektrycy (Logi Offline)</title>
+<title>Panel admina – Elektrycy</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
 table { width:100%; border-collapse:collapse; background:#fff; margin-bottom:20px; }
@@ -19,7 +21,7 @@ button { padding:6px 10px; cursor:pointer; background:#2ecc71; border:none; colo
 <body>
 
 <div id="loginBox">
-  <h2>Logowanie admin (Offline Logi)</h2>
+  <h2>Logowanie admin</h2>
   <input id="email" type="email" placeholder="Email" style="margin-bottom:10px">
   <input id="password" type="password" placeholder="Hasło" style="margin-bottom:10px">
   <button id="loginBtn">Zaloguj</button>
@@ -64,67 +66,142 @@ function log(msg, type="log") {
   logBox.scrollTop = logBox.scrollHeight;
 }
 
-// --- DANE TESTOWE (offline) ---
-let fakeData = [
-  { id:1, "lp.":1, imie:"Blanka", nazwisko:"Janukowicz", miasto:"269", wojewodztwo:"4", nrE:"g", nrEPomiary:"", nrD:"", status:"✅", gwiazdki:"⭐", telefon:"123456789", email:"blanka.janukowicz@gmail.com", show_contact:true },
-  { id:2, "lp.":2, imie:"Piotr", nazwisko:"Janukowicz", miasto:"270", wojewodztwo:"4", nrE:"h", nrEPomiary:"", nrD:"", status:"❌", gwiazdki:"⭐⭐", telefon:"987654321", email:"piotr.janukowicz@gmail.com", show_contact:false }
-];
+// --- INICJALIZACJA SUPABASE ---
+log("Inicjalizacja Supabase...");
+const supabase = supabase.createClient(
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",   // Twój URL Supabase
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"                               // Twój ANON KEY
+);
+log("Supabase gotowy");
+
+// --- KONFIG ---
+const adminEmail = "piotr8040@gmail.com";
 
 // --- LOGIN ---
-const adminEmail = "piotr8040@gmail.com";
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   log(`Kliknięto Zaloguj. Email: ${email}, Hasło: ${"*".repeat(password.length)}`);
 
-  // --- SPRAWDZENIE DANYCH OFFLINE ---
-  if(email === adminEmail && password === "admin123") {
-    log("Logowanie poprawne (offline test)");
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    loadData();
-  } else {
-    log("Błędne dane logowania", "error");
-    document.getElementById("loginError").innerText = "Błędne dane logowania (offline)";
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) {
+      log("Błąd logowania: " + JSON.stringify(error), "error");
+      document.getElementById("loginError").innerText = "Błędne dane logowania";
+      return;
+    }
+    log("Logowanie OK. Dane sesji: " + JSON.stringify(data));
+    checkSession();
+  } catch(e) {
+    log("Wyjątek podczas logowania: " + e, "error");
   }
 }
 
-// --- ŁADOWANIE DANYCH OFFLINE ---
-function loadData() {
-  log("Ładowanie danych (offline)...");
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
+// --- SPRAWDZENIE SESJI ---
+async function checkSession() {
+  log("Sprawdzanie sesji...");
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if(error) {
+      log("Błąd getSession: " + JSON.stringify(error), "error");
+      return;
+    }
+    log("Dane sesji: " + JSON.stringify(data));
 
-  fakeData.forEach(row => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><input value="${row['lp.']}"></td>
-      <td><input value="${row.imie}"></td>
-      <td><input value="${row.nazwisko}"></td>
-      <td><input value="${row.miasto}"></td>
-      <td><input value="${row.wojewodztwo}"></td>
-      <td><input value="${row.nrE}"></td>
-      <td><input value="${row.nrEPomiary}"></td>
-      <td><input value="${row.nrD}"></td>
-      <td><input value="${row.status}"></td>
-      <td><input value="${row.gwiazdki}"></td>
-      <td><input value="${row.telefon}"></td>
-      <td><input value="${row.email}"></td>
-      <td style="text-align:center"><input type="checkbox" ${row.show_contact ? 'checked' : ''}></td>
-      <td><button>Zapisz</button></td>
-    `;
+    if(!data.session) {
+      log("Brak aktywnej sesji");
+      return;
+    }
 
-    tr.querySelector("button").onclick = () => {
-      log(`Kliknięto Zapisz dla id=${row.id}`);
-      alert("Zapisano (offline test)");
-    };
+    if(data.session.user.email !== adminEmail) {
+      alert("Brak uprawnień administratora");
+      await supabase.auth.signOut();
+      log("Wylogowano nieadmina");
+      return;
+    }
 
-    tbody.appendChild(tr);
-  });
+    log("Użytkownik jest adminem, pokaz panel");
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+
+    loadData();
+  } catch(e) {
+    log("Wyjątek checkSession: " + e, "error");
+  }
+}
+
+// --- ŁADOWANIE DANYCH Z SUPABASE ---
+async function loadData() {
+  log("Ładowanie danych z Supabase...");
+  try {
+    const { data, error } = await supabase
+      .from("tabela_elektrykow")
+      .select("id, \"lp.\", imie, nazwisko, miasto, wojewodztwo, nrE, nrEPomiary, nrD, status, gwiazdki, telefon, email, show_contact")
+      .order("lp.");
+    if(error) { log("Błąd loadData: " + JSON.stringify(error), "error"); return; }
+    log("Pobrano rekordy: " + data.length);
+
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input value="${row['lp.'] || ''}"></td>
+        <td><input value="${row.imie || ''}"></td>
+        <td><input value="${row.nazwisko || ''}"></td>
+        <td><input value="${row.miasto || ''}"></td>
+        <td><input value="${row.wojewodztwo || ''}"></td>
+        <td><input value="${row.nrE || ''}"></td>
+        <td><input value="${row.nrEPomiary || ''}"></td>
+        <td><input value="${row.nrD || ''}"></td>
+        <td><input value="${row.status || ''}"></td>
+        <td><input value="${row.gwiazdki || ''}"></td>
+        <td><input value="${row.telefon || ''}"></td>
+        <td><input value="${row.email || ''}"></td>
+        <td style="text-align:center"><input type="checkbox" ${row.show_contact ? 'checked' : ''}></td>
+        <td><button>Zapisz</button></td>
+      `;
+
+      tr.querySelector("button").onclick = async () => {
+        log(`Kliknięto Zapisz id=${row.id}`);
+        const i = tr.querySelectorAll("input");
+        const payload = {
+          "lp.": i[0].value,
+          imie: i[1].value,
+          nazwisko: i[2].value,
+          miasto: i[3].value,
+          wojewodztwo: i[4].value,
+          nrE: i[5].value,
+          nrEPomiary: i[6].value,
+          nrD: i[7].value,
+          status: i[8].value,
+          gwiazdki: i[9].value,
+          telefon: i[10].value,
+          email: i[11].value,
+          show_contact: i[12].checked
+        };
+
+        try {
+          const { error } = await supabase
+            .from("tabela_elektrykow")
+            .update(payload)
+            .eq("id", row.id);
+          if(error) { log("Błąd zapisu: " + JSON.stringify(error), "error"); alert("Błąd zapisu"); }
+          else { log("Zapisano rekord: " + row.id); alert("Zapisano"); }
+        } catch(e) { log("Wyjątek przy zapisie: " + e, "error"); }
+      };
+
+      tbody.appendChild(tr);
+    });
+  } catch(e) { log("Wyjątek loadData: " + e, "error"); }
 }
 
 // --- PRZYPISANIE PRZYCISKU ---
 document.getElementById("loginBtn").addEventListener("click", login);
+
+// --- SPRAWDZENIE SESJI PRZY ŁADOWANIU ---
+checkSession();
 </script>
 
 </body>
