@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel admina</title>
 <meta name="robots" content="noindex, nofollow">
 
@@ -10,8 +10,12 @@
 
 <style>
 body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
-button { padding:8px 12px; background:#2ecc71; color:#fff; border:0; cursor:pointer; }
-input { width:100%; margin-bottom:10px; padding:6px; }
+input { width:100%; padding:5px; }
+button { padding:6px 10px; cursor:pointer; background:#2ecc71; color:#fff; border:0; }
+
+table { width:100%; border-collapse:collapse; background:#fff; margin-top:15px; }
+th, td { border:1px solid #ddd; padding:6px; font-size:12px; }
+th { background:#222; color:#fff; }
 
 #logBox {
   background:#000;
@@ -39,84 +43,146 @@ input { width:100%; margin-bottom:10px; padding:6px; }
 
 <!-- PANEL -->
 <div id="adminPanel" style="display:none">
-  <h1>Panel admina</h1>
+  <h1>Panel admina – tabela_elektrykow</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>LP</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Miasto</th>
+        <th>Woj.</th>
+        <th>Email</th>
+        <th>Telefon</th>
+        <th>Pokaż kontakt</th>
+        <th>Zapisz</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div id="logBoxAdmin"></div>
 </div>
 
 <script>
-/* ========= LOGI ========= */
+/* ===== LOGI ===== */
 function log(msg) {
   const box = document.getElementById("logBox");
+  if (box) box.innerHTML += msg + "<br>";
+}
+function logAdmin(msg) {
+  const box = document.getElementById("logBoxAdmin");
   box.innerHTML += msg + "<br>";
   box.scrollTop = box.scrollHeight;
 }
 
-log("JS uruchomiony");
-
-/* ========= SUPABASE ========= */
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
-log("Tworzenie klienta Supabase...");
-
+/* ===== SUPABASE ===== */
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
 );
 
 log("Supabase OK");
 
-/* ========= LOGIN ========= */
+/* ===== LOGIN ===== */
 async function login() {
-  log("Kliknięto ZALOGUJ");
+  log("Klik ZALOGUJ");
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-  log("Email: " + email);
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-  try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      log("BŁĄD LOGOWANIA: " + error.message);
-      return;
-    }
-
-    log("Zalogowano poprawnie");
-    checkSession();
-
-  } catch (e) {
-    log("EXCEPTION: " + e.message);
-  }
-}
-
-/* ========= SESJA ========= */
-async function checkSession() {
-  log("Sprawdzanie sesji...");
-
-  const { data } = await supabaseClient.auth.getSession();
-
-  if (!data.session) {
-    log("Brak sesji");
+  if (error) {
+    log("BŁĄD: " + error.message);
     return;
   }
 
-  log("Sesja OK: " + data.session.user.email);
+  checkSession();
+}
+
+/* ===== SESJA ===== */
+async function checkSession() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data.session) return;
 
   if (data.session.user.email !== "piotr8040@gmail.com") {
-    log("BRAK UPRAWNIEŃ ADMINA");
+    alert("Brak uprawnień admina");
     await supabaseClient.auth.signOut();
     return;
   }
 
-  log("ADMIN POTWIERDZONY");
+  loginBox.style.display = "none";
+  adminPanel.style.display = "block";
 
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("adminPanel").style.display = "block";
+  loadData();
 }
+
+/* ===== DANE ===== */
+async function loadData() {
+  logAdmin("Ładowanie danych...");
+
+  const { data, error } = await supabaseClient
+    .from("tabela_elektrykow")
+    .select("id, lp, imie, nazwisko, miasto, wojewodztwo, email, telefon, show_contact")
+    .order("lp");
+
+  if (error) {
+    logAdmin("BŁĄD: " + error.message);
+    return;
+  }
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td><input value="${row.lp || ''}"></td>
+      <td><input value="${row.imie || ''}"></td>
+      <td><input value="${row.nazwisko || ''}"></td>
+      <td><input value="${row.miasto || ''}"></td>
+      <td><input value="${row.wojewodztwo || ''}"></td>
+      <td><input value="${row.email || ''}"></td>
+      <td><input value="${row.telefon || ''}"></td>
+      <td style="text-align:center">
+        <input type="checkbox" ${row.show_contact ? "checked" : ""}>
+      </td>
+      <td><button>Zapisz</button></td>
+    `;
+
+    tr.querySelector("button").onclick = async () => {
+      const i = tr.querySelectorAll("input");
+
+      const payload = {
+        lp: i[0].value,
+        imie: i[1].value,
+        nazwisko: i[2].value,
+        miasto: i[3].value,
+        wojewodztwo: i[4].value,
+        email: i[5].value,
+        telefon: i[6].value,
+        show_contact: i[7].checked
+      };
+
+      const { error } = await supabaseClient
+        .from("tabela_elektrykow")
+        .update(payload)
+        .eq("id", row.id);
+
+      if (error) logAdmin("❌ Błąd zapisu");
+      else logAdmin("✅ Zapisano ID: " + row.id);
+    };
+
+    tbody.appendChild(tr);
+  });
+
+  logAdmin("Dane załadowane: " + data.length);
+}
+
+checkSession();
 </script>
 
 </body>
