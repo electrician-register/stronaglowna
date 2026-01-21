@@ -24,7 +24,7 @@
   <h2>Logowanie admin</h2>
   <input id="email" type="email" placeholder="Email" style="margin-bottom:10px" />
   <input id="password" type="password" placeholder="Hasło" style="margin-bottom:10px" />
-  <button onclick="login()">Zaloguj</button>
+  <button id="loginBtn">Zaloguj</button>
   <p id="loginError" style="color:red"></p>
 </div>
 
@@ -69,7 +69,7 @@
   }
 
   // --- INICJALIZACJA SUPABASE ---
-  const supabase = supabaseJs.createClient(
+  const supabase = supabase.createClient(
     "https://tfbqqduxtsacvwfigsvt.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
   );
@@ -194,6 +194,9 @@
       log("Wyjątek loadData: " + e, "error");
     }
   }
+
+  // --- PRZYPISANIE PRZYCISKU DO FUNKCJI LOGIN ---
+  document.getElementById("loginBtn").addEventListener("click", login);
 
   // --- SPRAWDZENIE SESJI PRZY ŁADOWANIU STRONY ---
   checkSession();
