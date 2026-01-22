@@ -9,13 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
+body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
 
-/* ===== LOGI ===== */
 #logBox {
   background:#000;
   color:#0f0;
@@ -26,51 +21,12 @@ body {
   margin-bottom:15px;
 }
 
-/* ===== FORM ===== */
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-  width:100%;
-  padding:6px;
-  box-sizing:border-box;
-  font-size:13px;
-}
+input, button { width:100%; padding:8px; margin:5px 0 }
+button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
-button {
-  padding:6px 10px;
-  background:#2ecc71;
-  border:0;
-  color:#fff;
-  cursor:pointer;
-  font-size:13px;
-  border-radius:4px;
-}
-
-/* ===== TABLE DESKTOP ===== */
-table {
-  width:100%;
-  border-collapse:collapse;
-  background:#fff;
-}
-
-th, td {
-  border:1px solid #ccc;
-  padding:6px;
-  font-size:12px;
-}
-
-th {
-  background:#222;
-  color:#fff;
-  text-align:center;
-}
-
-td:nth-child(1) { width:50px; }
-td:nth-child(6),
-td:nth-child(7) {
-  text-align:center;
-  width:90px;
-}
+table { width:100%; border-collapse:collapse; background:#fff }
+th, td { border:1px solid #ccc; padding:6px; font-size:12px }
+th { background:#222; color:#fff }
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
@@ -85,36 +41,50 @@ td:nth-child(7) {
 
   tr {
     background:#fff;
-    margin-bottom:12px;
-    padding:10px;
-    border-radius:6px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    margin-bottom:14px;
+    padding:12px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
   }
 
   td {
-    display:flex;
-    justify-content:space-between;
+    display:grid;
+    grid-template-columns: 120px 1fr; /* etykiety i input */
     align-items:center;
     border:none;
     padding:6px 0;
-    font-size:13px;
+    font-size:14px;
   }
 
   td::before {
     content: attr(data-label);
-    font-weight:bold;
-    color:#555;
-    padding-right:10px;
+    font-weight:600;
+    color:#444;
   }
 
   td input[type="text"],
   td input[type="email"] {
-    width:65%;
+    width:100%;
+  }
+
+  td input[type="checkbox"] {
+    transform: scale(1.2);
+    justify-self:start;
+  }
+
+  td[data-label="Akcja"] {
+    grid-template-columns: 1fr;
+    margin-top:8px;
+  }
+
+  td[data-label="Akcja"]::before {
+    display:none;
   }
 
   td button {
     width:100%;
-    margin-top:6px;
+    padding:10px;
+    font-size:15px;
   }
 }
 </style>
@@ -134,7 +104,6 @@ td:nth-child(7) {
 
 <div id="adminPanel" style="display:none">
   <h2>Panel admina – tabela_elektrykow</h2>
-
   <table>
     <thead>
       <tr>
@@ -178,7 +147,10 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
+  log("Email: " + email);
+  log("Hasło wpisane: " + (password.length > 0));
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
@@ -231,12 +203,13 @@ async function loadData() {
     return;
   }
 
+  log("Rekordów: " + data.length);
+
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
   data.forEach(row => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
