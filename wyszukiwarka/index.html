@@ -208,7 +208,7 @@ const miasto = document.getElementById("miasto")
 const results = document.getElementById("results")
 const gwiazdki = document.getElementById("gwiazdki")
 const status = document.getElementById("status")
-if(show_contact.checked) query = query.eq("show_contact", true)
+if(show_contact.checked) query = query.is("show_contact", true)
 
 // --- Ładowanie województw ---
 async function loadWoj(){
