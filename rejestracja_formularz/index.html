@@ -372,7 +372,7 @@ console.log('USER:', user)
 // === BLOKADA EMAILA I TELEFONU W NIEODPOWIEDNICH POLACH ===
 
 const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/i
-const phoneRegex = /\+?\d[\d\s\-]{6,}/
+const phoneRegex = /\+?\d[\d\s\-]{2,}/
 
 const blockedFields = [
   'imie',
