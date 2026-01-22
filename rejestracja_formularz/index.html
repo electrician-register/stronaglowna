@@ -369,6 +369,35 @@ console.log('USER:', user)
     window.location.href = 'https://orep.pl/logowanie';
   }
 })
+<script type="module">
+/* === BLOKADA EMAILA I TELEFONU W INNYCH POLACH === */
+
+const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/i
+const phoneRegex = /\+?\d[\d\s\-]{6,}/
+
+const forbiddenInputs = [
+  'imie',
+  'nazwisko',
+  'nrE',
+  'nrEPomiary',
+  'nrD',
+  'zajmujeSie'
+]
+
+forbiddenInputs.forEach(id => {
+  const el = document.getElementById(id)
+  if (!el) return
+
+  el.addEventListener('input', () => {
+    if (emailRegex.test(el.value) || phoneRegex.test(el.value)) {
+      el.value = el.value
+        .replace(emailRegex, '')
+        .replace(phoneRegex, '')
+      alert('Numer telefonu i adres e-mail można podać tylko w przeznaczonych do tego polach.')
+    }
+  })
+})
+</script>
 </script>
 </body>
 </html>
