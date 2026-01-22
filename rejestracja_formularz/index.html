@@ -369,13 +369,12 @@ console.log('USER:', user)
     window.location.href = 'https://orep.pl/logowanie';
   }
 })
-<script type="module">
-/* === BLOKADA EMAILA I TELEFONU W INNYCH POLACH === */
+// === BLOKADA EMAILA I TELEFONU W NIEODPOWIEDNICH POLACH ===
 
 const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/i
 const phoneRegex = /\+?\d[\d\s\-]{6,}/
 
-const forbiddenInputs = [
+const blockedFields = [
   'imie',
   'nazwisko',
   'nrE',
@@ -384,20 +383,24 @@ const forbiddenInputs = [
   'zajmujeSie'
 ]
 
-forbiddenInputs.forEach(id => {
+blockedFields.forEach(id => {
   const el = document.getElementById(id)
   if (!el) return
 
   el.addEventListener('input', () => {
-    if (emailRegex.test(el.value) || phoneRegex.test(el.value)) {
-      el.value = el.value
-        .replace(emailRegex, '')
-        .replace(phoneRegex, '')
-      alert('Numer telefonu i adres e-mail można podać tylko w przeznaczonych do tego polach.')
+    const original = el.value
+    const cleaned = original
+      .replace(emailRegex, '')
+      .replace(phoneRegex, '')
+
+    if (original !== cleaned) {
+      el.value = cleaned
+      result.textContent =
+        'Adres e-mail i numer telefonu można podać wyłącznie w przeznaczonych do tego polach.'
+      result.className = 'error'
     }
   })
 })
-</script>
 </script>
 </body>
 </html>
