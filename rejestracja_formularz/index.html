@@ -2,102 +2,95 @@
 <html lang="pl">
 <head>
   <link rel="icon" href="/favicon.png">
-  <meta name="robots" content="noindex, nofollow">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
 
-    .form-wrapper {
-      width: 100%;
-      max-width: 600px;
-    }
+.form-wrapper {
+  width: 100%;
+  max-width: 600px;
+}
 
-    form {
-      position: relative;
-      background-color: #fff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+form {
+  position: relative;
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-    h2 { text-align: center; margin-bottom: 20px; }
+h2 { text-align: center; margin-bottom: 20px; }
 
-    label { margin-top: 15px; display: block; font-weight: 600; }
+label { margin-top: 15px; display: block; font-weight: 600; }
 
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box;
-      background-color: #fff;
-      color: #000;
-    }
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: #000;
+}
 
-    input[readonly] { background-color: #f4f6f8; cursor: not-allowed; }
-    input[type="tel"] { ime-mode: disabled; }
+select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
+select:not(:disabled) { background-color: #fff; color: #000; }
 
-    select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
-    select:not(:disabled) { background-color: #fff; color: #000; }
+textarea { min-height: 80px; }
 
-    /* Ujednolicenie wysokości selectów */
-    select { height: 42px; }
+button[type="submit"] {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+button[type="submit"]:hover { background: #45a049; }
 
-    textarea { min-height: 80px; }
+#close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 26px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+}
+#close-btn:hover { color: #000; }
 
-    button[type="submit"] {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background: #4CAF50;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button[type="submit"]:hover { background: #45a049; }
+#result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
+.error { background: #f44336; color: #fff; }
+#loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
 
-    #close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #666;
-      line-height: 1;
-    }
-    #close-btn:hover { color: #000; }
-
-    #result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
-    .error { background: #f44336; color: #fff; }
-    #loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
-
-    .rodo-label {
-      display: flex;
-      align-items: flex-start;
-      margin-top: 15px;
-      font-weight: normal;
-      font-size: 14px;
-      gap: 10px;
-    }
-    .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
-  </style>
+.rodo-label {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  font-weight: normal;
+  font-size: 14px;
+}
+.rodo-label input[type="checkbox"] { margin-right: 10px; accent-color: orange; }
+</style>
 </head>
 
 <body>
@@ -109,10 +102,10 @@
   <h2 id="form-title">Rejestracja</h2>
 
   <label>Imię</label>
-  <input id="imie" required oninput="this.value=this.value.toUpperCase()" autocomplete="off">
+  <input id="imie" required oninput="this.value=this.value.toUpperCase()">
 
   <label>Nazwisko</label>
-  <input id="nazwisko" required oninput="this.value=this.value.toUpperCase()" autocomplete="off">
+  <input id="nazwisko" required oninput="this.value=this.value.toUpperCase()">
 
   <label for="wojewodztwo">Województwo</label>
   <select id="wojewodztwo" required>
@@ -125,22 +118,22 @@
   </select>
 
   <label>Nr upr. EKSPLOATACJA</label>
-  <textarea id="nrE" autocomplete="off"></textarea>
+  <textarea id="nrE"></textarea>
 
   <label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
-  <textarea id="nrEPomiary" autocomplete="off"></textarea>
+  <textarea id="nrEPomiary"></textarea>
 
   <label>Nr upr. DOZÓR</label>
-  <textarea id="nrD" autocomplete="off"></textarea>
+  <textarea id="nrD"></textarea>
 
   <label>Email</label>
-  <input id="email" type="email" readonly>
+  <input id="email" readonly>
 
   <label>Telefon</label>
-  <input id="telefon" type="tel" pattern="[0-9+ -]*" placeholder="np. +48 123 456 789">
+  <input id="telefon">
 
   <label>Zajmuje się</label>
-  <textarea id="zajmujeSie" autocomplete="off"></textarea>
+  <textarea id="zajmujeSie"></textarea>
 
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
@@ -221,7 +214,132 @@ document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
-// Pozostała logika JS pozostaje bez zmian
+// --- Pobranie bieżącego użytkownika i wstępne wypełnienie formularza ---
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  currentUser = user
+  email.value = user.email
+
+  const { data } = await supabase
+    .from('tabela_elektrykow')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+
+  if (data) {
+    document.getElementById('form-title').textContent = 'Aktualizacja danych'
+    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
+    fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
+    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
+    if (data.miasto) document.getElementById('miasto').value = data.miasto
+  } else {
+    loadWojewodztwa()
+  }
+})
+
+// --- FUNKCJA WYSYŁAJĄCA MAGIC EMAIL ---
+async function wyslijMagicEmail(email) {
+  try {
+    const res = await fetch('https://orep.pl/api/magic-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      console.error('Błąd wysyłki magic email:', data.error || 'Nieznany błąd');
+    }
+  } catch(err) {
+    console.error('Błąd połączenia z serwerem przy wysyłce magic email:', err);
+  }
+}
+
+// --- OBSŁUGA SUBMIT FORMULARZA ---
+document.getElementById('register-form').addEventListener('submit', async e => {
+  e.preventDefault()
+  loading.style.display = 'block'
+  result.textContent = ''
+  result.className = ''
+
+  // --- WALIDACJA nrE / nrEPomiary / nrD ---
+  if (nrE.value && nrEPomiary.value) {
+    loading.style.display = 'none'
+    result.textContent = 'Wybierz tylko jeden rodzaj eksploatacji'
+    result.className = 'error'
+    return
+  }
+  if (nrD.value && !nrEPomiary.value) {
+    loading.style.display = 'none'
+    result.textContent = 'Do DOZORU wymagane są pomiary'
+    result.className = 'error'
+    return
+  }
+
+  // --- WALIDACJA PLIKU ---
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  for (let i = 0; i < plik.files.length; i++) {
+    const file = plik.files[i]
+    if (!allowedTypes.includes(file.type)) {
+      loading.style.display = 'none'
+      result.textContent = 'Nieprawidłowy typ pliku. Dozwolone: PDF, JPG, PNG'
+      result.className = 'error'
+      return
+    }
+    if (file.size > maxSize) {
+      loading.style.display = 'none'
+      result.textContent = 'Plik zbyt duży. Maksymalny rozmiar: 5 MB'
+      result.className = 'error'
+      return
+    }
+  }
+
+  // --- UPLOAD PLIKÓW ---
+  let plikUrls = []
+  for (let i = 0; i < plik.files.length; i++) {
+    const file = plik.files[i]
+  const path = `${currentUser.id}/${Date.now()}_${file.name}`
+
+    const { error: uploadError } = await supabase.storage.from('uprawnienia').upload(path, file, { upsert: true })
+    if (uploadError) {
+      loading.style.display = 'none'
+      result.textContent = 'Błąd wysyłania pliku: ' + uploadError.message
+      result.className = 'error'
+      return
+    }
+    const { data: urlData, error: urlError } = await supabase.storage.from('uprawnienia').createSignedUrl(path, 3600)
+    if (urlError) {
+      loading.style.display = 'none'
+      result.textContent = 'Błąd generowania linku do pliku'
+      result.className = 'error'
+      return
+    }
+    plikUrls.push(urlData.signedUrl)
+  }
+
+  // --- PRZYGOTOWANIE DANYCH DO BAZY ---
+  const payload = { email: currentUser.email }
+  fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
+  if (plikUrls.length) payload.plik = plikUrls.join(',')
+
+  const { error } = await supabase.from('tabela_elektrykow').upsert(payload, { onConflict: 'email' })
+
+  loading.style.display = 'none'
+
+  if (error) {
+    result.textContent = error.message
+    result.className = 'error'
+    const { data: { user } } = await supabase.auth.getUser()
+console.log('USER:', user)
+  } else {
+    // --- WYŚLIJ MAGIC EMAIL ---
+    await wyslijMagicEmail(currentUser.email)
+
+    // --- PRZEKIEROWANIE po sukcesie ---
+    window.location.href = 'https://orep.pl/logowanie';
+  }
+})
 </script>
 </body>
 </html>
