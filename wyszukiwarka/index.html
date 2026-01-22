@@ -215,7 +215,8 @@ const miasto = document.getElementById("miasto")
 const results = document.getElementById("results")
 const gwiazdki = document.getElementById("gwiazdki")
 const status = document.getElementById("status")
-if(show_contact.checked) query = query.is("show_contact", true)
+const show_contact = document.getElementById("show_contact")
+
 
 // --- Ładowanie województw ---
 async function loadWoj(){
@@ -259,7 +260,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
   if(miasto.value) query = query.eq("miasto", miasto.value)
   if(gwiazdki.value) query = query.eq("gwiazdki", parseInt(gwiazdki.value))
   if(status.value) query = query.eq("status", status.value)
-  if(show_contact.checked) query = query.not("telefon","is",null).not("email","is",null)
+  if(show_contact.checked) query = query.eq("show_contact", true)
 
   const { data, error } = await query
 
