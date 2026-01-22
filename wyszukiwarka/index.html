@@ -46,12 +46,29 @@ main{
   box-shadow:0 10px 25px rgba(0,0,0,.1);
 }
 
+/* NOWE STYLES DLA JEDNAKOWEJ WYSOKOŚCI */
+.search-card select,
+.search-card button {
+  height: 48px;       /* jednolita wysokość */
+  font-size: 16px;    /* spójny rozmiar tekstu */
+  padding: 0 12px;    /* padding poziomy */
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.search-card label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.search-card label span {
+  margin-left: 3px; /* gwiazdka nie przykleja się do tekstu */
+}
+
 select,button{
   width:100%;
-  padding:12px;
   margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
 }
 
 button{
@@ -296,8 +313,8 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
 })
 </script>
 
-<p id="p1"class="przypis"></br>
-  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b></br><br>⭐ elektryk posiada uprawnienia Eksploatacja.</br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem. wykonywania pomiarów ochronnych.</br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.</br><br> ✅ Elektryk udostepnił uprawnienia i został pozytywnie zweryfikowany.</br><br> ⌛ Elektryk udostepnił uprawnienia i oczekuję na weryfikację.</br><br>❌ Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydanę przez komisję do tego uprawnione zgodnie z URE .</br><p>
+<p id="p1" class="przypis"><br>
+  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b><br><br>⭐ elektryk posiada uprawnienia Eksploatacja.<br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem. wykonywania pomiarów ochronnych.<br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.<br><br> ✅ Elektryk udostepnił uprawnienia i został pozytywnie zweryfikowany.<br><br> ⌛ Elektryk udostepnił uprawnienia i oczekuję na weryfikację.<br><br>❌ Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydanę przez komisję do tego uprawnione zgodnie z URE .<br></p>
 
 </body>
 </html>
