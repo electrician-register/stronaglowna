@@ -168,6 +168,27 @@ sup a:hover {
     <select id="miasto">
       <option value="">Wybierz miasto</option>
     </select>
+
+    <!-- NOWE FILTRY -->
+    <select id="gwiazdki">
+      <option value="">Wszystkie uprawnienia</option>
+      <option value="1">⭐</option>
+      <option value="2">⭐⭐</option>
+      <option value="3">⭐⭐⭐</option>
+    </select>
+
+    <select id="status">
+      <option value="">Wszystkie statusy</option>
+      <option value="✅">✅ Zweryfikowany</option>
+      <option value="⌛">⌛ Weryfikacja w toku</option>
+      <option value="❌">❌ Nieudostępnione</option>
+    </select>
+
+    <label style="display:block;margin-top:10px;">
+      <input type="checkbox" id="show_contact">
+      Pokaż tylko elektryków z możliwością kontaktu
+    </label>
+
     <button id="szukaj">Szukaj</button>
   </div>
 
@@ -185,6 +206,9 @@ const supabase = createClient(
 const woj = document.getElementById("wojewodztwo")
 const miasto = document.getElementById("miasto")
 const results = document.getElementById("results")
+const gwiazdki = document.getElementById("gwiazdki")
+const status = document.getElementById("status")
+const show_contact = document.getElementById("show_contact")
 
 // --- Ładowanie województw ---
 async function loadWoj(){
@@ -222,14 +246,16 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
 
   let query = supabase
     .from("tabela_elektrykow")
-    .select("id,imie,nazwisko,gwiazdki,status")
-    .eq("wojewodztwo", woj.value)
+    .select("id,imie,nazwisko,gwiazdki,status,telefon,email")
 
-  if(miasto.value){
-    query = query.eq("miasto", miasto.value)
-  }
+  if(woj.value) query = query.eq("wojewodztwo", woj.value)
+  if(miasto.value) query = query.eq("miasto", miasto.value)
+  if(gwiazdki.value) query = query.eq("gwiazdki", parseInt(gwiazdki.value))
+  if(status.value) query = query.eq("status", status.value)
+  if(show_contact.checked) query = query.not("telefon","is",null).not("email","is",null)
 
   const { data, error } = await query
+
   if(error){
     results.innerHTML = "Błąd pobierania danych"
     console.error(error)
@@ -248,11 +274,9 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
     d.innerHTML = `
       <div class="lp">${i+1}</div>
       <div class="person">
-        <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki}</div>
-             
-     
-                
+        <div class="name">${e.imie} ${e.nazwisko} ${'⭐'.repeat(e.gwiazdki)}</div>
         <div class="small">Status: ${e.status}</div>
+      </div>
       <div>
         <button onclick="window.location.href='/profil/index.html?id=${e.id}'">
           Zobacz profil
@@ -265,7 +289,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
 </script>
 
 <p id="p1"class="przypis"></br>
-  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b></br><br>⭐ elektryk posiada uprawnienia Eksploatacja.</br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem. wykonywania pomiarów ochronnych.</br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.</br><br> ✅ Elektryk udostepnił uprawnienia i został pozytywnie zweryfikowany.</br><br> ⌛ Elektryk udostepnił uprawnienia i oczekuję na weryfikację.</br><br>❌ Elektryk <b>NIE</b> udostepnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydanę przez komisję do tego uprawnione zgodnie z URE .</br><p>
+  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b></br><br>⭐ elektryk posiada uprawnienia Eksploatacja.</br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem. wykonywania pomiarów ochronnych.</br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.</br><br> ✅ Elektryk udostepnił uprawnienia i został pozytywnie zweryfikowany.</br><br> ⌛ Elektryk udostepnił uprawnienia i oczekuję na weryfikację.</br><br>❌ Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydanę przez komisję do tego uprawnione zgodnie z URE .</br><p>
 
 </body>
 </html>
