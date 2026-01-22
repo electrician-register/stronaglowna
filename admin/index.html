@@ -9,7 +9,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:20px }
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+/* ===== LOGI ===== */
 #logBox {
   background:#000;
   color:#0f0;
@@ -19,11 +25,98 @@ body { font-family: Arial; background:#f4f6f8; padding:20px }
   overflow:auto;
   margin-bottom:15px;
 }
-input, button { width:100%; padding:8px; margin:5px 0 }
-button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
-table { width:100%; border-collapse:collapse; background:#fff }
-th, td { border:1px solid #ccc; padding:6px; font-size:12px }
-th { background:#222; color:#fff }
+
+/* ===== FORM ===== */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width:100%;
+  padding:6px;
+  box-sizing:border-box;
+  font-size:13px;
+}
+
+button {
+  padding:6px 10px;
+  background:#2ecc71;
+  border:0;
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+  border-radius:4px;
+}
+
+/* ===== TABLE DESKTOP ===== */
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+
+th, td {
+  border:1px solid #ccc;
+  padding:6px;
+  font-size:12px;
+}
+
+th {
+  background:#222;
+  color:#fff;
+  text-align:center;
+}
+
+td:nth-child(1) { width:50px; }
+td:nth-child(6),
+td:nth-child(7) {
+  text-align:center;
+  width:90px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+
+  table, thead, tbody, th, tr {
+    display:block;
+  }
+
+  thead {
+    display:none;
+  }
+
+  tr {
+    background:#fff;
+    margin-bottom:12px;
+    padding:10px;
+    border-radius:6px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  td {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border:none;
+    padding:6px 0;
+    font-size:13px;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight:bold;
+    color:#555;
+    padding-right:10px;
+  }
+
+  td input[type="text"],
+  td input[type="email"] {
+    width:65%;
+  }
+
+  td button {
+    width:100%;
+    margin-top:6px;
+  }
+}
 </style>
 </head>
 
@@ -41,6 +134,7 @@ th { background:#222; color:#fff }
 
 <div id="adminPanel" style="display:none">
   <h2>Panel admina – tabela_elektrykow</h2>
+
   <table>
     <thead>
       <tr>
@@ -58,7 +152,7 @@ th { background:#222; color:#fff }
 </div>
 
 <script>
-/* ===== LOGI NA EKRANIE ===== */
+/* ===== LOGI ===== */
 function log(txt) {
   const box = document.getElementById("logBox");
   box.innerHTML += txt + "<br>";
@@ -84,10 +178,7 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  log("Email: " + email);
-  log("Hasło wpisane: " + (password.length > 0));
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
@@ -140,23 +231,22 @@ async function loadData() {
     return;
   }
 
-  log("Rekordów: " + data.length);
-
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
   data.forEach(row => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td><input value="${row.lp || ""}"></td>
-      <td><input value="${row.imie || ""}"></td>
-      <td><input value="${row.nazwisko || ""}"></td>
-      <td><input value="${row.telefon || ""}"></td>
-      <td><input value="${row.email || ""}"></td>
-      <td style="text-align:center">
+      <td data-label="LP"><input value="${row.lp || ""}"></td>
+      <td data-label="Imię"><input value="${row.imie || ""}"></td>
+      <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
+      <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
+      <td data-label="Email"><input value="${row.email || ""}"></td>
+      <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
-      <td><button>Zapisz</button></td>
+      <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
     tr.querySelector("button").onclick = async () => {
