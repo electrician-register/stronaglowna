@@ -21,7 +21,7 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, button, select { width:100%; padding:8px; margin:5px 0 }
+input, button { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
 table { width:100%; border-collapse:collapse; background:#fff }
@@ -30,22 +30,17 @@ th { background:#222; color:#fff }
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
-
   td input,
-  td button,
-  td select {
+  td button {
     box-sizing: border-box;
     max-width: 100%;
   }
-
+}
+@media (max-width: 768px) {
   table, thead, tbody, th, tr {
     display:block;
   }
-
-  thead {
-    display:none;
-  }
-
+  thead { display:none; }
   tr {
     background:#fff;
     margin-bottom:14px;
@@ -53,7 +48,6 @@ th { background:#222; color:#fff }
     border-radius:8px;
     box-shadow:0 2px 8px rgba(0,0,0,0.08);
   }
-
   td {
     display:grid;
     grid-template-columns: 120px 1fr;
@@ -62,27 +56,20 @@ th { background:#222; color:#fff }
     padding:6px 0;
     font-size:14px;
   }
-
   td::before {
     content: attr(data-label);
     font-weight:600;
     color:#444;
   }
-
   td input[type="checkbox"] {
     transform: scale(1.2);
     justify-self:start;
   }
-
   td[data-label="Akcja"] {
     grid-template-columns: 1fr;
     margin-top:8px;
   }
-
-  td[data-label="Akcja"]::before {
-    display:none;
-  }
-
+  td[data-label="Akcja"]::before { display:none; }
   td button {
     width:100%;
     padding:10px;
@@ -124,38 +111,33 @@ th { background:#222; color:#fff }
 </div>
 
 <script>
+/* ===== LOGI ===== */
 function log(txt) {
   const box = document.getElementById("logBox");
   box.innerHTML += txt + "<br>";
   box.scrollTop = box.scrollHeight;
 }
 
-log("Start JS");
-
+/* ===== SUPABASE ===== */
 const supabaseClient = supabase.createClient(
   "https://tfbqqduxtsacvwfigsvt.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
 );
 
+/* ===== LOGOWANIE ===== */
 document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    log("Błąd logowania");
-    return;
-  }
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return log("BŁĄD LOGOWANIA");
 
   checkSession();
 }
 
+/* ===== ADMIN ===== */
 async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) return;
@@ -167,37 +149,33 @@ async function checkSession() {
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("adminPanel").style.display = "block";
-
   loadData();
 }
 
+/* ===== TABELA ===== */
 async function loadData() {
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("tabela_elektrykow")
     .select("id, lp, imie, nazwisko, telefon, email, status, show_contact")
     .order("lp");
-
-  if (error) {
-    log("Błąd bazy");
-    return;
-  }
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
   data.forEach(row => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
       <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
-      <td data-label="Status ❌ ⌛ ✅">
-        <select>
-          <option value="❌" ${row.status==="❌"?"selected":""}>❌</option>
-          <option value="⌛" ${row.status==="⌛"?"selected":""}>⌛</option>
-          <option value="✅" ${row.status==="✅"?"selected":""}>✅</option>
+      <td data-label="Status">
+        <select class="statusSelect">
+          <option value="❌">❌</option>
+          <option value="⌛">⌛</option>
+          <option value="✅">✅</option>
         </select>
       </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
@@ -206,9 +184,11 @@ async function loadData() {
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
+    const statusSelect = tr.querySelector(".statusSelect");
+    statusSelect.value = row.status || "❌";
+
     tr.querySelector("button").onclick = async () => {
       const i = tr.querySelectorAll("input");
-      const statusSelect = tr.querySelector("select");
 
       const payload = {
         lp: i[0].value,
@@ -220,13 +200,10 @@ async function loadData() {
         show_contact: i[5].checked
       };
 
-      const { error } = await supabaseClient
+      await supabaseClient
         .from("tabela_elektrykow")
         .update(payload)
         .eq("id", row.id);
-
-      if (error) log("Błąd zapisu");
-      else log("Zapisano ID: " + row.id);
     };
 
     tbody.appendChild(tr);
