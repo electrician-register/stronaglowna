@@ -241,7 +241,7 @@ const status = document.getElementById("status")
 const show_contact = document.getElementById("show_contact")
 
 let currentPage = 1
-const pageSize = 2
+const pageSize = 10
 
 // --- Ładowanie województw ---
 async function loadWoj(){
@@ -280,7 +280,7 @@ function renderPagination(hasMore){
 
   if(currentPage > 1){
     const prev = document.createElement("button")
-    prev.textContent = "← Poprzednia"
+    prev.textContent = "← Poprzednia strona"
     prev.onclick = ()=>{
       currentPage--
       search()
@@ -290,7 +290,7 @@ function renderPagination(hasMore){
 
   if(hasMore){
     const next = document.createElement("button")
-    next.textContent = "Następna →"
+    next.textContent = "Następna strona →"
     next.style.marginLeft = "10px"
     next.onclick = ()=>{
       currentPage++
