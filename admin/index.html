@@ -21,18 +21,8 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, select, button {
-  width:100%;
-  padding:8px;
-  margin:5px 0;
-}
-
-button {
-  background:#2ecc71;
-  border:0;
-  color:#fff;
-  cursor:pointer;
-}
+input, button, select { width:100%; padding:8px; margin:5px 0 }
+button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
 table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
@@ -42,8 +32,8 @@ th { background:#222; color:#fff }
 @media (max-width: 768px) {
 
   td input,
-  td select,
-  td button {
+  td button,
+  td select {
     box-sizing: border-box;
     max-width: 100%;
   }
@@ -52,7 +42,9 @@ th { background:#222; color:#fff }
     display:block;
   }
 
-  thead { display:none }
+  thead {
+    display:none;
+  }
 
   tr {
     background:#fff;
@@ -92,6 +84,7 @@ th { background:#222; color:#fff }
   }
 
   td button {
+    width:100%;
     padding:10px;
     font-size:15px;
   }
@@ -131,14 +124,12 @@ th { background:#222; color:#fff }
 </div>
 
 <script>
-/* ===== LOGI ===== */
 function log(txt) {
   const box = document.getElementById("logBox");
   box.innerHTML += txt + "<br>";
   box.scrollTop = box.scrollHeight;
 }
 
-/* ===== SUPABASE ===== */
 log("Start JS");
 
 const supabaseClient = supabase.createClient(
@@ -148,34 +139,24 @@ const supabaseClient = supabase.createClient(
 
 log("Supabase OK");
 
-/* ===== LOGOWANIE ===== */
 document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    log("Błąd logowania: " + error.message);
-    return;
-  }
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return log("Błąd logowania");
 
   checkSession();
 }
 
-/* ===== SPRAWDZENIE ADMINA ===== */
 async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) return;
 
   if (data.session.user.email !== "piotr8040@gmail.com") {
     await supabaseClient.auth.signOut();
-    log("Brak uprawnień admin");
     return;
   }
 
@@ -185,17 +166,13 @@ async function checkSession() {
   loadData();
 }
 
-/* ===== WCZYTANIE TABELI ===== */
 async function loadData() {
   const { data, error } = await supabaseClient
     .from("tabela_elektrykow")
     .select("id, lp, imie, nazwisko, telefon, email, show_contact, status")
     .order("lp");
 
-  if (error) {
-    log("Błąd bazy: " + error.message);
-    return;
-  }
+  if (error) return log("Błąd bazy");
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
@@ -213,25 +190,26 @@ async function loadData() {
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
       <td data-label="Status">
-        <select>
-          <option value="zweryfikowany" ${row.status === "zweryfikowany" ? "selected" : ""}>Zweryfikowany</option>
-          <option value="w trakcie weryfikacji" ${row.status === "w trakcie weryfikacji" ? "selected" : ""}>W trakcie weryfikacji</option>
+        <select class="status">
+          <option value="zweryfikowany" ${row.status==="zweryfikowany"?"selected":""}>Zweryfikowany</option>
+          <option value="w trakcie weryfikacji" ${row.status==="w trakcie weryfikacji"?"selected":""}>W trakcie weryfikacji</option>
         </select>
       </td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
     tr.querySelector("button").onclick = async () => {
-      const i = tr.querySelectorAll("input, select");
+      const inputs = tr.querySelectorAll("input");
+      const status = tr.querySelector("select.status").value;
 
       const payload = {
-        lp: i[0].value,
-        imie: i[1].value,
-        nazwisko: i[2].value,
-        telefon: i[3].value,
-        email: i[4].value,
-        show_contact: i[5].checked,
-        status: i[6].value
+        lp: inputs[0].value,
+        imie: inputs[1].value,
+        nazwisko: inputs[2].value,
+        telefon: inputs[3].value,
+        email: inputs[4].value,
+        show_contact: inputs[5].checked,
+        status: status
       };
 
       const { error } = await supabaseClient
@@ -239,8 +217,7 @@ async function loadData() {
         .update(payload)
         .eq("id", row.id);
 
-      if (error) log("Błąd zapisu");
-      else log("Zapisano ID: " + row.id);
+      log(error ? "Błąd zapisu" : "Zapisano ID: " + row.id);
     };
 
     tbody.appendChild(tr);
