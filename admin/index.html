@@ -21,32 +21,38 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, button { width:100%; padding:8px; margin:5px 0 }
-button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
+input, select, button {
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+}
+
+button {
+  background:#2ecc71;
+  border:0;
+  color:#fff;
+  cursor:pointer;
+}
 
 table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
 /* ===== MOBILE ===== */
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
 
   td input,
+  td select,
   td button {
     box-sizing: border-box;
     max-width: 100%;
   }
 
-}
-@media (max-width: 768px) {
-
   table, thead, tbody, th, tr {
     display:block;
   }
 
-  thead {
-    display:none;
-  }
+  thead { display:none }
 
   tr {
     background:#fff;
@@ -58,7 +64,7 @@ th { background:#222; color:#fff }
 
   td {
     display:grid;
-    grid-template-columns: 120px 1fr; /* etykiety i input */
+    grid-template-columns: 120px 1fr;
     align-items:center;
     border:none;
     padding:6px 0;
@@ -69,11 +75,6 @@ th { background:#222; color:#fff }
     content: attr(data-label);
     font-weight:600;
     color:#444;
-  }
-
-  td input[type="text"],
-  td input[type="email"] {
-    width:100%;
   }
 
   td input[type="checkbox"] {
@@ -91,7 +92,6 @@ th { background:#222; color:#fff }
   }
 
   td button {
-    width:100%;
     padding:10px;
     font-size:15px;
   }
@@ -122,6 +122,7 @@ th { background:#222; color:#fff }
         <th>Telefon</th>
         <th>Email</th>
         <th>Pokaż kontakt</th>
+        <th>Status</th>
         <th>Zapisz</th>
       </tr>
     </thead>
@@ -151,46 +152,32 @@ log("Supabase OK");
 document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
-  log("Klik ZALOGUJ");
-
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  log("Email: " + email);
-  log("Hasło wpisane: " + (password.length > 0));
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
 
   if (error) {
-    log("BŁĄD LOGOWANIA: " + error.message);
+    log("Błąd logowania: " + error.message);
     return;
   }
 
-  log("Zalogowano OK");
   checkSession();
 }
 
 /* ===== SPRAWDZENIE ADMINA ===== */
 async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
+  if (!data.session) return;
 
-  if (!data.session) {
-    log("Brak sesji");
-    return;
-  }
-
-  const adminEmail = "piotr8040@gmail.com";
-
-  if (data.session.user.email !== adminEmail) {
-    log("Brak uprawnień admin");
+  if (data.session.user.email !== "piotr8040@gmail.com") {
     await supabaseClient.auth.signOut();
+    log("Brak uprawnień admin");
     return;
   }
-
-  log("Admin potwierdzony");
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("adminPanel").style.display = "block";
@@ -200,25 +187,22 @@ async function checkSession() {
 
 /* ===== WCZYTANIE TABELI ===== */
 async function loadData() {
-  log("Pobieram dane...");
-
   const { data, error } = await supabaseClient
     .from("tabela_elektrykow")
-    .select("id, lp, imie, nazwisko, telefon, email, show_contact")
+    .select("id, lp, imie, nazwisko, telefon, email, show_contact, status")
     .order("lp");
 
   if (error) {
-    log("BŁĄD BAZY: " + error.message);
+    log("Błąd bazy: " + error.message);
     return;
   }
-
-  log("Rekordów: " + data.length);
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
   data.forEach(row => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
@@ -228,11 +212,17 @@ async function loadData() {
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
+      <td data-label="Status">
+        <select>
+          <option value="zweryfikowany" ${row.status === "zweryfikowany" ? "selected" : ""}>Zweryfikowany</option>
+          <option value="w trakcie weryfikacji" ${row.status === "w trakcie weryfikacji" ? "selected" : ""}>W trakcie weryfikacji</option>
+        </select>
+      </td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
     tr.querySelector("button").onclick = async () => {
-      const i = tr.querySelectorAll("input");
+      const i = tr.querySelectorAll("input, select");
 
       const payload = {
         lp: i[0].value,
@@ -240,7 +230,8 @@ async function loadData() {
         nazwisko: i[2].value,
         telefon: i[3].value,
         email: i[4].value,
-        show_contact: i[5].checked
+        show_contact: i[5].checked,
+        status: i[6].value
       };
 
       const { error } = await supabaseClient
@@ -256,7 +247,6 @@ async function loadData() {
   });
 }
 
-/* ===== AUTO CHECK ===== */
 checkSession();
 </script>
 
