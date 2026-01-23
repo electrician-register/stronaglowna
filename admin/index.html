@@ -21,7 +21,7 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, button { width:100%; padding:8px; margin:5px 0 }
+input, button, select { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
 table { width:100%; border-collapse:collapse; background:#fff }
@@ -31,7 +31,8 @@ th { background:#222; color:#fff }
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
   td input,
-  td button {
+  td button,
+  td select {
     box-sizing: border-box;
     max-width: 100%;
   }
@@ -172,7 +173,7 @@ async function loadData() {
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status">
-        <select class="statusSelect">
+        <select>
           <option value="❌">❌</option>
           <option value="⌛">⌛</option>
           <option value="✅">✅</option>
@@ -184,7 +185,8 @@ async function loadData() {
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
-    const statusSelect = tr.querySelector(".statusSelect");
+    /* JEDYNA KLUCZOWA LINIA */
+    const statusSelect = tr.querySelector("select");
     statusSelect.value = row.status || "❌";
 
     tr.querySelector("button").onclick = async () => {
