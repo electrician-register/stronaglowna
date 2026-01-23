@@ -193,34 +193,36 @@ sup a:hover {
     </select>
   </label>
 
-    <!-- NOWE FILTRY -->
-   <label>
-  Uprawnienia     <select id="gwiazdki">
+  <label>
+    Uprawnienia
+    <select id="gwiazdki">
       <option value="">Wszystkie uprawnienia</option>
       <option value="1">⭐</option>
       <option value="2">⭐⭐</option>
       <option value="3">⭐⭐⭐</option>
     </select>
-   </label>
- <label>
-   Status
-  <select id="status">
+  </label>
+
+  <label>
+    Status
+    <select id="status">
       <option value="">Wszystkie statusy</option>
       <option value="✅">✅ Zweryfikowany</option>
       <option value="⌛">⌛ Weryfikacja w toku</option>
       <option value="❌">❌ Nieudostępnione</option>
     </select>
- </label>
+  </label>
 
-    <label style="display:block;margin-top:10px;">
-      <input type="checkbox" id="show_contact">
-      Pokaż tylko elektryków z możliwością kontaktu
-    </label>
+  <label style="display:block;margin-top:10px;">
+    <input type="checkbox" id="show_contact">
+    Pokaż tylko elektryków z możliwością kontaktu
+  </label>
 
-    <button id="szukaj">Szukaj</button>
-  </div>
+  <button id="szukaj">Szukaj</button>
+</div>
 
-  <div id="results"></div>
+<div id="results"></div>
+<div id="pagination" style="margin-top:20px;text-align:center"></div>
 </main>
 
 <script type="module">
@@ -238,6 +240,8 @@ const gwiazdki = document.getElementById("gwiazdki")
 const status = document.getElementById("status")
 const show_contact = document.getElementById("show_contact")
 
+let currentPage = 1
+const pageSize = 10
 
 // --- Ładowanie województw ---
 async function loadWoj(){
@@ -269,13 +273,40 @@ woj.addEventListener("change", async ()=>{
   })
 })
 
+// --- Render pagination ---
+function renderPagination(hasMore){
+  const p = document.getElementById("pagination")
+  p.innerHTML = ""
+
+  if(currentPage > 1){
+    const prev = document.createElement("button")
+    prev.textContent = "← Poprzednia"
+    prev.onclick = ()=>{
+      currentPage--
+      search()
+    }
+    p.appendChild(prev)
+  }
+
+  if(hasMore){
+    const next = document.createElement("button")
+    next.textContent = "Następna →"
+    next.style.marginLeft = "10px"
+    next.onclick = ()=>{
+      currentPage++
+      search()
+    }
+    p.appendChild(next)
+  }
+}
+
 // --- Szukanie ---
-document.getElementById("szukaj").addEventListener("click", async ()=>{
+async function search(){
   results.innerHTML = "Szukam..."
 
   let query = supabase
     .from("tabela_elektrykow")
-    .select("id,imie,nazwisko,gwiazdki,status,telefon,email")
+    .select("id,imie,nazwisko,gwiazdki,status,telefon,email", { count: "exact" })
 
   if(woj.value) query = query.eq("wojewodztwo", woj.value)
   if(miasto.value) query = query.eq("miasto", miasto.value)
@@ -283,7 +314,10 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
   if(status.value) query = query.eq("status", status.value)
   if(show_contact.checked) query = query.eq("show_contact", true)
 
-  const { data, error } = await query
+  const from = (currentPage - 1) * pageSize
+  const to   = from + pageSize - 1
+
+  const { data, error, count } = await query.range(from, to)
 
   if(error){
     results.innerHTML = "Błąd pobierania danych"
@@ -301,7 +335,7 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
     const d = document.createElement("div")
     d.className="card"
     d.innerHTML = `
-      <div class="lp">${i+1}</div>
+      <div class="lp">${from + i + 1}</div>
       <div class="person">
         <div class="name">${e.imie} ${e.nazwisko} ${'⭐'.repeat(e.gwiazdki)}</div>
         <div class="small">Status: ${e.status}</div>
@@ -314,6 +348,13 @@ document.getElementById("szukaj").addEventListener("click", async ()=>{
     `
     results.appendChild(d)
   })
+
+  renderPagination(to + 1 < count)
+}
+
+document.getElementById("szukaj").addEventListener("click", ()=>{
+  currentPage = 1
+  search()
 })
 </script>
 
