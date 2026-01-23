@@ -5,12 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel admina</title>
 <meta name="robots" content="noindex, nofollow">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
-
 #logBox {
   background:#000;
   color:#0f0;
@@ -20,27 +17,14 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   overflow:auto;
   margin-bottom:15px;
 }
-
-input, button, select { width:100%; padding:8px; margin:5px 0 }
+input, button { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
-
 table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
-/* ===== MOBILE ===== */
 @media (max-width: 768px) {
-  td input,
-  td button,
-  td select {
-    box-sizing: border-box;
-    max-width: 100%;
-  }
-}
-@media (max-width: 768px) {
-  table, thead, tbody, th, tr {
-    display:block;
-  }
+  table, thead, tbody, th, tr { display:block; }
   thead { display:none; }
   tr {
     background:#fff;
@@ -51,7 +35,7 @@ th { background:#222; color:#fff }
   }
   td {
     display:grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns:120px 1fr;
     align-items:center;
     border:none;
     padding:6px 0;
@@ -60,21 +44,6 @@ th { background:#222; color:#fff }
   td::before {
     content: attr(data-label);
     font-weight:600;
-    color:#444;
-  }
-  td input[type="checkbox"] {
-    transform: scale(1.2);
-    justify-self:start;
-  }
-  td[data-label="Akcja"] {
-    grid-template-columns: 1fr;
-    margin-top:8px;
-  }
-  td[data-label="Akcja"]::before { display:none; }
-  td button {
-    width:100%;
-    padding:10px;
-    font-size:15px;
   }
 }
 </style>
@@ -111,49 +80,43 @@ th { background:#222; color:#fff }
   </table>
 </div>
 
+<datalist id="statusList">
+  <option value="❌"></option>
+  <option value="⌛"></option>
+  <option value="✅"></option>
+</datalist>
+
 <script>
-/* ===== LOGI ===== */
 function log(txt) {
   const box = document.getElementById("logBox");
   box.innerHTML += txt + "<br>";
   box.scrollTop = box.scrollHeight;
 }
 
-/* ===== SUPABASE ===== */
 const supabaseClient = supabase.createClient(
   "https://tfbqqduxtsacvwfigsvt.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
 );
 
-/* ===== LOGOWANIE ===== */
-document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("loginBtn").onclick = login;
 
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) return log("BŁĄD LOGOWANIA");
-
   checkSession();
 }
 
-/* ===== ADMIN ===== */
 async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) return;
-
-  if (data.session.user.email !== "piotr8040@gmail.com") {
-    await supabaseClient.auth.signOut();
-    return;
-  }
-
+  if (data.session.user.email !== "piotr8040@gmail.com") return;
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("adminPanel").style.display = "block";
   loadData();
 }
 
-/* ===== TABELA ===== */
 async function loadData() {
   const { data } = await supabaseClient
     .from("tabela_elektrykow")
@@ -165,7 +128,6 @@ async function loadData() {
 
   data.forEach(row => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
@@ -173,39 +135,27 @@ async function loadData() {
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status">
-        <select>
-          <option value="❌">❌</option>
-          <option value="⌛">⌛</option>
-          <option value="✅">✅</option>
-        </select>
+        <input list="statusList" value="${row.status || ""}">
       </td>
-      <td data-label="Pokaż kontakt" style="text-align:center">
+      <td data-label="Pokaż kontakt">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
-    /* JEDYNA KLUCZOWA LINIA */
-    const statusSelect = tr.querySelector("select");
-    statusSelect.value = row.status || "❌";
-
     tr.querySelector("button").onclick = async () => {
       const i = tr.querySelectorAll("input");
-
       const payload = {
         lp: i[0].value,
         imie: i[1].value,
         nazwisko: i[2].value,
         telefon: i[3].value,
         email: i[4].value,
-        status: statusSelect.value,
-        show_contact: i[5].checked
+        status: i[5].value,
+        show_contact: i[6].checked
       };
-
-      await supabaseClient
-        .from("tabela_elektrykow")
-        .update(payload)
-        .eq("id", row.id);
+      await supabaseClient.from("tabela_elektrykow").update(payload).eq("id", row.id);
+      log("Zapisano ID: " + row.id);
     };
 
     tbody.appendChild(tr);
