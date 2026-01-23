@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
@@ -34,29 +34,24 @@ th { background:#222; color:#fff }
   td input,
   td button,
   td select {
-    box-sizing: border-box;
-    max-width: 100%;
+    box-sizing:border-box;
+    max-width:100%;
   }
 
-  table, thead, tbody, th, tr {
-    display:block;
-  }
-
-  thead {
-    display:none;
-  }
+  table, thead, tbody, th, tr { display:block }
+  thead { display:none }
 
   tr {
     background:#fff;
     margin-bottom:14px;
     padding:12px;
     border-radius:8px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
   }
 
   td {
     display:grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns:120px 1fr;
     align-items:center;
     border:none;
     padding:6px 0;
@@ -64,30 +59,22 @@ th { background:#222; color:#fff }
   }
 
   td::before {
-    content: attr(data-label);
+    content:attr(data-label);
     font-weight:600;
     color:#444;
   }
 
   td input[type="checkbox"] {
-    transform: scale(1.2);
+    transform:scale(1.2);
     justify-self:start;
   }
 
   td[data-label="Akcja"] {
-    grid-template-columns: 1fr;
+    grid-template-columns:1fr;
     margin-top:8px;
   }
 
-  td[data-label="Akcja"]::before {
-    display:none;
-  }
-
-  td button {
-    width:100%;
-    padding:10px;
-    font-size:15px;
-  }
+  td[data-label="Akcja"]::before { display:none }
 }
 </style>
 </head>
@@ -114,8 +101,8 @@ th { background:#222; color:#fff }
         <th>Nazwisko</th>
         <th>Telefon</th>
         <th>Email</th>
-        <th>Pokaż kontakt</th>
         <th>Status</th>
+        <th>Pokaż kontakt</th>
         <th>Zapisz</th>
       </tr>
     </thead>
@@ -124,100 +111,97 @@ th { background:#222; color:#fff }
 </div>
 
 <script>
-function log(txt) {
-  const box = document.getElementById("logBox");
-  box.innerHTML += txt + "<br>";
-  box.scrollTop = box.scrollHeight;
+function log(txt){
+  const box=document.getElementById("logBox");
+  box.innerHTML+=txt+"<br>";
+  box.scrollTop=box.scrollHeight;
 }
-
-log("Start JS");
 
 const supabaseClient = supabase.createClient(
   "https://tfbqqduxtsacvwfigsvt.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
 );
 
-log("Supabase OK");
+document.getElementById("loginBtn").onclick = login;
 
-document.getElementById("loginBtn").addEventListener("click", login);
+async function login(){
+  const email=email.value;
+  const password=password.value;
 
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) return log("Błąd logowania");
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error) return log("Błąd logowania");
 
   checkSession();
 }
 
-async function checkSession() {
-  const { data } = await supabaseClient.auth.getSession();
-  if (!data.session) return;
+async function checkSession(){
+  const {data}=await supabaseClient.auth.getSession();
+  if(!data.session) return;
 
-  if (data.session.user.email !== "piotr8040@gmail.com") {
+  if(data.session.user.email!=="piotr8040@gmail.com"){
     await supabaseClient.auth.signOut();
     return;
   }
 
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("adminPanel").style.display = "block";
-
+  loginBox.style.display="none";
+  adminPanel.style.display="block";
   loadData();
 }
 
-async function loadData() {
-  const { data, error } = await supabaseClient
+async function loadData(){
+  const {data,error}=await supabaseClient
     .from("tabela_elektrykow")
-    .select("id, lp, imie, nazwisko, telefon, email, show_contact, status")
+    .select("id, lp, imie, nazwisko, telefon, email, status, show_contact")
     .order("lp");
 
-  if (error) return log("Błąd bazy");
+  if(error) return log("Błąd bazy");
 
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
+  tbody.innerHTML="";
 
-  data.forEach(row => {
-    const tr = document.createElement("tr");
+  data.forEach(row=>{
+    const tr=document.createElement("tr");
 
-    tr.innerHTML = `
-      <td data-label="LP"><input value="${row.lp || ""}"></td>
-      <td data-label="Imię"><input value="${row.imie || ""}"></td>
-      <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
-      <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
-      <td data-label="Email"><input value="${row.email || ""}"></td>
-      <td data-label="Pokaż kontakt" style="text-align:center">
-        <input type="checkbox" ${row.show_contact ? "checked" : ""}>
-      </td>
+    tr.innerHTML=`
+      <td data-label="LP"><input value="${row.lp||""}"></td>
+      <td data-label="Imię"><input value="${row.imie||""}"></td>
+      <td data-label="Nazwisko"><input value="${row.nazwisko||""}"></td>
+      <td data-label="Telefon"><input value="${row.telefon||""}"></td>
+      <td data-label="Email"><input value="${row.email||""}"></td>
+
       <td data-label="Status">
         <select class="status">
           <option value="zweryfikowany" ${row.status==="zweryfikowany"?"selected":""}>Zweryfikowany</option>
-          <option value="w trakcie weryfikacji" ${row.status==="w trakcie weryfikacji"?"selected":""}>W trakcie weryfikacji</option>
+          <option value="w trakcie weryfikacji" ${row.status==="w trakcie weryfikacji"?"selected":""}>W trakcie</option>
         </select>
       </td>
+
+      <td data-label="Pokaż kontakt" style="text-align:center">
+        <input type="checkbox" ${row.show_contact?"checked":""}>
+      </td>
+
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
-    tr.querySelector("button").onclick = async () => {
-      const inputs = tr.querySelectorAll("input");
-      const status = tr.querySelector("select.status").value;
+    tr.querySelector("button").onclick=async()=>{
+      const i=tr.querySelectorAll("input");
+      const status=tr.querySelector(".status").value;
 
-      const payload = {
-        lp: inputs[0].value,
-        imie: inputs[1].value,
-        nazwisko: inputs[2].value,
-        telefon: inputs[3].value,
-        email: inputs[4].value,
-        show_contact: inputs[5].checked,
-        status: status
+      const payload={
+        lp:i[0].value,
+        imie:i[1].value,
+        nazwisko:i[2].value,
+        telefon:i[3].value,
+        email:i[4].value,
+        show_contact:i[5].checked,
+        status:status
       };
 
-      const { error } = await supabaseClient
+      const {error}=await supabaseClient
         .from("tabela_elektrykow")
         .update(payload)
-        .eq("id", row.id);
+        .eq("id",row.id);
 
-      log(error ? "Błąd zapisu" : "Zapisano ID: " + row.id);
+      log(error?"Błąd zapisu":"Zapisano ID: "+row.id);
     };
 
     tbody.appendChild(tr);
