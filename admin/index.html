@@ -237,11 +237,11 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status">
         <select>
-          <option value="" ${statusValue === "" ? "selected" : ""}>-</option>
-          <option value="inactive" ${statusValue === "inactive" ? "selected" : ""}>❌</option>
-          <option value="active" ${statusValue === "active" ? "selected" : ""}>✅</option>
-          <option value="pending" ${statusValue === "pending" ? "selected" : ""}>⌛</option>
-        </select>
+  <option value="">-</option>
+  <option value="❌">❌</option>
+  <option value="✅">✅</option>
+  <option value="⌛">⌛</option>
+</select>
       </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
