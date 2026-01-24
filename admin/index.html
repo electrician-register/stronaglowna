@@ -21,18 +21,22 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, button { width:100%; padding:8px; margin:5px 0 }
+input, button, select { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
 table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
+/* select specific adjustments */
+td select { padding:6px; font-size:12px }
+
 /* ===== MOBILE ===== */
   @media (max-width: 768px) {
 
   td input,
-  td button {
+  td button,
+  td select {
     box-sizing: border-box;
     max-width: 100%;
   }
@@ -72,7 +76,8 @@ th { background:#222; color:#fff }
   }
 
   td input[type="text"],
-  td input[type="email"] {
+  td input[type="email"],
+  td select {
     width:100%;
   }
 
@@ -143,7 +148,7 @@ log("Start JS");
 
 const supabaseClient = supabase.createClient(
   "https://tfbqqduxtsacvwfigsvt.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnO[...]
 );
 
 log("Supabase OK");
@@ -220,13 +225,24 @@ async function loadData() {
 
   data.forEach(row => {
     const tr = document.createElement("tr");
+
+    // przygotuj zaznaczenie statusu
+    const statusValue = row.status || "";
+
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
       <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
-<td data-label="Status ❌ ✅ ⌛"><input value="${row.status || ""}"></td>
+      <td data-label="Status">
+        <select>
+          <option value="" ${statusValue === "" ? "selected" : ""}>-</option>
+          <option value="inactive" ${statusValue === "inactive" ? "selected" : ""}>❌ Nieaktywny</option>
+          <option value="active" ${statusValue === "active" ? "selected" : ""}>✅ Aktywny</option>
+          <option value="pending" ${statusValue === "pending" ? "selected" : ""}>⌛ Oczekuje</option>
+        </select>
+      </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
@@ -234,7 +250,8 @@ async function loadData() {
     `;
 
     tr.querySelector("button").onclick = async () => {
-      const i = tr.querySelectorAll("input");
+      // bierzemy wszystkie inputy i selecty w wierszu
+      const i = tr.querySelectorAll("input, select");
 
       const payload = {
         lp: i[0].value,
@@ -242,16 +259,18 @@ async function loadData() {
         nazwisko: i[2].value,
         telefon: i[3].value,
         email: i[4].value,
-        status: i[5].value,
+        status: i[5].value,       // teraz select zwraca wybraną wartość
         show_contact: i[6].checked
       };
+
+      log("Zapisuję ID " + row.id + " z payload: " + JSON.stringify(payload));
 
       const { error } = await supabaseClient
         .from("tabela_elektrykow")
         .update(payload)
         .eq("id", row.id);
 
-      if (error) log("Błąd zapisu");
+      if (error) log("Błąd zapisu: " + error.message);
       else log("Zapisano ID: " + row.id);
     };
 
@@ -265,4 +284,3 @@ checkSession();
 
 </body>
 </html>
-    
