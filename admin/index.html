@@ -229,12 +229,8 @@ async function loadData() {
     // przygotuj zaznaczenie statusu
     const statusValue = row.status || "";
 
-    tr.innerHTML = `
-      <td data-label="LP"><input value="${row.lp || ""}"></td>
-      <td data-label="Imię"><input value="${row.imie || ""}"></td>
-      <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
-      <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
-      <td data-label="Email"><input value="${row.email || ""}"></td>
+ const i = tr.querySelectorAll("input, select");
+
  <td data-label="Status">
   <select name="status">
     <option value="❌" ${statusValue === "❌" ? "selected" : ""}>❌</option>
