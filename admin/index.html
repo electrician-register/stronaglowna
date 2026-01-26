@@ -21,22 +21,18 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, button, select { width:100%; padding:8px; margin:5px 0 }
+input, button { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
 table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
-/* select specific adjustments */
-td select { padding:6px; font-size:12px }
-
 /* ===== MOBILE ===== */
   @media (max-width: 768px) {
 
   td input,
-  td button,
-  td select {
+  td button {
     box-sizing: border-box;
     max-width: 100%;
   }
@@ -76,8 +72,7 @@ td select { padding:6px; font-size:12px }
   }
 
   td input[type="text"],
-  td input[type="email"],
-  td select {
+  td input[type="email"] {
     width:100%;
   }
 
@@ -225,41 +220,21 @@ async function loadData() {
 
   data.forEach(row => {
     const tr = document.createElement("tr");
-
-    // przygotuj zaznaczenie statusu
-    const statusValue = row.status || "";
-
- const i = tr.querySelectorAll("input, select");
-
-<td data-label="Status">
-  <select name="status">
-    <option value="❌" ${statusValue === "❌" ? "selected" : ""}>❌</option>
-    <option value="✅" ${statusValue === "✅" ? "selected" : ""}>✅</option>
-    <option value="⌛" ${statusValue === "⌛" ? "selected" : ""}>⌛</option>
-  </select>
-</td>
-
-<td data-label="Pokaż kontakt" style="text-align:center">
-  <input type="checkbox" name="show_contact" ${row.show_contact ? "checked" : ""}>
-</td>
-
+    tr.innerHTML = `
+      <td data-label="LP"><input value="${row.lp || ""}"></td>
+      <td data-label="Imię"><input value="${row.imie || ""}"></td>
+      <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
+      <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
+      <td data-label="Email"><input value="${row.email || ""}"></td>
+<td data-label="Status ❌ ✅ ⌛"><input value="${row.status || ""}"></td>
+      <td data-label="Pokaż kontakt" style="text-align:center">
+        <input type="checkbox" ${row.show_contact ? "checked" : ""}>
+      </td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
-    
-
 
     tr.querySelector("button").onclick = async () => {
-      // bierzemy wszystkie inputy i selecty w wierszu
-      const payload = {
-  lp: tr.querySelector('td[data-label="LP"] input').value,
-  imie: tr.querySelector('td[data-label="Imię"] input').value,
-  nazwisko: tr.querySelector('td[data-label="Nazwisko"] input').value,
-  telefon: tr.querySelector('td[data-label="Telefon"] input').value,
-  email: tr.querySelector('td[data-label="Email"] input').value,
-  status: tr.querySelector('select[name="status"]').value,
-  show_contact: tr.querySelector('input[name="show_contact"]').checked
-};
-
+      const i = tr.querySelectorAll("input");
 
       const payload = {
         lp: i[0].value,
@@ -267,18 +242,16 @@ async function loadData() {
         nazwisko: i[2].value,
         telefon: i[3].value,
         email: i[4].value,
-        status: i[5].value,       // teraz select zwraca wybraną wartość
+        status: i[5].value,
         show_contact: i[6].checked
       };
-
-      log("Zapisuję ID " + row.id + " z payload: " + JSON.stringify(payload));
 
       const { error } = await supabaseClient
         .from("tabela_elektrykow")
         .update(payload)
         .eq("id", row.id);
 
-      if (error) log("Błąd zapisu: " + error.message);
+      if (error) log("Błąd zapisu");
       else log("Zapisano ID: " + row.id);
     };
 
@@ -292,3 +265,4 @@ checkSession();
 
 </body>
 </html>
+    
