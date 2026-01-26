@@ -310,7 +310,7 @@ async function search(){
 
   if(woj.value) query = query.eq("wojewodztwo", woj.value)
   if(miasto.value) query = query.eq("miasto", miasto.value)
-  if(gwiazdki.value) query = query.eq("gwiazdki", parseInt(gwiazdki.value))
+  if(gwiazdki.value) query = query.eq("gwiazdki",gwiazdki.value)
   if(status.value) query = query.eq("status", status.value)
   if(show_contact.checked) query = query.eq("show_contact", true)
 
