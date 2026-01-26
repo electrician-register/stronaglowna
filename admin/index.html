@@ -236,10 +236,10 @@ async function loadData() {
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status">
-        <select>
-  <option value="❌">❌</option>
-  <option value="✅">✅</option>
-  <option value="⌛">⌛</option>
+<select>
+  <option value="❌" ${statusValue === "❌" ? "selected" : ""}>❌</option>
+  <option value="✅" ${statusValue === "✅" ? "selected" : ""}>✅</option>
+  <option value="⌛" ${statusValue === "⌛" ? "selected" : ""}>⌛</option>
 </select>
       </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
