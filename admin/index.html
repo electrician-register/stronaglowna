@@ -231,7 +231,7 @@ async function loadData() {
 
  const i = tr.querySelectorAll("input, select");
 
- <td data-label="Status">
+<td data-label="Status">
   <select name="status">
     <option value="❌" ${statusValue === "❌" ? "selected" : ""}>❌</option>
     <option value="✅" ${statusValue === "✅" ? "selected" : ""}>✅</option>
@@ -242,6 +242,7 @@ async function loadData() {
 <td data-label="Pokaż kontakt" style="text-align:center">
   <input type="checkbox" name="show_contact" ${row.show_contact ? "checked" : ""}>
 </td>
+
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
     
