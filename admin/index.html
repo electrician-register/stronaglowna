@@ -235,22 +235,34 @@ async function loadData() {
       <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
-      <td data-label="Status">
-<select>
-  <option value="❌" ${statusValue === "❌" ? "selected" : ""}>❌</option>
-  <option value="✅" ${statusValue === "✅" ? "selected" : ""}>✅</option>
-  <option value="⌛" ${statusValue === "⌛" ? "selected" : ""}>⌛</option>
-</select>
-      </td>
-      <td data-label="Pokaż kontakt" style="text-align:center">
-        <input type="checkbox" ${row.show_contact ? "checked" : ""}>
-      </td>
+ <td data-label="Status">
+  <select name="status">
+    <option value="❌" ${statusValue === "❌" ? "selected" : ""}>❌</option>
+    <option value="✅" ${statusValue === "✅" ? "selected" : ""}>✅</option>
+    <option value="⌛" ${statusValue === "⌛" ? "selected" : ""}>⌛</option>
+  </select>
+</td>
+
+<td data-label="Pokaż kontakt" style="text-align:center">
+  <input type="checkbox" name="show_contact" ${row.show_contact ? "checked" : ""}>
+</td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
+    log("STATUS REALNY: " + tr.querySelector('select[name="status"]').value);
+
 
     tr.querySelector("button").onclick = async () => {
       // bierzemy wszystkie inputy i selecty w wierszu
-      const i = tr.querySelectorAll("input, select");
+      const payload = {
+  lp: tr.querySelector('td[data-label="LP"] input').value,
+  imie: tr.querySelector('td[data-label="Imię"] input').value,
+  nazwisko: tr.querySelector('td[data-label="Nazwisko"] input').value,
+  telefon: tr.querySelector('td[data-label="Telefon"] input').value,
+  email: tr.querySelector('td[data-label="Email"] input').value,
+  status: tr.querySelector('select[name="status"]').value,
+  show_contact: tr.querySelector('input[name="show_contact"]').checked
+};
+
 
       const payload = {
         lp: i[0].value,
