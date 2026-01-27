@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>DIAGNOZA JS</title>
+<title>Supabase Signup – DIAGNOZA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -16,44 +16,86 @@ body {
   white-space: pre-wrap;
   border: 1px solid #0f0;
   padding: 10px;
-  min-height: 200px;
+  min-height: 220px;
+}
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 16px;
 }
 button {
-  padding: 12px;
-  margin-top: 10px;
-  width: 100%;
-  font-size: 16px;
+  background: #0B5FA5;
+  color: #fff;
+  border: none;
 }
 </style>
 
-<script>
-  // TEN LOG MUSI SIĘ POKAZAĆ ZAWSZE
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("log").textContent += "✅ DOMContentLoaded\n";
-  });
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  // ŁAPIEMY KAŻDY BŁĄD
-  window.onerror = function(msg, src, line, col) {
-    document.getElementById("log").textContent +=
-      "❌ JS ERROR:\n" + msg + "\n" + src + ":" + line + "\n";
-  };
+<script>
+window.onerror = function(msg, src, line) {
+  document.getElementById("log").textContent +=
+    "❌ JS ERROR:\n" + msg + "\n" + src + ":" + line + "\n";
+};
 </script>
 </head>
 
 <body>
 
-<h3>DIAGNOSTYKA JS</h3>
+<h3>SUPABASE SIGNUP – TEST</h3>
+
+<input id="email" type="email" placeholder="email@test.pl">
+<input id="password" type="password" placeholder="hasło min. 6 znaków">
+
+<button onclick="signup()">WYŚLIJ EMAIL POTWIERDZAJĄCY</button>
 
 <div id="log">🟢 HTML ZAŁADOWANY\n</div>
 
-<button onclick="testClick()">TEST KLIK</button>
-
 <script>
-  function testClick() {
-    document.getElementById("log").textContent += "👉 KLIK DZIAŁA\n";
-  }
+document.getElementById("log").textContent += "🟢 JS AKTYWNY\n";
 
-  document.getElementById("log").textContent += "🟢 SCRIPT NA DOLE STRONY\n";
+if (!window.supabase) {
+  document.getElementById("log").textContent += "❌ SUPABASE NIE ZAŁADOWANY\n";
+} else {
+  document.getElementById("log").textContent += "🟢 SUPABASE ZAŁADOWANY\n";
+}
+
+const supabase = window.supabase.createClient(
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+);
+
+document.getElementById("log").textContent += "🟢 CLIENT UTWORZONY\n";
+
+async function signup() {
+  const log = document.getElementById("log");
+  log.textContent += "👉 KLIK SIGNUP\n";
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  log.textContent += "📨 EMAIL: " + email + "\n";
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: "https://orep.pl/proelektryk/"
+      }
+    });
+
+    if (error) {
+      log.textContent += "❌ SUPABASE ERROR:\n" + error.message + "\n";
+    } else {
+      log.textContent += "✅ EMAIL POTWIERDZAJĄCY WYSŁANY\n";
+      log.textContent += JSON.stringify(data, null, 2) + "\n";
+    }
+  } catch (e) {
+    log.textContent += "🔥 EXCEPTION:\n" + e.message + "\n";
+  }
+}
 </script>
 
 </body>
