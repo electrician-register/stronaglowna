@@ -1,1 +1,102 @@
-ProElektryk
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test – Confirm Your Signup (Supabase)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .box {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+      font-size: 15px;
+    }
+
+    button {
+      background: #0B5FA5;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .msg {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h1>Test Confirm Your Signup</h1>
+
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="password" id="password" placeholder="Hasło (min. 6 znaków)" required />
+
+  <button onclick="signup()">Wyślij email potwierdzający</button>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+  const supabase = window.supabase.createClient(
+    "https://tfbqqduxtsacvwfigsvt.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+  );
+
+  async function signup() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    msg.textContent = "Wysyłanie…";
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: "https://orep.pl/proelektryk/"
+      }
+    });
+
+    if (error) {
+      msg.textContent = "❌ Błąd: " + error.message;
+      msg.style.color = "red";
+    } else {
+      msg.textContent = "✅ Email potwierdzający został wysłany. Sprawdź skrzynkę.";
+      msg.style.color = "green";
+    }
+  }
+</script>
+
+</body>
+</html>
+
