@@ -202,6 +202,9 @@
               log.innerText = "❌ Nieprawidłowy adres e-mail";
             } else if (error.message.includes("Password should be at least")) {
               log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
+              
+            } else if (error.message.includes("rate limit")) {
+              log.innerText = "❌ Wysłana zbyt wiele prób logowania. Spróbuj ponownie za kilka minut...";
             } else {
               log.innerText = "❌ " + error.message;
             }
