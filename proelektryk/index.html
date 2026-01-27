@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Supabase Signup – DIAGNOZA</title>
+<title>Supabase Signup – TEST</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -31,6 +31,7 @@ button {
 }
 </style>
 
+<!-- CDN (może się nie załadować – OBSŁUGUJEMY TO) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -48,53 +49,51 @@ window.onerror = function(msg, src, line) {
 <input id="email" type="email" placeholder="email@test.pl">
 <input id="password" type="password" placeholder="hasło min. 6 znaków">
 
-<button onclick="signup()">WYŚLIJ EMAIL POTWIERDZAJĄCY</button>
+<button id="signupBtn">WYŚLIJ EMAIL POTWIERDZAJĄCY</button>
 
 <div id="log">🟢 HTML ZAŁADOWANY\n</div>
 
 <script>
-document.getElementById("log").textContent += "🟢 JS AKTYWNY\n";
+const log = document.getElementById("log");
+log.textContent += "🟢 JS AKTYWNY\n";
 
-if (!window.supabase) {
-  document.getElementById("log").textContent += "❌ SUPABASE NIE ZAŁADOWANY\n";
-} else {
-  document.getElementById("log").textContent += "🟢 SUPABASE ZAŁADOWANY\n";
-}
+const btn = document.getElementById("signupBtn");
 
-const supabase = window.supabase.createClient(
-  "https://tfbqqduxtsacvwfigsvt.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
-);
+btn.addEventListener("click", signup);
 
-document.getElementById("log").textContent += "🟢 CLIENT UTWORZONY\n";
+function signup() {
+  log.textContent += "👉 KLIK\n";
 
-async function signup() {
-  const log = document.getElementById("log");
-  log.textContent += "👉 KLIK SIGNUP\n";
+  if (!window.supabase) {
+    log.textContent += "❌ SUPABASE NIE ZAŁADOWANY (CDN BLOKOWANY)\n";
+    return;
+  }
+
+  log.textContent += "🟢 SUPABASE OK\n";
+
+  const supabase = window.supabase.createClient(
+    "https://tfbqqduxtsacvwfigsvt.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+  );
 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   log.textContent += "📨 EMAIL: " + email + "\n";
 
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: "https://orep.pl/proelektryk/"
-      }
-    });
-
+  supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: "https://orep.pl/proelektryk/"
+    }
+  }).then(({ data, error }) => {
     if (error) {
       log.textContent += "❌ SUPABASE ERROR:\n" + error.message + "\n";
     } else {
       log.textContent += "✅ EMAIL POTWIERDZAJĄCY WYSŁANY\n";
-      log.textContent += JSON.stringify(data, null, 2) + "\n";
     }
-  } catch (e) {
-    log.textContent += "🔥 EXCEPTION:\n" + e.message + "\n";
-  }
+  });
 }
 </script>
 
