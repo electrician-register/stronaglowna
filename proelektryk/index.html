@@ -1,131 +1,59 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Test – Confirm Your Signup (Supabase)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>DIAGNOZA JS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .box {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.1);
-    }
-
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      font-size: 16px;
-    }
-
-    button {
-      background: #0B5FA5;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    #log {
-      margin-top: 15px;
-      font-size: 13px;
-      background: #111;
-      color: #0f0;
-      padding: 10px;
-      height: 140px;
-      overflow-y: auto;
-      border-radius: 4px;
-      white-space: pre-wrap;
-    }
-  </style>
-</head>
-<body>
-
-<div class="box">
-  <h3>Test Confirm Your Signup</h3>
-
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Hasło (min. 6 znaków)" />
-
-  <button id="signupBtn">Wyślij email</button>
-
-  <div id="log"></div>
-</div>
+<style>
+body {
+  font-family: monospace;
+  background: #111;
+  color: #0f0;
+  padding: 10px;
+}
+#log {
+  white-space: pre-wrap;
+  border: 1px solid #0f0;
+  padding: 10px;
+  min-height: 200px;
+}
+button {
+  padding: 12px;
+  margin-top: 10px;
+  width: 100%;
+  font-size: 16px;
+}
+</style>
 
 <script>
-  const logBox = document.getElementById("log");
+  // TEN LOG MUSI SIĘ POKAZAĆ ZAWSZE
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("log").textContent += "✅ DOMContentLoaded\n";
+  });
 
-  function log(msg) {
-    console.log(msg);
-    logBox.textContent += msg + "\n";
-    logBox.scrollTop = logBox.scrollHeight;
+  // ŁAPIEMY KAŻDY BŁĄD
+  window.onerror = function(msg, src, line, col) {
+    document.getElementById("log").textContent +=
+      "❌ JS ERROR:\n" + msg + "\n" + src + ":" + line + "\n";
+  };
+</script>
+</head>
+
+<body>
+
+<h3>DIAGNOSTYKA JS</h3>
+
+<div id="log">🟢 HTML ZAŁADOWANY\n</div>
+
+<button onclick="testClick()">TEST KLIK</button>
+
+<script>
+  function testClick() {
+    document.getElementById("log").textContent += "👉 KLIK DZIAŁA\n";
   }
 
-  log("🟢 JS załadowany");
-
-  const supabase = window.supabase.createClient(
-    "https://tfbqqduxtsacvwfigsvt.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
-  );
-
-  log("🟢 Supabase client OK");
-
-  const btn = document.getElementById("signupBtn");
-
-  btn.addEventListener("click", signup);
-  btn.addEventListener("touchstart", signup);
-
-  function signup(e) {
-    e.preventDefault();
-
-    log("👉 Klik wykryty");
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    log("📨 Email: " + email);
-
-    if (!email || !password) {
-      log("⚠️ Brak email lub hasła");
-      return;
-    }
-
-    log("⏳ Wysyłanie do Supabase...");
-
-    supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: "https://orep.pl/proelektryk/"
-      }
-    }).then(({ data, error }) => {
-      if (error) {
-        log("❌ Błąd Supabase: " + error.message);
-      } else {
-        log("✅ Email potwierdzający wysłany");
-        log("📦 Odpowiedź: " + JSON.stringify(data));
-      }
-    }).catch(err => {
-      log("🔥 Exception: " + err.message);
-    });
-  }
+  document.getElementById("log").textContent += "🟢 SCRIPT NA DOLE STRONY\n";
 </script>
 
 </body>
