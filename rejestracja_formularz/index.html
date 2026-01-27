@@ -127,7 +127,7 @@ button[type="submit"]:hover { background: #45a049; }
   <textarea id="nrD"></textarea>
 
   <label>Email</label>
-  <input id="email" readonly>
+  <input id="email" required> <!-- usunięty readonly -->
 
   <label>Telefon</label>
   <input id="telefon">
@@ -228,32 +228,31 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
 
 // -------------------- INIT --------------------
 document.addEventListener('DOMContentLoaded', async () => {
-  // ✅ województwa zawsze się ładują
   await loadWojewodztwa()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
-
-  currentUser = user
-  email.value = user.email
+  if (user) {
+    currentUser = user
+    document.getElementById('email').value = user.email
+  }
 
   const { data } = await supabase
     .from('tabela_elektrykow')
     .select('*')
-    .eq('email', user.email)
+    .eq('email', user ? user.email : '')
     .single()
 
-  if (!data) return
+  if (data) {
+    document.getElementById('form-title').textContent = 'Aktualizacja danych'
+    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
 
-  document.getElementById('form-title').textContent = 'Aktualizacja danych'
-  document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
+    fields.forEach(f => {
+      if (data[f]) document.getElementById(f).value = data[f]
+    })
 
-  fields.forEach(f => {
-    if (data[f]) document.getElementById(f).value = data[f]
-  })
-
-  if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
-  if (data.miasto) document.getElementById('miasto').value = data.miasto
+    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
+    if (data.miasto) document.getElementById('miasto').value = data.miasto
+  }
 })
 
 // -------------------- ZAMKNIJ --------------------
@@ -261,7 +260,7 @@ document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/'
 })
 
-// --- reszta Twojego kodu pozostaje BEZ zmian ---
+// --- reszta Twojego kodu submit / upload / walidacja pozostaje BEZ zmian ---
 </script>
 </body>
 </html>
