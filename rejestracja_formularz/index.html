@@ -114,7 +114,7 @@
 <div class="form-wrapper">
 <form id="register-form">
 
-  <button type="button" id="close-btn">❌</button>
+  <button type="button" id="close-btn" aria-label="Zamknij formularz">❌</button>
 
   <h2 id="form-title">Rejestracja</h2>
 
@@ -157,7 +157,7 @@
 
   <label class="rodo-label">
     <input type="checkbox" id="rodo" required>
-    Wyrażam zgodę na przetwarzanie moich danych osobowych…
+    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
   </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
@@ -178,10 +178,51 @@ const supabase = createClient(
 let currentUser = null
 const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
 
+async function loadWojewodztwa(selectedWoj = null) {
+  const { data, error } = await supabase.from('wojewodztwa').select('id, nazwa').order('nazwa')
+  if (error) return
+  const wojSelect = document.getElementById('wojewodztwo')
+  wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
+  data.forEach(w => {
+    const o = document.createElement('option')
+    o.value = w.id
+    o.textContent = w.nazwa
+    wojSelect.appendChild(o)
+  })
+  if (selectedWoj) {
+    wojSelect.value = selectedWoj
+    wojSelect.dispatchEvent(new Event('change'))
+  }
+}
+
+document.getElementById('wojewodztwo').addEventListener('change', async function() {
+  const wojId = this.value
+  const miastoSelect = document.getElementById('miasto')
+  if (!wojId) {
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+    miastoSelect.disabled = true
+    return
+  }
+  const { data, error } = await supabase.from('miasta').select('id,nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
+  if (error) return
+  miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+  data.forEach(m => {
+    const o = document.createElement('option')
+    o.value = m.id
+    o.textContent = m.nazwa
+    miastoSelect.appendChild(o)
+  })
+  miastoSelect.disabled = false
+})
+
+document.getElementById('close-btn').addEventListener('click', () => {
+  window.location.href = 'https://orep.pl/'
+})
+
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { user } } = await supabase.auth.getUser()
 
-  /* === KROK 1: TWARDY REDIRECT === */
+  /* KROK 1 – REDIRECT NIEZALOGOWANYCH */
   if (!user) {
     window.location.href = '/logowanie'
     return
@@ -190,18 +231,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   currentUser = user
   email.value = user.email
 
-  const { data } = await supabase.from('tabela_elektrykow').select('*').eq('email', user.email).single()
+  const { data } = await supabase.from('tabela_elektrykow')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+
   if (data) {
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
     fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
+    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
+    if (data.miasto) document.getElementById('miasto').value = data.miasto
+  } else {
+    loadWojewodztwa()
   }
 })
+
+async function wyslijMagicEmail(email) {
+  try {
+    const res = await fetch('https://orep.pl/api/magic-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+    await res.json()
+  } catch {}
+}
 
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
 
-  /* === KROK 2: BLOKADA SUBMITU === */
+  /* KROK 2 – BLOKADA SUBMITU */
   if (!currentUser) {
     result.textContent = 'Musisz być zalogowany'
     result.className = 'error'
@@ -212,7 +272,66 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   result.textContent = ''
   result.className = ''
 
-  /* --- DALEJ KOD BEZ ZMIAN --- */
+  if (nrE.value && nrEPomiary.value) {
+    loading.style.display='none'
+    result.textContent='Wybierz tylko jeden rodzaj eksploatacji'
+    result.className='error'
+    return
+  }
+
+  if (nrD.value && !nrEPomiary.value) {
+    loading.style.display='none'
+    result.textContent='Do DOZORU wymagane są pomiary'
+    result.className='error'
+    return
+  }
+
+  const allowedTypes = ['application/pdf','image/jpeg','image/png']
+  const maxSize = 5*1024*1024
+
+  let plikUrls=[]
+  for (let i=0;i<plik.files.length;i++) {
+    const file = plik.files[i]
+    if (!allowedTypes.includes(file.type) || file.size>maxSize) {
+      loading.style.display='none'
+      result.textContent='Nieprawidłowy plik'
+      result.className='error'
+      return
+    }
+    const path = `${currentUser.id}/${Date.now()}_${file.name}`
+    const { error } = await supabase.storage.from('uprawnienia').upload(path,file,{upsert:true})
+    if (error) {
+      loading.style.display='none'
+      result.textContent=error.message
+      result.className='error'
+      return
+    }
+    const { data } = await supabase.storage.from('uprawnienia').createSignedUrl(path,3600)
+    plikUrls.push(data.signedUrl)
+  }
+
+  const payload = { email: currentUser.email }
+  fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
+  if (plikUrls.length) payload.plik = plikUrls.join(',')
+
+  const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
+  let error
+  if (existing) {
+    const { error: e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id)
+    error = e2
+  } else {
+    const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload)
+    error = e3
+  }
+
+  loading.style.display='none'
+  if (error) {
+    result.textContent = error.message
+    result.className = 'error'
+  } else {
+    await wyslijMagicEmail(currentUser.email)
+    window.location.href = 'https://orep.pl/logowanie'
+  }
 })
 </script>
 </body>
