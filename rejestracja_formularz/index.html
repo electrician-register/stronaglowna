@@ -64,16 +64,17 @@ const wojSelect = document.getElementById('wojewodztwo')
 const miastoSelect = document.getElementById('miasto')
 const loading = document.getElementById('loading')
 const result = document.getElementById('result')
-
 const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
+
 let currentUser = null
+let currentRecordId = null
 
 // -------------------- Ładowanie województw --------------------
 async function loadWojewodztwa() {
   const { data, error } = await supabase.from('wojewodztwa').select('id,nazwa').order('nazwa')
   if (error) return
   wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
-  data.forEach(w => { const option=document.createElement('option'); option.value=w.id; option.textContent=w.nazwa; wojSelect.appendChild(option) })
+  data.forEach(w => { const o=document.createElement('option'); o.value=w.id; o.textContent=w.nazwa; wojSelect.appendChild(o) })
 }
 
 // -------------------- Ładowanie miast --------------------
@@ -83,26 +84,26 @@ wojSelect.addEventListener('change', async () => {
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
   if (!wojId) return
   const { data } = await supabase.from('miasta').select('id,nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
-  data.forEach(m => { const option=document.createElement('option'); option.value=m.id; option.textContent=m.nazwa; miastoSelect.appendChild(option) })
+  data.forEach(m => { const o=document.createElement('option'); o.value=m.id; o.textContent=m.nazwa; miastoSelect.appendChild(o) })
 })
 
 // -------------------- INIT --------------------
 document.addEventListener('DOMContentLoaded', async () => {
   await loadWojewodztwa()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return window.location.href='index.html'
   currentUser = user
   document.getElementById('email').value = user.email
 
-  // Pobranie danych użytkownika z tabeli
+  // Sprawdź czy rekord istnieje
   const { data } = await supabase.from('tabela_elektrykow').select('*').eq('email', user.email).single()
   if (data) {
+    currentRecordId = data.id
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
     fields.forEach(f => { if(data[f]) document.getElementById(f).value = data[f] })
     if (data.wojewodztwo) wojSelect.value = data.wojewodztwo
-    if (data.miasto) { miastoSelect.disabled=false; miastoSelect.value = data.miasto }
+    if (data.miasto) { miastoSelect.disabled=false; miastoSelect.value=data.miasto }
   }
 })
 
@@ -115,7 +116,17 @@ form.addEventListener('submit', async e => {
   fields.forEach(f => { payload[f] = document.getElementById(f).value })
   payload.email = document.getElementById('email').value
 
-  const { error } = await supabase.from('tabela_elektrykow').insert(payload)
+  let error = null
+  if (currentRecordId) {
+    // UPDATE
+    const { error: err } = await supabase.from('tabela_elektrykow').update(payload).eq('id', currentRecordId)
+    error = err
+  } else {
+    // INSERT
+    const { error: err } = await supabase.from('tabela_elektrykow').insert(payload)
+    error = err
+  }
+
   loading.style.display='none'
   if(error){ result.textContent=error.message; result.className='error'; return }
   result.textContent='Dane zapisane poprawnie'
@@ -124,6 +135,5 @@ form.addEventListener('submit', async e => {
 // -------------------- ZAMKNIJ --------------------
 document.getElementById('close-btn').addEventListener('click', () => { window.location.href='https://orep.pl/' })
 </script>
-
 </body>
 </html>
