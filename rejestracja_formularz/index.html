@@ -10,7 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* --- BEZ ZMIAN --- */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f6f8;
@@ -19,10 +18,7 @@ body {
   padding: 20px;
 }
 
-.form-wrapper {
-  width: 100%;
-  max-width: 600px;
-}
+.form-wrapper { width: 100%; max-width: 600px; }
 
 form {
   position: relative;
@@ -33,9 +29,7 @@ form {
 }
 
 h2 { text-align: center; margin-bottom: 20px; }
-
 label { margin-top: 15px; display: block; font-weight: 600; }
-
 input, textarea, select {
   width: 100%;
   padding: 10px;
@@ -46,10 +40,8 @@ input, textarea, select {
   background-color: #fff;
   color: #000;
 }
-
 select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
 select:not(:disabled) { background-color: #fff; color: #000; }
-
 textarea { min-height: 80px; }
 
 button[type="submit"] {
@@ -160,24 +152,15 @@ const supabase = createClient(
 )
 
 let currentUser = null
-
-const fields = [
-  'imie','nazwisko','miasto','wojewodztwo',
-  'nrE','nrEPomiary','nrD','telefon','zajmujeSie'
-]
+const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
 
 // -------------------- WOJEWÓDZTWA --------------------
 async function loadWojewodztwa(selectedWoj = null) {
-  const { data, error } = await supabase
-    .from('wojewodztwa')
-    .select('id, nazwa')
-    .order('nazwa')
-
+  const { data, error } = await supabase.from('wojewodztwa').select('id, nazwa').order('nazwa')
   if (error) return
 
   const wojSelect = document.getElementById('wojewodztwo')
   wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
-
   data.forEach(w => {
     const option = document.createElement('option')
     option.value = w.id
@@ -185,10 +168,8 @@ async function loadWojewodztwa(selectedWoj = null) {
     wojSelect.appendChild(option)
   })
 
-  if (selectedWoj) {
-    wojSelect.value = selectedWoj
-    wojSelect.dispatchEvent(new Event('change'))
-  }
+  // TYLKO ustaw wartość, nie wywołuj dispatchEvent
+  if (selectedWoj) wojSelect.value = selectedWoj
 }
 
 // -------------------- MIASTA --------------------
@@ -197,16 +178,12 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
   const miastoSelect = document.getElementById('miasto')
 
   if (!wojId) {
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
     miastoSelect.disabled = true
     return
   }
 
-  const { data } = await supabase
-    .from('miasta')
-    .select('id, nazwa')
-    .eq('wojewodztwo_id', wojId)
-    .order('nazwa')
-
+  const { data } = await supabase.from('miasta').select('id, nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
   data.forEach(m => {
     const option = document.createElement('option')
@@ -214,7 +191,6 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
     option.textContent = m.nazwa
     miastoSelect.appendChild(option)
   })
-
   miastoSelect.disabled = false
 })
 
@@ -223,7 +199,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadWojewodztwa()
 
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) {
     window.location.href = 'index.html'
     return
@@ -233,10 +208,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   email.value = user.email
 })
 
-// -------------------- SUBMIT (DODANE) --------------------
+// -------------------- SUBMIT --------------------
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault()
-
   loading.style.display = 'block'
   result.textContent = ''
 
@@ -253,10 +227,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     zajmujeSie: zajmujeSie.value
   }
 
-  const { error } = await supabase
-    .from('tabela_elektrykow')
-    .insert(payload)
-
+  const { error } = await supabase.from('tabela_elektrykow').insert(payload)
   loading.style.display = 'none'
 
   if (error) {
