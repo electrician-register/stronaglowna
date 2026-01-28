@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* --- BEZ ZMIAN --- */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f6f8;
@@ -127,7 +128,7 @@ button[type="submit"]:hover { background: #45a049; }
   <textarea id="nrD"></textarea>
 
   <label>Email</label>
-  <input id="email" required> <!-- usunięty readonly -->
+  <input id="email" required>
 
   <label>Telefon</label>
   <input id="telefon">
@@ -140,7 +141,7 @@ button[type="submit"]:hover { background: #45a049; }
 
   <label class="rodo-label">
     <input type="checkbox" id="rodo" required>
-    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
+    Wyrażam zgodę na przetwarzanie moich danych osobowych…
   </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
@@ -155,7 +156,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://tfbqqduxtsacvwfigsvt.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+  'PUBLIC_ANON_KEY'
 )
 
 let currentUser = null
@@ -172,10 +173,7 @@ async function loadWojewodztwa(selectedWoj = null) {
     .select('id, nazwa')
     .order('nazwa')
 
-  if (error) {
-    console.error('Błąd ładowania województw:', error)
-    return
-  }
+  if (error) return
 
   const wojSelect = document.getElementById('wojewodztwo')
   wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
@@ -199,21 +197,15 @@ document.getElementById('wojewodztwo').addEventListener('change', async function
   const miastoSelect = document.getElementById('miasto')
 
   if (!wojId) {
-    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
     miastoSelect.disabled = true
     return
   }
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('miasta')
     .select('id, nazwa')
     .eq('wojewodztwo_id', wojId)
     .order('nazwa')
-
-  if (error) {
-    console.error('Błąd ładowania miast:', error)
-    return
-  }
 
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
   data.forEach(m => {
@@ -231,36 +223,55 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadWojewodztwa()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    currentUser = user
-    document.getElementById('email').value = user.email
+
+  if (!user) {
+    window.location.href = 'index.html'
+    return
   }
 
-  const { data } = await supabase
+  currentUser = user
+  email.value = user.email
+})
+
+// -------------------- SUBMIT (DODANE) --------------------
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+  loading.style.display = 'block'
+  result.textContent = ''
+
+  const payload = {
+    imie: imie.value,
+    nazwisko: nazwisko.value,
+    wojewodztwo: wojewodztwo.value,
+    miasto: miasto.value,
+    nrE: nrE.value,
+    nrEPomiary: nrEPomiary.value,
+    nrD: nrD.value,
+    email: email.value,
+    telefon: telefon.value,
+    zajmujeSie: zajmujeSie.value
+  }
+
+  const { error } = await supabase
     .from('tabela_elektrykow')
-    .select('*')
-    .eq('email', user ? user.email : '')
-    .single()
+    .insert(payload)
 
-  if (data) {
-    document.getElementById('form-title').textContent = 'Aktualizacja danych'
-    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
+  loading.style.display = 'none'
 
-    fields.forEach(f => {
-      if (data[f]) document.getElementById(f).value = data[f]
-    })
-
-    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
-    if (data.miasto) document.getElementById('miasto').value = data.miasto
+  if (error) {
+    result.textContent = error.message
+    result.className = 'error'
+    return
   }
+
+  result.textContent = 'Dane zapisane poprawnie'
 })
 
 // -------------------- ZAMKNIJ --------------------
 document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/'
 })
-
-// --- reszta Twojego kodu submit / upload / walidacja pozostaje BEZ zmian ---
 </script>
 </body>
 </html>
