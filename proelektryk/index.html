@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Supabase Signup – TEST</title>
+<title>Supabase Magic Link – TEST</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -31,7 +31,7 @@ button {
 }
 </style>
 
-<!-- CDN (może się nie załadować – OBSŁUGUJEMY TO) -->
+<!-- CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -44,12 +44,11 @@ window.onerror = function(msg, src, line) {
 
 <body>
 
-<h3>SUPABASE SIGNUP – TEST</h3>
+<h3>SUPABASE MAGIC LINK – TEST</h3>
 
 <input id="email" type="email" placeholder="email@test.pl">
-<input id="password" type="password" placeholder="hasło min. 6 znaków">
 
-<button id="signupBtn">WYŚLIJ EMAIL POTWIERDZAJĄCY</button>
+<button id="magicBtn">WYŚLIJ MAGIC LINK</button>
 
 <div id="log">🟢 HTML ZAŁADOWANY\n</div>
 
@@ -57,11 +56,10 @@ window.onerror = function(msg, src, line) {
 const log = document.getElementById("log");
 log.textContent += "🟢 JS AKTYWNY\n";
 
-const btn = document.getElementById("signupBtn");
+const btn = document.getElementById("magicBtn");
+btn.addEventListener("click", sendMagicLink);
 
-btn.addEventListener("click", signup);
-
-function signup() {
+function sendMagicLink() {
   log.textContent += "👉 KLIK\n";
 
   if (!window.supabase) {
@@ -77,13 +75,10 @@ function signup() {
   );
 
   const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
   log.textContent += "📨 EMAIL: " + email + "\n";
 
-  supabase.auth.signUp({
+  supabase.auth.signInWithOtp({
     email,
-    password,
     options: {
       emailRedirectTo: "https://orep.pl/proelektryk/"
     }
@@ -91,7 +86,7 @@ function signup() {
     if (error) {
       log.textContent += "❌ SUPABASE ERROR:\n" + error.message + "\n";
     } else {
-      log.textContent += "✅ EMAIL POTWIERDZAJĄCY WYSŁANY\n";
+      log.textContent += "✅ MAGIC LINK WYSŁANY\n";
     }
   });
 }
