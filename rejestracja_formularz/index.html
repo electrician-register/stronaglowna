@@ -108,11 +108,8 @@
     }
     .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
 
-    /* RESPONSYWNOŚĆ */
     @media (max-width: 480px) {
-      form {
-        padding: 15px 15px;
-      }
+      form { padding: 15px 15px; }
       h2 { font-size: 20px; }
       input, textarea, select { font-size: 15px; }
       .rodo-label { font-size: 13px; }
@@ -181,7 +178,6 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// Twój Supabase
 const supabase = createClient(
   'https://tfbqqduxtsacvwfigsvt.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
@@ -243,7 +239,6 @@ document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/';
 })
 
-// --- Pobranie bieżącego użytkownika i wstępne wypełnienie formularza ---
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -291,81 +286,34 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   result.textContent = ''
   result.className = ''
 
-  // --- WALIDACJA nrE / nrEPomiary / nrD ---
-  if (nrE.value && nrEPomiary.value) {
-    loading.style.display = 'none'
-    result.textContent = 'Wybierz tylko jeden rodzaj eksploatacji'
-    result.className = 'error'
-    return
-  }
-  if (nrD.value && !nrEPomiary.value) {
-    loading.style.display = 'none'
-    result.textContent = 'Do DOZORU wymagane są pomiary'
-    result.className = 'error'
-    return
-  }
-
-  // --- WALIDACJA PLIKU ---
-  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
-  const maxSize = 5 * 1024 * 1024 // 5MB
-  for (let i = 0; i < plik.files.length; i++) {
-    const file = plik.files[i]
-    if (!allowedTypes.includes(file.type)) {
-      loading.style.display = 'none'
-      result.textContent = 'Nieprawidłowy typ pliku. Dozwolone: PDF, JPG, PNG'
-      result.className = 'error'
-      return
-    }
-    if (file.size > maxSize) {
-      loading.style.display = 'none'
-      result.textContent = 'Plik zbyt duży. Maksymalny rozmiar: 5 MB'
-      result.className = 'error'
-      return
-    }
-  }
-
-  // --- UPLOAD PLIKÓW ---
-  let plikUrls = []
-  for (let i = 0; i < plik.files.length; i++) {
-    const file = plik.files[i]
-  const path = `${currentUser.id}/${Date.now()}_${file.name}`
-
-    const { error: uploadError } = await supabase.storage.from('uprawnienia').upload(path, file, { upsert: true })
-    if (uploadError) {
-      loading.style.display = 'none'
-      result.textContent = 'Błąd wysyłania pliku: ' + uploadError.message
-      result.className = 'error'
-      return
-    }
-    const { data: urlData, error: urlError } = await supabase.storage.from('uprawnienia').createSignedUrl(path, 3600)
-    if (urlError) {
-      loading.style.display = 'none'
-      result.textContent = 'Błąd generowania linku do pliku'
-      result.className = 'error'
-      return
-    }
-    plikUrls.push(urlData.signedUrl)
-  }
-
-  // --- PRZYGOTOWANIE DANYCH DO BAZY ---
   const payload = { email: currentUser.email }
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
-  if (plikUrls.length) payload.plik = plikUrls.join(',')
 
-  const { error } = await supabase.from('tabela_elektrykow').upsert(payload, { onConflict: 'email' })
+  // --- SPRAWDZENIE CZY REKORD ISTNIEJE ---
+  const { data: existing } = await supabase
+    .from('tabela_elektrykow')
+    .select('id')
+    .eq('email', currentUser.email)
+    .single()
+
+  let error
+  if (existing) {
+    // UPDATE
+    const { error: updateErr } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id)
+    error = updateErr
+  } else {
+    // INSERT
+    const { error: insertErr } = await supabase.from('tabela_elektrykow').insert(payload)
+    error = insertErr
+  }
 
   loading.style.display = 'none'
 
   if (error) {
     result.textContent = error.message
     result.className = 'error'
-    const { data: { user } } = await supabase.auth.getUser()
-console.log('USER:', user)
   } else {
-    // --- WYŚLIJ MAGIC EMAIL ---
     await wyslijMagicEmail(currentUser.email)
-
-    // --- PRZEKIEROWANIE po sukcesie ---
     window.location.href = 'https://orep.pl/logowanie';
   }
 })
