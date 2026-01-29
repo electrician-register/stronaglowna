@@ -170,7 +170,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   const { data: sessionData } = await supabase.auth.getSession()
 
   await fetch(
-    'https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-welcome-email',
+    'https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email',
     {
       method: 'POST',
       headers: {
