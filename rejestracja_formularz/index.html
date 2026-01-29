@@ -329,8 +329,23 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     result.textContent = error.message
     result.className = 'error'
   } else {
-    await wyslijMagicEmail(currentUser.email)
-    window.location.href = 'https://orep.pl/logowanie'
+    await fetch(
+  'https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-welcome-email',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session.access_token}`
+    },
+    body: JSON.stringify({
+      email: currentUser.email,
+      name: document.getElementById('imie').value
+    })
+  }
+);
+
+window.location.href = 'https://orep.pl/logowanie';
+
   }
 })
 </script>
