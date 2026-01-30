@@ -10,26 +10,102 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f8; display: flex; justify-content: center; padding: 10px; margin: 0; }
-    .form-wrapper { width: 100%; max-width: 600px; padding: 0 10px; box-sizing: border-box; }
-    form { position: relative; background-color: #fff; padding: 20px 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      margin: 0;
+    }
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 600px;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+
+    form {
+      position: relative;
+      background-color: #fff;
+      padding: 20px 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+
     h2 { text-align: center; margin-bottom: 20px; font-size: 22px; }
-    label { margin-top: 15px; display: block; font-weight: 600; font-size: 14px; }
-    input, textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; background-color: #fff; color: #000; }
+
+    label {
+      margin-top: 15px;
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+      background-color: #fff;
+      color: #000;
+    }
+
     input[readonly] { background-color: #f4f6f8; cursor: not-allowed; }
     input[type="tel"] { ime-mode: disabled; }
+
     select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
     select:not(:disabled) { background-color: #fff; color: #000; }
+
     select { height: 42px; }
+
     textarea { min-height: 80px; }
-    button[type="submit"] { margin-top: 20px; width: 100%; padding: 12px; background: #4CAF50; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+
+    button[type="submit"] {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
     button[type="submit"]:hover { background: #45a049; }
-    #close-btn { position: absolute; top: 12px; right: 12px; background: transparent; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: #666; line-height: 1; }
+
+    #close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      font-size: 26px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+    }
     #close-btn:hover { color: #000; }
+
     #result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
     .error { background: #f44336; color: #fff; }
     #loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
-    .rodo-label { display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-start; margin-top: 15px; font-weight: normal; font-size: 14px; gap: 10px; }
+
+    .rodo-label {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-top: 15px;
+      font-weight: normal;
+      font-size: 14px;
+      gap: 10px;
+    }
     .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
   </style>
 </head>
@@ -39,6 +115,7 @@
 <form id="register-form">
 
   <button type="button" id="close-btn" aria-label="Zamknij formularz">❌</button>
+
   <h2 id="form-title">Rejestracja</h2>
 
   <label>Imię</label>
@@ -84,6 +161,7 @@
   </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
+
   <div id="loading">Zapisywanie danych...</div>
   <div id="result"></div>
 </form>
@@ -143,11 +221,20 @@ document.getElementById('close-btn').addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) { window.location.href = '/logowanie'; return }
+
+  if (!user) {
+    window.location.href = '/logowanie'
+    return
+  }
+
   currentUser = user
   email.value = user.email
 
-  const { data } = await supabase.from('tabela_elektrykow').select('*').eq('email', user.email).single()
+  const { data } = await supabase.from('tabela_elektrykow')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+
   if (data) {
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
@@ -161,24 +248,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
-  if (!currentUser) { result.textContent='Musisz być zalogowany'; result.className='error'; return }
-  const nameValue = document.getElementById('imie').value.trim()
-  if (!nameValue) { result.textContent='Proszę podać imię'; result.className='error'; return }
+  if (!currentUser) {
+    result.textContent = 'Musisz być zalogowany'
+    result.className = 'error'
+    return
+  }
 
-  loading.style.display = 'block'; result.textContent=''; result.className=''
+  loading.style.display = 'block'
+  result.textContent = ''
+  result.className = ''
 
-  if (nrE.value && nrEPomiary.value) { loading.style.display='none'; result.textContent='Wybierz tylko jeden rodzaj eksploatacji'; result.className='error'; return }
-  if (nrD.value && !nrEPomiary.value) { loading.style.display='none'; result.textContent='Do DOZORU wymagane są pomiary'; result.className='error'; return }
+  if (nrE.value && nrEPomiary.value) {
+    loading.style.display='none'
+    result.textContent='Wybierz tylko jeden rodzaj eksploatacji'
+    result.className='error'
+    return
+  }
+
+  if (nrD.value && !nrEPomiary.value) {
+    loading.style.display='none'
+    result.textContent='Do DOZORU wymagane są pomiary'
+    result.className='error'
+    return
+  }
 
   const allowedTypes = ['application/pdf','image/jpeg','image/png']
   const maxSize = 5*1024*1024
+
   let plikUrls=[]
   for (let i=0;i<plik.files.length;i++) {
     const file = plik.files[i]
-    if (!allowedTypes.includes(file.type) || file.size>maxSize) { loading.style.display='none'; result.textContent='Nieprawidłowy plik'; result.className='error'; return }
+    if (!allowedTypes.includes(file.type) || file.size>maxSize) {
+      loading.style.display='none'
+      result.textContent='Nieprawidłowy plik'
+      result.className='error'
+      return
+    }
     const path = `${currentUser.id}/${Date.now()}_${file.name}`
     const { error } = await supabase.storage.from('uprawnienia').upload(path,file,{upsert:true})
-    if (error) { loading.style.display='none'; result.textContent=error.message; result.className='error'; return }
+    if (error) {
+      loading.style.display='none'
+      result.textContent=error.message
+      result.className='error'
+      return
+    }
     const { data } = await supabase.storage.from('uprawnienia').createSignedUrl(path,3600)
     plikUrls.push(data.signedUrl)
   }
@@ -196,30 +309,39 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload)
     error = e3
   }
+
   loading.style.display='none'
-  if (error) { result.textContent=error.message; result.className='error'; return }
+  if (error) {
+    result.textContent = error.message
+    result.className = 'error'
+    return
+  }
 
   // WYSYŁKA EMAILA – Edge Function obsługuje Resend API Key
   try {
-    const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_email_rejestracja_aktualizacja', {
+    const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: currentUser.email,
-        name: nameValue,
-        update: !!existing
-      })
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+    },
+  body: JSON.stringify({
+  email: currentUser.email,
+  name: document.getElementById('imie').value
     })
+  }
+)
     if (!res.ok) {
       const err = await res.text()
       throw new Error(err || 'Błąd wysyłki emaila')
     }
   } catch(err) {
-    result.textContent = 'Nie udało się wysłać emaila: ' + err.message
+    result.textContent = 'Nie udało się wysłać emaila powitalnego: ' + err.message
     result.className = 'error'
     return
   }
 
+  // JEŚLI WSZYSTKO OK – REDIRECT
   window.location.href = 'https://orep.pl/logowanie'
 })
 </script>
