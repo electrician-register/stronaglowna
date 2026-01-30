@@ -327,7 +327,8 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     },
   body: JSON.stringify({
   email: currentUser.email,
-  name: document.getElementById('imie,nazwisko').value
+  name: document.getElementById('imie').value
+  nazwisko: document.getElementById('nazwisko').value
     })
   }
 )
