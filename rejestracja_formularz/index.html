@@ -328,7 +328,14 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   body: JSON.stringify({
   email: currentUser.email,
   name: document.getElementById('imie').value,
-  nazwisko: document.getElementById('nazwisko').value
+  nazwisko: document.getElementById('nazwisko').value,
+    email: document.getElementById('email').value,
+    miasto: document.getElementById('miasto').value,
+    wojewodztwo: document.getElementById('wojewodztwo').value,
+    nrE: document.getElementById('nrE').value,
+    nrEPomiary: document.getElementById('nrEPomiary').value,
+    nrD: document.getElementById('nrD').value
+  
     })
   }
 )
