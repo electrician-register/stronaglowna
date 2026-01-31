@@ -418,7 +418,11 @@ zajmujeSieInput.addEventListener('input', () => {
   let digitsCount = 0;
   value = value.replace(/\d/g, (d) => {
     digitsCount++;
-    return digitsCount <= 2 ? d : ''; // zostawiamy tylko pierwsze 2 cyfry
+    if (digitsCount > 2) {
+      alert('W tym polu nie można wpisać więcej niż 2 cyfr.');
+      return ''; // trzecia i kolejne cyfry są blokowane
+    }
+    return d; // pierwsze 2 cyfry zostają
   });
 
   // Usuwamy adresy e-mail
@@ -431,6 +435,7 @@ zajmujeSieInput.addEventListener('input', () => {
 
   zajmujeSieInput.value = value;
 });
+
 </script>
 </body>
 </html>
