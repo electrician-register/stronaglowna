@@ -211,25 +211,29 @@ if (id) {
 
       // 🔗 EVENT UDOSTĘPNIANIA
       const shareBtn = document.getElementById("shareProfileBtn");
-      shareBtn.addEventListener("click", async () => {
-        const profileUrl = window.location.href;
-        const profileText = `Sprawdź profil elektryka ${document.getElementById('heroName').textContent}`;
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: 'Profil Elektryka',
-              text: profileText,
-              url: profileUrl
-            });
-            console.log('Profil udostępniony!');
-          } catch (err) {
-            console.error('Błąd udostępniania:', err);
-          }
-        } else {
-          await navigator.clipboard.writeText(profileUrl);
-          alert('Adres profilu został skopiowany do schowka. Możesz go udostępnić ręcznie.');
-        }
+
+shareBtn.addEventListener("click", async () => {
+  const heroName = document.getElementById('heroName').textContent; // dynamiczne imię i nazwisko
+  const profileUrl = window.location.href; // aktualny link
+  const profileText = `Profil elektryka ${heroName} ${profileUrl}`; // TU JEST JEDNO WYWOŁANIE
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Profil Elektryka',
+        text: profileText,
+        url: profileUrl
       });
+      console.log('Profil udostępniony!');
+    } catch (err) {
+      console.error('Błąd udostępniania:', err);
+    }
+  } else {
+    await navigator.clipboard.writeText(profileUrl);
+    alert('Adres profilu został skopiowany do schowka. Możesz go udostępnić ręcznie.');
+  }
+});
+
     }
   };
 
