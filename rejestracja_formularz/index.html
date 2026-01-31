@@ -134,14 +134,32 @@
     <option value="">— wybierz miasto —</option>
   </select>
 
-  <label>Nr upr. EKSPLOATACJA</label>
-  <textarea id="nrE"></textarea>
+<label>Nr upr. EKSPLOATACJA</label>
+<textarea id="nrE"></textarea>
 
-  <label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
-  <textarea id="nrEPomiary"></textarea>
+<label id="nrEValidLabel" style="display:none;">
+  Data ważności – EKSPLOATACJA
+</label>
+<input type="date" id="nrEValidTo" style="display:none;">
 
-  <label>Nr upr. DOZÓR</label>
-  <textarea id="nrD"></textarea>
+
+<label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
+<textarea id="nrEPomiary"></textarea>
+
+<label id="nrEPomiaryValidLabel" style="display:none;">
+  Data ważności – EKSPLOATACJA Z POMIARAMI
+</label>
+<input type="date" id="nrEPomiaryValidTo" style="display:none;">
+
+
+<label>Nr upr. DOZÓR</label>
+<textarea id="nrD"></textarea>
+
+<label id="nrDValidLabel" style="display:none;">
+  Data ważności – DOZÓR
+</label>
+<input type="date" id="nrDValidTo" style="display:none;">
+
 
   <label>Email</label>
   <input id="email" readonly>
@@ -177,6 +195,29 @@ const supabase = createClient(
 
 let currentUser = null
 const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
+function bindValidity(inputId, labelId, dateId) {
+  const input = document.getElementById(inputId)
+  const label = document.getElementById(labelId)
+  const date = document.getElementById(dateId)
+
+  date.min = new Date().toISOString().split('T')[0]
+
+  input.addEventListener('input', () => {
+    if (input.value.trim() !== '') {
+      label.style.display = 'block'
+      date.style.display = 'block'
+      date.required = true
+    } else {
+      label.style.display = 'none'
+      date.style.display = 'none'
+      date.required = false
+      date.value = ''
+    }
+  })
+}
+bindValidity('nrE', 'nrEValidLabel', 'nrEValidTo')
+bindValidity('nrEPomiary', 'nrEPomiaryValidLabel', 'nrEPomiaryValidTo')
+bindValidity('nrD', 'nrDValidLabel', 'nrDValidTo')
 
 async function loadWojewodztwa(selectedWoj = null) {
   const { data, error } = await supabase.from('wojewodztwa').select('id, nazwa').order('nazwa')
@@ -245,6 +286,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadWojewodztwa()
   }
 })
+// EKSPLOATACJA
+if (data.nrE) {
+  document.getElementById('nrEValidLabel').style.display = 'block'
+  document.getElementById('nrEValidTo').style.display = 'block'
+  document.getElementById('nrEValidTo').value = data.nrE_valid_to || ''
+}
+
+// EKSPLOATACJA + POMIARY
+if (data.nrEPomiary) {
+  document.getElementById('nrEPomiaryValidLabel').style.display = 'block'
+  document.getElementById('nrEPomiaryValidTo').style.display = 'block'
+  document.getElementById('nrEPomiaryValidTo').value = data.nrEPomiary_valid_to || ''
+}
+
+// DOZÓR
+if (data.nrD) {
+  document.getElementById('nrDValidLabel').style.display = 'block'
+  document.getElementById('nrDValidTo').style.display = 'block'
+  document.getElementById('nrDValidTo').value = data.nrD_valid_to || ''
+}
 
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
@@ -297,6 +358,10 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   }
 
   const payload = { email: currentUser.email }
+  payload.nrE_valid_to = nrEValidTo.value || null
+payload.nrEPomiary_valid_to = nrEPomiaryValidTo.value || null
+payload.nrD_valid_to = nrDValidTo.value || null
+
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
   if (plikUrls.length) payload.plik = plikUrls.join(',')
 
