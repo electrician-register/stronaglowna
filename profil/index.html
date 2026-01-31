@@ -33,6 +33,25 @@ header p {
   opacity:0.9;
   color: #f4f4f5;
 }
+  /* PRZYCISK UDOSTEPNIJ */
+.share-btn {
+  background-color: #0B5FA5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s ease;
+}
+
+.share-btn:hover {
+  background-color: #094c84;
+}
 
 /* 🔶 POMARAŃCZOWA LINIA Z TEKSTEM */
 .header-line {
@@ -104,6 +123,12 @@ section {
   <!-- DODANE: EMAIL + TELEFON -->
   <p><strong>Email:</strong> <span id="email"></span></p>
   <p><strong>Telefon:</strong> <span id="telefon"></span></p>
+  <p>
+  <button type="button" id="shareProfileBtn" class="share-btn">
+    🔗 Udostępnij profil
+  </button>
+</p>
+
 </section>
 
 <section id="brak" class="hidden">
@@ -193,6 +218,31 @@ if (id) {
 
   loadProfile();
 }
+  const shareBtn = document.getElementById("shareProfileBtn");
+
+shareBtn.addEventListener("click", async () => {
+  const profileUrl = window.location.href; // aktualny adres profilu
+  const profileText = `Sprawdź profil elektryka ${document.getElementById('heroName').textContent}`;
+
+  if (navigator.share) {
+    // 🌐 Jeśli przeglądarka obsługuje Web Share API (mobilne urządzenia)
+    try {
+      await navigator.share({
+        title: 'Profil Elektryka',
+        text: profileText,
+        url: profileUrl
+      });
+      console.log('Profil udostępniony!');
+    } catch (err) {
+      console.error('Błąd udostępniania:', err);
+    }
+  } else {
+    // 🖥 Desktop – kopiowanie do schowka jako fallback
+    await navigator.clipboard.writeText(profileUrl);
+    alert('Adres profilu został skopiowany do schowka. Możesz go udostępnić ręcznie.');
+  }
+});
+
 </script>
 
 </body>
