@@ -409,28 +409,28 @@ document.getElementById('register-form').addEventListener('submit', async e => {
 
 /* === BLOKADA EMAILA I TELEFONU W INNYCH POLACH === */
 
-const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/i
-const phoneRegex = /\+?\d[\d\s\-]{2,}/
+const zajmujeSieInput = document.getElementById('zajmujeSie');
 
-const forbiddenInputs = [
-  
-  'zajmujeSie'
-]
+zajmujeSieInput.addEventListener('input', () => {
+  let value = zajmujeSieInput.value;
 
-forbiddenInputs.forEach(id => {
-  const el = document.getElementById(id)
-  if (!el) return
+  // Ograniczenie do maksymalnie 2 cyfr
+  let digitsCount = 0;
+  value = value.replace(/\d/g, (d) => {
+    digitsCount++;
+    return digitsCount <= 2 ? d : ''; // zostawiamy tylko pierwsze 2 cyfry
+  });
 
-  el.addEventListener('input', () => {
-    if (emailRegex.test(el.value) || phoneRegex.test(el.value)) {
-      el.value = el.value
-        .replace(emailRegex, '')
-        .replace(phoneRegex, '')
-      alert('Numer telefonu i adres e-mail można podać tylko w przeznaczonych do tego polach.')
-    }
-  })
-})
+  // Usuwamy adresy e-mail
+  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
+  value = value.replace(emailRegex, '');
 
+  // Usuwamy numery telefonu
+  const phoneRegex = /\+?\d[\d\s\-]{2,}/g;
+  value = value.replace(phoneRegex, '');
+
+  zajmujeSieInput.value = value;
+});
 </script>
 </body>
 </html>
