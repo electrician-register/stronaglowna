@@ -353,9 +353,9 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   }
 
   const payload = { email: currentUser.email }
-  payload.nrE_valid_to = nrEValidTo.value || null
-  payload.nrEPomiary_valid_to = nrEPomiaryValidTo.value || null
-  payload.nrD_valid_to = nrDValidTo.value || null
+  payload.nre_valid_to = nrEValidTo.value || null
+  payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
+  payload.nrd_valid_to = nrDValidTo.value || null
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
   if (plikUrls.length) payload.plik = plikUrls.join(',')
 
