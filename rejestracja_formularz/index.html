@@ -280,7 +280,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     const file = plik.files[i]
     if (!allowedTypes.includes(file.type) || file.size>maxSize) {
       loading.style.display='none'
-      result.textContent='Nieprawidłowy plik'
+      result.textContent='Plik nie może przekraczać 5MB. Obsługiwane pliki to: PDF, JPG/JPEG i PNG'
       result.className='error'
       return
     }
