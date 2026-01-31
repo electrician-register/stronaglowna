@@ -430,7 +430,7 @@ zajmujeSieInput.addEventListener('input', () => {
   value = value.replace(emailRegex, '');
 
   // Usuwamy numery telefonu
-  const phoneRegex = /\+?\d[\d\s\-]{2,}/g;
+  const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
   value = value.replace(phoneRegex, '');
 
   zajmujeSieInput.value = value;
