@@ -220,7 +220,7 @@ const shareBtn = document.getElementById("shareProfileBtn");
 shareBtn.addEventListener("click", async () => {
   const heroName = document.getElementById('heroName').textContent;
   const profileUrl = window.location.href;
-  const profileText = `Profil elektryka ${heroName} ${profileUrl}`;
+  const profileText = `Profil elektryka ${heroName}`;
 
   if (navigator.share) {
     try {
