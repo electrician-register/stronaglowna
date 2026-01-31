@@ -140,7 +140,7 @@ section {
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"; // TU WPISZ SWÓJ KLUCZ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -208,14 +208,19 @@ if (id) {
 
       profil.classList.remove("hidden");
       brak.classList.add("hidden");
+    }
+  };
 
-      // 🔗 EVENT UDOSTĘPNIANIA
-      const shareBtn = document.getElementById("shareProfileBtn");
+  loadProfile();
+}
+
+// 🔗 UDOSTĘPNIANIE – listener poza loadProfile
+const shareBtn = document.getElementById("shareProfileBtn");
 
 shareBtn.addEventListener("click", async () => {
-  const heroName = document.getElementById('heroName').textContent; // dynamiczne imię i nazwisko
-  const profileUrl = window.location.href; // aktualny link
-  const profileText = `Profil elektryka ${heroName} ${profileUrl}`; // TU JEST JEDNO WYWOŁANIE
+  const heroName = document.getElementById('heroName').textContent;
+  const profileUrl = window.location.href;
+  const profileText = `Profil elektryka ${heroName} ${profileUrl}`;
 
   if (navigator.share) {
     try {
@@ -233,13 +238,8 @@ shareBtn.addEventListener("click", async () => {
     alert('Adres profilu został skopiowany do schowka. Możesz go udostępnić ręcznie.');
   }
 });
-
-    }
-  };
-
-  loadProfile();
-}
 </script>
 
 </body>
 </html>
+  
