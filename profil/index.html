@@ -191,6 +191,7 @@ if (id) {
     } else {
       document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
       document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
+      document.getElementById('displayZajmujeSie').innerHTML = data.zajmujeSie;
       gwiazdkiLine.textContent = data.gwiazdki || "";
 
       statusEl.className = "badge";
