@@ -57,14 +57,10 @@
 
     input[readonly] { background-color: #f4f6f8; cursor: not-allowed; }
     input[type="tel"] { ime-mode: disabled; }
-
     select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
     select:not(:disabled) { background-color: #fff; color: #000; }
-
     select { height: 42px; }
-
     textarea { min-height: 80px; }
-
     button[type="submit"] {
       margin-top: 20px;
       width: 100%;
@@ -77,7 +73,6 @@
       cursor: pointer;
     }
     button[type="submit"]:hover { background: #45a049; }
-
     #close-btn {
       position: absolute;
       top: 12px;
@@ -91,11 +86,9 @@
       line-height: 1;
     }
     #close-btn:hover { color: #000; }
-
     #result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
     .error { background: #f44336; color: #fff; }
     #loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
-
     .rodo-label {
       display: flex;
       flex-direction: row;
@@ -108,16 +101,16 @@
     }
     .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
 
-    /* contenteditable wygląd */
+    /* contenteditable styl */
     #zajmujeSie {
       min-height: 80px;
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 10px;
       background-color: #fff;
+      color: #000;
       font-size: 16px;
-      overflow-y: auto;
-      white-space: pre-wrap;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -146,32 +139,20 @@
     <option value="">— wybierz miasto —</option>
   </select>
 
-<label>Nr upr. EKSPLOATACJA</label>
-<textarea id="nrE"></textarea>
+  <label>Nr upr. EKSPLOATACJA</label>
+  <textarea id="nrE"></textarea>
+  <label id="nrEValidLabel" style="display:none;">Data ważności – EKSPLOATACJA</label>
+  <input type="date" id="nrEValidTo" style="display:none;">
 
-<label id="nrEValidLabel" style="display:none;">
-  Data ważności – EKSPLOATACJA
-</label>
-<input type="date" id="nrEValidTo" style="display:none;">
+  <label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
+  <textarea id="nrEPomiary"></textarea>
+  <label id="nrEPomiaryValidLabel" style="display:none;">Data ważności – EKSPLOATACJA Z POMIARAMI</label>
+  <input type="date" id="nrEPomiaryValidTo" style="display:none;">
 
-
-<label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
-<textarea id="nrEPomiary"></textarea>
-
-<label id="nrEPomiaryValidLabel" style="display:none;">
-  Data ważności – EKSPLOATACJA Z POMIARAMI
-</label>
-<input type="date" id="nrEPomiaryValidTo" style="display:none;">
-
-
-<label>Nr upr. DOZÓR</label>
-<textarea id="nrD"></textarea>
-
-<label id="nrDValidLabel" style="display:none;">
-  Data ważności – DOZÓR
-</label>
-<input type="date" id="nrDValidTo" style="display:none;">
-
+  <label>Nr upr. DOZÓR</label>
+  <textarea id="nrD"></textarea>
+  <label id="nrDValidLabel" style="display:none;">Data ważności – DOZÓR</label>
+  <input type="date" id="nrDValidTo" style="display:none;">
 
   <label>Email</label>
   <input id="email" readonly>
@@ -288,56 +269,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (data) {
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
-    fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
-    if (data.wojewodztwo) loadWojewodztwa(data.wojewodztwo)
+    fields.forEach(f => {
+      if(f !== 'zajmujeSie') {
+        data[f] && (document.getElementById(f).value = data[f])
+      } else {
+        data[f] && (document.getElementById(f).innerHTML = data[f])
+      }
+    })
+    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
     if (data.miasto) document.getElementById('miasto').value = data.miasto
 
-    if (data.nrE) {
-      nrEValidLabel.style.display = 'block'
-      nrEValidTo.style.display = 'block'
-      nrEValidTo.value = data.nrE_valid_to || ''
-    }
-    if (data.nrEPomiary) {
-      nrEPomiaryValidLabel.style.display = 'block'
-      nrEPomiaryValidTo.style.display = 'block'
-      nrEPomiaryValidTo.value = data.nrEPomiary_valid_to || ''
-    }
-    if (data.nrD) {
-      nrDValidLabel.style.display = 'block'
-      nrDValidTo.style.display = 'block'
-      nrDValidTo.value = data.nrD_valid_to || ''
-    }
+    if (data.nrE) { nrEValidLabel.style.display = 'block'; nrEValidTo.style.display = 'block'; nrEValidTo.value = data.nrE_valid_to || '' }
+    if (data.nrEPomiary) { nrEPomiaryValidLabel.style.display = 'block'; nrEPomiaryValidTo.style.display = 'block'; nrEPomiaryValidTo.value = data.nrEPomiary_valid_to || '' }
+    if (data.nrD) { nrDValidLabel.style.display = 'block'; nrDValidTo.style.display = 'block'; nrDValidTo.value = data.nrD_valid_to || '' }
 
-  } else {
-    loadWojewodztwa()
-  }
+  } else { loadWojewodztwa() }
 })
 
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
-  if (!currentUser) {
-    result.textContent = 'Musisz być zalogowany'
-    result.className = 'error'
-    return
-  }
+  if (!currentUser) { result.textContent = 'Musisz być zalogowany'; result.className = 'error'; return }
 
-  loading.style.display = 'block'
-  result.textContent = ''
-  result.className = ''
+  loading.style.display = 'block'; result.textContent = ''; result.className = ''
 
-  if (nrE.value && nrEPomiary.value) {
-    loading.style.display='none'
-    result.textContent='Wybierz tylko jeden rodzaj eksploatacji'
-    result.className='error'
-    return
-  }
-
-  if (nrD.value && !nrEPomiary.value) {
-    loading.style.display='none'
-    result.textContent='Do DOZORU wymagane są pomiary'
-    result.className='error'
-    return
-  }
+  if (nrE.value && nrEPomiary.value) { loading.style.display='none'; result.textContent='Wybierz tylko jeden rodzaj eksploatacji'; result.className='error'; return }
+  if (nrD.value && !nrEPomiary.value) { loading.style.display='none'; result.textContent='Do DOZORU wymagane są pomiary'; result.className='error'; return }
 
   const allowedTypes = ['application/pdf','image/jpeg','image/png']
   const maxSize = 5*1024*1024
@@ -353,12 +309,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
     }
     const path = `${currentUser.id}/${Date.now()}_${file.name}`
     const { error } = await supabase.storage.from('uprawnienia').upload(path,file,{upsert:true})
-    if (error) {
-      loading.style.display='none'
-      result.textContent=error.message
-      result.className='error'
-      return
-    }
+    if (error) { loading.style.display='none'; result.textContent=error.message; result.className='error'; return }
     const { data } = await supabase.storage.from('uprawnienia').createSignedUrl(path,3600)
     plikUrls.push(data.signedUrl)
   }
@@ -367,34 +318,24 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   payload.nre_valid_to = nrEValidTo.value || null
   payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
   payload.nrd_valid_to = nrDValidTo.value || null
-  fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
-  payload.zajmujeSie = document.getElementById('zajmujeSie').innerHTML.trim()
+  fields.forEach(f => {
+    if(f !== 'zajmujeSie') { payload[f] = document.getElementById(f).value.trim() }
+    else { payload[f] = document.getElementById(f).innerHTML.trim() }
+  })
   if (plikUrls.length) payload.plik = plikUrls.join(',')
 
   const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
   let error
-  if (existing) {
-    const { error: e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id)
-    error = e2
-  } else {
-    const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload)
-    error = e3
-  }
+  if (existing) { const { error: e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id); error = e2 }
+  else { const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload); error = e3 }
 
   loading.style.display='none'
-  if (error) {
-    result.textContent = error.message
-    result.className = 'error'
-    return
-  }
+  if (error) { result.textContent = error.message; result.className = 'error'; return }
 
   try {
     const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8' },
       body: JSON.stringify({
         email: currentUser.email,
         name: document.getElementById('imie').value,
@@ -406,46 +347,31 @@ document.getElementById('register-form').addEventListener('submit', async e => {
         nrD: document.getElementById('nrD').value
       })
     })
-    if (!res.ok) {
-      const err = await res.text()
-      throw new Error(err || 'Błąd wysyłki emaila')
-    }
-  } catch(err) {
-    result.textContent = 'Nie udało się wysłać emaila powitalnego: ' + err.message
-    result.className = 'error'
-    return
-  }
+    if (!res.ok) { const err = await res.text(); throw new Error(err || 'Błąd wysyłki emaila') }
+  } catch(err) { result.textContent = 'Nie udało się wysłać emaila powitalnego: ' + err.message; result.className = 'error'; return }
 
   window.location.href = 'https://orep.pl/logowanie'
 })
 
-/* === BLOKADA EMAILA I TELEFONU W INNYCH POLACH === */
-
 const zajmujeSieInput = document.getElementById('zajmujeSie');
 
 zajmujeSieInput.addEventListener('input', () => {
-  let value = zajmujeSieInput.innerText;
+  let value = zajmujeSieInput.innerHTML;
 
-  // Ograniczenie do maksymalnie 2 cyfr
   let digitsCount = 0;
   value = value.replace(/\d/g, (d) => {
     digitsCount++;
-    if (digitsCount > 2) {
-      alert('W tym polu nie można wpisać więcej niż 2 cyfr.');
-      return ''; // trzecia i kolejne cyfry są blokowane
-    }
-    return d; // pierwsze 2 cyfry zostają
+    if (digitsCount > 2) return '';
+    return d;
   });
 
-  // Usuwamy adresy e-mail
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
   value = value.replace(emailRegex, '');
 
-  // Usuwamy numery telefonu
   const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
   value = value.replace(phoneRegex, '');
 
-  zajmujeSieInput.innerText = value;
+  zajmujeSieInput.innerHTML = value;
 });
 </script>
 </body>
