@@ -37,53 +37,55 @@ header p {
   max-width:700px;
   margin:0 auto 25px;
   opacity:0.9;
-  color: #f4f4f5;
+  color:#f4f4f5;
 }
+
 /* === WIZYTÓWKA ELEKTRYKA === */
 .about-box {
-  margin: 30px auto;
-  padding: 25px 30px;
-  max-width: 720px;
-  background: #f8fafc;
-  border-left: 5px solid #0B5FA5;
-  border-radius: 10px;
-  text-align: left;
+  margin:30px auto;
+  padding:25px 30px;
+  max-width:720px;
+  background:#f8fafc;
+  border-left:5px solid #0B5FA5;
+  border-radius:10px;
+  text-align:left;
 }
 
 .about-box h3 {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #0B5FA5;
+  margin:0 0 12px;
+  font-size:18px;
+  font-weight:700;
+  color:#0B5FA5;
 }
 
 #opis {
-  font-size: 16.5px;
-  line-height: 1.7;
-  color: #1f2937;
-  white-space: pre-line;
+  font-size:16.5px;
+  line-height:1.7;
+  color:#1f2937;
+  white-space:pre-line;
 }
-/* PRZYCISK UDOSTEPNIJ */
+
+/* PRZYCISK UDOSTĘPNIJ */
 .share-btn {
-  background-color: #0B5FA5;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.3s ease;
+  background-color:#0B5FA5;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:12px 20px;
+  font-size:16px;
+  cursor:pointer;
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition:background 0.3s ease;
 }
 
 .share-btn:hover {
-  background-color: #094c84;
+  background-color:#094c84;
 }
 
-/* 🔶 POMARAŃCZOWA LINIA Z TEKSTEM */
+/* LINIA POD HEADEREM */
 .header-line {
   width:100%;
   height:56px;
@@ -98,7 +100,7 @@ header p {
 .header-line span {
   font-weight:700;
   font-size:24px;
-  color:#000;
+  color:#fff;
   line-height:1;
 }
 
@@ -123,7 +125,6 @@ section {
   margin-bottom:20px;
 }
 
-/* KOLORY STATUSÓW */
 .status-ok { background:#16a34a; }
 .status-wait { background:#f59e0b; }
 .status-no { background:#dc2626; }
@@ -141,21 +142,20 @@ section {
   <p id="heroDesc">Profil w Centralnym Rejestrze Elektryków</p>
 </header>
 
-<!-- 🔶 LINIA POD HEADEREM -->
 <div class="header-line">
   <span id="gwiazdkiLine"></span>
 </div>
 
 <section id="profil" class="hidden">
   <span id="status" class="badge"></span>
+
   <div class="about-box">
-  <h3>⚡ Zakres usług / O mnie</h3>
-  <p id="opis"></p>
-</div>
+    <h3>⚡ Zakres usług / O mnie</h3>
+    <p id="opis"></p>
+  </div>
 
   <p><strong>Email:</strong> <span id="email"></span></p>
   <p><strong>Telefon:</strong> <span id="telefon"></span></p>
-
 
   <p>
     <button type="button" id="shareProfileBtn" class="share-btn">
@@ -163,7 +163,6 @@ section {
     </button>
   </p>
 </section>
-
 
 <section id="brak" class="hidden">
   <h2>Brak wyników</h2>
@@ -174,7 +173,7 @@ section {
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"; // TU WPISZ SWÓJ KLUCZ
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -184,9 +183,9 @@ const statusEl = document.getElementById("status");
 const gwiazdkiLine = document.getElementById("gwiazdkiLine");
 
 const statusMap = {
-  "✅": { text: "Status ELEKTRYKA - zweryfikowany 🙂", class: "status-ok" },
-  "⌛": { text: "Status ELEKTRYKA - w trakcie weryfikacji 😴", class: "status-wait" },
-  "❌": { text: "Status ELEKTRYKA - aktualnie brak weryfikacji 😕", class: "status-no" }
+  "✅": { text:"Status ELEKTRYKA - zweryfikowany 🙂", class:"status-ok" },
+  "⌛": { text:"Status ELEKTRYKA - w trakcie weryfikacji 😴", class:"status-wait" },
+  "❌": { text:"Status ELEKTRYKA - aktualnie brak weryfikacji 😕", class:"status-no" }
 };
 
 function maskEmail(email) {
@@ -198,11 +197,11 @@ function maskEmail(email) {
 
 function maskPhone(phone) {
   if (!phone) return "";
-  return phone.slice(0, 2) + "******" + phone.slice(-2);
+  return phone.slice(0,2) + "******" + phone.slice(-2);
 }
 
 const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get('id');
+const id = urlParams.get("id");
 
 if (id) {
   const loadProfile = async () => {
@@ -219,15 +218,12 @@ if (id) {
     } else {
       document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
       document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
-      document.getElementById('displayZajmujeSie').innerHTML = data.zajmujeSie;
       gwiazdkiLine.textContent = data.gwiazdki || "";
 
       statusEl.className = "badge";
       if (statusMap[data.status]) {
         statusEl.textContent = statusMap[data.status].text;
         statusEl.classList.add(statusMap[data.status].class);
-      } else {
-        statusEl.textContent = "";
       }
 
       const emailEl = document.getElementById("email");
@@ -249,27 +245,24 @@ if (id) {
   loadProfile();
 }
 
-// 🔗 UDOSTĘPNIANIE – listener poza loadProfile
 const shareBtn = document.getElementById("shareProfileBtn");
 
 shareBtn.addEventListener("click", async () => {
-  const heroName = document.getElementById('heroName').textContent;
+  const heroName = document.getElementById("heroName").textContent;
   const profileUrl = window.location.href;
 
   if (navigator.share) {
     await navigator.share({
-      title: 'Profil Elektryka',
-      text: `Profil elektryka ${heroName}`,
-      url: profileUrl
+      title:"Profil Elektryka",
+      text:`Profil elektryka ${heroName}`,
+      url:profileUrl
     });
   } else {
     await navigator.clipboard.writeText(profileUrl);
-    alert('Adres profilu został skopiowany do schowka.');
+    alert("Adres profilu został skopiowany do schowka.");
   }
 });
-
 </script>
 
 </body>
 </html>
-  
