@@ -107,6 +107,18 @@
       gap: 10px;
     }
     .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
+
+    /* contenteditable wygląd */
+    #zajmujeSie {
+      min-height: 80px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      background-color: #fff;
+      font-size: 16px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 
@@ -168,7 +180,7 @@
   <input id="telefon" type="tel">
 
   <label>Zajmuje się</label>
-  <textarea id="zajmujeSie"></textarea>
+  <div id="zajmujeSie" contenteditable="true"></div>
 
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
@@ -190,7 +202,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://tfbqqduxtsacvwfigsvt.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+  'YOUR_SUPABASE_ANON_KEY'
 )
 
 let currentUser = null
@@ -277,10 +289,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
     fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
-    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
+    if (data.wojewodztwo) loadWojewodztwa(data.wojewodztwo)
     if (data.miasto) document.getElementById('miasto').value = data.miasto
 
-    // daty ważności
     if (data.nrE) {
       nrEValidLabel.style.display = 'block'
       nrEValidTo.style.display = 'block'
@@ -357,6 +368,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
   payload.nrd_valid_to = nrDValidTo.value || null
   fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
+  payload.zajmujeSie = document.getElementById('zajmujeSie').innerHTML.trim()
   if (plikUrls.length) payload.plik = plikUrls.join(',')
 
   const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
@@ -381,7 +393,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+        'Authorization': 'Bearer YOUR_SUPABASE_ANON_KEY'
       },
       body: JSON.stringify({
         email: currentUser.email,
@@ -412,7 +424,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
 const zajmujeSieInput = document.getElementById('zajmujeSie');
 
 zajmujeSieInput.addEventListener('input', () => {
-  let value = zajmujeSieInput.value;
+  let value = zajmujeSieInput.innerText;
 
   // Ograniczenie do maksymalnie 2 cyfr
   let digitsCount = 0;
@@ -433,9 +445,8 @@ zajmujeSieInput.addEventListener('input', () => {
   const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
   value = value.replace(phoneRegex, '');
 
-  zajmujeSieInput.value = value;
+  zajmujeSieInput.innerText = value;
 });
-
 </script>
 </body>
 </html>
