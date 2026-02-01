@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+  <link rel="icon" href="/favicon.png">
+  <meta name="robots" content="noindex, nofollow">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
-  <link rel="icon" href="/favicon.png">
-  <meta name="robots" content="noindex, nofollow">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -56,9 +56,13 @@
     }
 
     input[readonly] { background-color: #f4f6f8; cursor: not-allowed; }
+    input[type="tel"] { ime-mode: disabled; }
+
     select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
     select:not(:disabled) { background-color: #fff; color: #000; }
+
     select { height: 42px; }
+
     textarea { min-height: 80px; }
 
     button[type="submit"] {
@@ -103,35 +107,9 @@
       gap: 10px;
     }
     .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
-
-    #zajmujeSie {
-      min-height: 80px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 10px;
-      background-color: #fff;
-      font-size: 16px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-
-    /* toolbar */
-    #toolbar {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-    #toolbar button {
-      padding: 5px 10px;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      background: #f0f0f0;
-    }
-    #toolbar button:hover { background: #ddd; }
   </style>
 </head>
+
 <body>
 <div class="form-wrapper">
 <form id="register-form">
@@ -156,20 +134,32 @@
     <option value="">— wybierz miasto —</option>
   </select>
 
-  <label>Nr upr. EKSPLOATACJA</label>
-  <textarea id="nrE"></textarea>
-  <label id="nrEValidLabel" style="display:none;">Data ważności – EKSPLOATACJA</label>
-  <input type="date" id="nrEValidTo" style="display:none;">
+<label>Nr upr. EKSPLOATACJA</label>
+<textarea id="nrE"></textarea>
 
-  <label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
-  <textarea id="nrEPomiary"></textarea>
-  <label id="nrEPomiaryValidLabel" style="display:none;">Data ważności – EKSPLOATACJA Z POMIARAMI</label>
-  <input type="date" id="nrEPomiaryValidTo" style="display:none;">
+<label id="nrEValidLabel" style="display:none;">
+  Data ważności – EKSPLOATACJA
+</label>
+<input type="date" id="nrEValidTo" style="display:none;">
 
-  <label>Nr upr. DOZÓR</label>
-  <textarea id="nrD"></textarea>
-  <label id="nrDValidLabel" style="display:none;">Data ważności – DOZÓR</label>
-  <input type="date" id="nrDValidTo" style="display:none;">
+
+<label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
+<textarea id="nrEPomiary"></textarea>
+
+<label id="nrEPomiaryValidLabel" style="display:none;">
+  Data ważności – EKSPLOATACJA Z POMIARAMI
+</label>
+<input type="date" id="nrEPomiaryValidTo" style="display:none;">
+
+
+<label>Nr upr. DOZÓR</label>
+<textarea id="nrD"></textarea>
+
+<label id="nrDValidLabel" style="display:none;">
+  Data ważności – DOZÓR
+</label>
+<input type="date" id="nrDValidTo" style="display:none;">
+
 
   <label>Email</label>
   <input id="email" readonly>
@@ -178,20 +168,14 @@
   <input id="telefon" type="tel">
 
   <label>Zajmuje się</label>
-  <div id="toolbar">
-    <button type="button" onclick="formatText('bold')"><b>B</b></button>
-    <button type="button" onclick="formatText('italic')"><i>I</i></button>
-    <button type="button" onclick="formatText('underline')"><u>U</u></button>
-    <button type="button" onclick="addLink()">Link</button>
-  </div>
-  <div id="zajmujeSie" contenteditable="true"></div>
+  <textarea id="zajmujeSie"></textarea>
 
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
 
   <label class="rodo-label">
     <input type="checkbox" id="rodo" required>
-    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy.
+    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
   </label>
 
   <button type="submit" id="submit-btn">Zarejestruj</button>
@@ -212,31 +196,30 @@ const supabase = createClient(
 let currentUser = null
 const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
 
-// formatowanie tekstu
-function formatText(command) {
-  const zajmujeSie = document.getElementById('zajmujeSie');
-  zajmujeSie.focus();
-  document.execCommand(command, false, null);
-}
+function bindValidity(inputId, labelId, dateId) {
+  const input = document.getElementById(inputId)
+  const label = document.getElementById(labelId)
+  const date = document.getElementById(dateId)
 
-function addLink() {
-  const zajmujeSie = document.getElementById('zajmujeSie');
-  zajmujeSie.focus();
-  const url = prompt("Wklej adres URL:");
-  if (!url) return;
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-  const range = selection.getRangeAt(0);
-  const selectedText = range.toString() || url;
-  const a = document.createElement('a');
-  a.href = url;
-  a.textContent = selectedText;
-  a.target = "_blank";
-  range.deleteContents();
-  range.insertNode(a);
-}
+  date.min = new Date().toISOString().split('T')[0]
 
-// --- Ładowanie województw ---
+  input.addEventListener('input', () => {
+    if (input.value.trim() !== '') {
+      label.style.display = 'block'
+      date.style.display = 'block'
+      date.required = true
+    } else {
+      label.style.display = 'none'
+      date.style.display = 'none'
+      date.required = false
+      date.value = ''
+    }
+  })
+}
+bindValidity('nrE', 'nrEValidLabel', 'nrEValidTo')
+bindValidity('nrEPomiary', 'nrEPomiaryValidLabel', 'nrEPomiaryValidTo')
+bindValidity('nrD', 'nrDValidLabel', 'nrDValidTo')
+
 async function loadWojewodztwa(selectedWoj = null) {
   const { data, error } = await supabase.from('wojewodztwa').select('id, nazwa').order('nazwa')
   if (error) return
@@ -248,82 +231,158 @@ async function loadWojewodztwa(selectedWoj = null) {
     o.textContent = w.nazwa
     wojSelect.appendChild(o)
   })
-  if (selectedWoj) { wojSelect.value = selectedWoj; wojSelect.dispatchEvent(new Event('change')) }
+  if (selectedWoj) {
+    wojSelect.value = selectedWoj
+    wojSelect.dispatchEvent(new Event('change'))
+  }
 }
 
 document.getElementById('wojewodztwo').addEventListener('change', async function() {
   const wojId = this.value
   const miastoSelect = document.getElementById('miasto')
-  if (!wojId) { miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'; miastoSelect.disabled=true; return }
+  if (!wojId) {
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
+    miastoSelect.disabled = true
+    return
+  }
   const { data, error } = await supabase.from('miasta').select('id,nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
   if (error) return
   miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-  data.forEach(m => { const o=document.createElement('option'); o.value=m.id; o.textContent=m.nazwa; miastoSelect.appendChild(o)})
+  data.forEach(m => {
+    const o = document.createElement('option')
+    o.value = m.id
+    o.textContent = m.nazwa
+    miastoSelect.appendChild(o)
+  })
   miastoSelect.disabled = false
 })
 
-document.getElementById('close-btn').addEventListener('click',()=>{ window.location.href='https://orep.pl/' })
-
-// --- Podpięcie formularza ---
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if(!user) return window.location.href='/logowanie'
-  currentUser=user
-  email.value=user.email
-
-  const { data } = await supabase.from('tabela_elektrykow').select('*').eq('email',user.email).single()
-  if(data){
-    document.getElementById('form-title').textContent='Aktualizacja danych'
-    document.getElementById('submit-btn').textContent='Zapisz zmiany'
-    fields.forEach(f => { if(f!=='zajmujeSie'){ data[f]&&(document.getElementById(f).value=data[f]) } else { data[f]&&(document.getElementById(f).innerHTML=data[f]) } })
-    if(data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
-    if(data.miasto) document.getElementById('miasto').value=data.miasto
-
-    if(data.nrE){ nrEValidLabel.style.display='block'; nrEValidTo.style.display='block'; nrEValidTo.value=data.nrE_valid_to||''}
-    if(data.nrEPomiary){ nrEPomiaryValidLabel.style.display='block'; nrEPomiaryValidTo.style.display='block'; nrEPomiaryValidTo.value=data.nrEPomiary_valid_to||''}
-    if(data.nrD){ nrDValidLabel.style.display='block'; nrDValidTo.style.display='block'; nrDValidTo.value=data.nrD_valid_to||''}
-  } else { loadWojewodztwa() }
+document.getElementById('close-btn').addEventListener('click', () => {
+  window.location.href = 'https://orep.pl/'
 })
 
-document.getElementById('register-form').addEventListener('submit', async e=>{
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return window.location.href = '/logowanie'
+
+  currentUser = user
+  email.value = user.email
+
+  const { data } = await supabase.from('tabela_elektrykow')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+
+  if (data) {
+    document.getElementById('form-title').textContent = 'Aktualizacja danych'
+    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
+    fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
+    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
+    if (data.miasto) document.getElementById('miasto').value = data.miasto
+
+    // daty ważności
+    if (data.nrE) {
+      nrEValidLabel.style.display = 'block'
+      nrEValidTo.style.display = 'block'
+      nrEValidTo.value = data.nrE_valid_to || ''
+    }
+    if (data.nrEPomiary) {
+      nrEPomiaryValidLabel.style.display = 'block'
+      nrEPomiaryValidTo.style.display = 'block'
+      nrEPomiaryValidTo.value = data.nrEPomiary_valid_to || ''
+    }
+    if (data.nrD) {
+      nrDValidLabel.style.display = 'block'
+      nrDValidTo.style.display = 'block'
+      nrDValidTo.value = data.nrD_valid_to || ''
+    }
+
+  } else {
+    loadWojewodztwa()
+  }
+})
+
+document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
-  if(!currentUser){ result.textContent='Musisz być zalogowany'; result.className='error'; return }
-  loading.style.display='block'; result.textContent=''; result.className=''
+  if (!currentUser) {
+    result.textContent = 'Musisz być zalogowany'
+    result.className = 'error'
+    return
+  }
 
-  if(nrE.value && nrEPomiary.value){ loading.style.display='none'; result.textContent='Wybierz tylko jeden rodzaj eksploatacji'; result.className='error'; return }
-  if(nrD.value && !nrEPomiary.value){ loading.style.display='none'; result.textContent='Do DOZORU wymagane są pomiary'; result.className='error'; return }
+  loading.style.display = 'block'
+  result.textContent = ''
+  result.className = ''
 
-  const allowedTypes=['application/pdf','image/jpeg','image/png'], maxSize=5*1024*1024
+  if (nrE.value && nrEPomiary.value) {
+    loading.style.display='none'
+    result.textContent='Wybierz tylko jeden rodzaj eksploatacji'
+    result.className='error'
+    return
+  }
+
+  if (nrD.value && !nrEPomiary.value) {
+    loading.style.display='none'
+    result.textContent='Do DOZORU wymagane są pomiary'
+    result.className='error'
+    return
+  }
+
+  const allowedTypes = ['application/pdf','image/jpeg','image/png']
+  const maxSize = 5*1024*1024
+
   let plikUrls=[]
-  for(let i=0;i<plik.files.length;i++){
-    const file=plik.files[i]
-    if(!allowedTypes.includes(file.type)||file.size>maxSize){ loading.style.display='none'; result.textContent='Plik nie może przekraczać 5MB. Obsługiwane pliki to: PDF, JPG/JPEG i PNG'; result.className='error'; return }
-    const path=`${currentUser.id}/${Date.now()}_${file.name}`
+  for (let i=0;i<plik.files.length;i++) {
+    const file = plik.files[i]
+    if (!allowedTypes.includes(file.type) || file.size>maxSize) {
+      loading.style.display='none'
+      result.textContent='Plik nie może przekraczać 5MB. Obsługiwane pliki to: PDF, JPG/JPEG i PNG'
+      result.className='error'
+      return
+    }
+    const path = `${currentUser.id}/${Date.now()}_${file.name}`
     const { error } = await supabase.storage.from('uprawnienia').upload(path,file,{upsert:true})
-    if(error){ loading.style.display='none'; result.textContent=error.message; result.className='error'; return }
+    if (error) {
+      loading.style.display='none'
+      result.textContent=error.message
+      result.className='error'
+      return
+    }
     const { data } = await supabase.storage.from('uprawnienia').createSignedUrl(path,3600)
     plikUrls.push(data.signedUrl)
   }
 
-  const payload={ email: currentUser.email }
-  payload.nre_valid_to = nrEValidTo.value||null
-  payload.nrepomiary_valid_to = nrEPomiaryValidTo.value||null
-  payload.nrd_valid_to = nrDValidTo.value||null
-  fields.forEach(f=>{ if(f!=='zajmujeSie'){ payload[f]=document.getElementById(f).value.trim() } else { payload[f]=document.getElementById(f).innerHTML.trim() } })
-  if(plikUrls.length) payload.plik = plikUrls.join(',')
+  const payload = { email: currentUser.email }
+  payload.nre_valid_to = nrEValidTo.value || null
+  payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
+  payload.nrd_valid_to = nrDValidTo.value || null
+  fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
+  if (plikUrls.length) payload.plik = plikUrls.join(',')
 
   const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
   let error
-  if(existing){ const { error:e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id',existing.id); error=e2 } 
-  else { const { error:e3 } = await supabase.from('tabela_elektrykow').insert(payload); error=e3 }
+  if (existing) {
+    const { error: e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id)
+    error = e2
+  } else {
+    const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload)
+    error = e3
+  }
 
   loading.style.display='none'
-  if(error){ result.textContent=error.message; result.className='error'; return }
+  if (error) {
+    result.textContent = error.message
+    result.className = 'error'
+    return
+  }
 
-  try{
-    const res=await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email',{
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8' },
+  try {
+    const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+      },
       body: JSON.stringify({
         email: currentUser.email,
         name: document.getElementById('imie').value,
@@ -335,12 +394,48 @@ document.getElementById('register-form').addEventListener('submit', async e=>{
         nrD: document.getElementById('nrD').value
       })
     })
-    if(!res.ok){ const err=await res.text(); throw new Error(err||'Błąd wysyłki emaila') }
-  }catch(e){ console.log('Mail error',e) }
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(err || 'Błąd wysyłki emaila')
+    }
+  } catch(err) {
+    result.textContent = 'Nie udało się wysłać emaila powitalnego: ' + err.message
+    result.className = 'error'
+    return
+  }
 
-  result.textContent='Dane zapisane pomyślnie'
-  result.className=''
+  window.location.href = 'https://orep.pl/logowanie'
 })
+
+/* === BLOKADA EMAILA I TELEFONU W INNYCH POLACH === */
+
+const zajmujeSieInput = document.getElementById('zajmujeSie');
+
+zajmujeSieInput.addEventListener('input', () => {
+  let value = zajmujeSieInput.value;
+
+  // Ograniczenie do maksymalnie 2 cyfr
+  let digitsCount = 0;
+  value = value.replace(/\d/g, (d) => {
+    digitsCount++;
+    if (digitsCount > 2) {
+      alert('W tym polu nie można wpisać więcej niż 2 cyfr.');
+      return ''; // trzecia i kolejne cyfry są blokowane
+    }
+    return d; // pierwsze 2 cyfry zostają
+  });
+
+  // Usuwamy adresy e-mail
+  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
+  value = value.replace(emailRegex, '');
+
+  // Usuwamy numery telefonu
+  const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
+  value = value.replace(phoneRegex, '');
+
+  zajmujeSieInput.value = value;
+});
+
 </script>
 </body>
 </html>
