@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -188,6 +189,19 @@ const statusMap = {
   "❌": { text:"Status ELEKTRYKA - aktualnie brak weryfikacji 😕", class:"status-no" }
 };
 
+/* === CZYSZCZENIE OPISU Z HTML === */
+function cleanOpis(text) {
+  if (!text) return "";
+
+  return text
+    .replace(/<\/div>\s*<div>/gi, "\n")
+    .replace(/<div>/gi, "")
+    .replace(/<\/div>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/?[^>]+(>|$)/g, "")
+    .trim();
+}
+
 function maskEmail(email) {
   if (!email) return "";
   const [name, domain] = email.split("@");
@@ -217,7 +231,8 @@ if (id) {
       gwiazdkiLine.textContent = "";
     } else {
       document.getElementById("heroName").textContent = `${data.imie} ${data.nazwisko}`;
-      document.getElementById("opis").textContent = data.zajmujeSie || "Usługi elektryczne";
+      document.getElementById("opis").textContent =
+        cleanOpis(data.zajmujeSie) || "Usługi elektryczne";
       gwiazdkiLine.textContent = data.gwiazdki || "";
 
       statusEl.className = "badge";
