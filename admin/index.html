@@ -28,6 +28,32 @@ table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
+.file-link {
+  display: block;
+  color: #3498db;
+  text-decoration: none;
+  font-size: 11px;
+  margin-bottom: 3px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+.file-link:hover {
+  background: #e3f2fd;
+  border-color: #3498db;
+}
+.file-link.error {
+  color: #e74c3c;
+  background: #fdeaea;
+  border-color: #f5c6cb;
+}
+.file-link.success {
+  color: #27ae60;
+  background: #eafaf1;
+  border-color: #c3e6cb;
+}
+
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
   td input,
@@ -83,11 +109,11 @@ th { background:#222; color:#fff }
   
   <!-- Przyciski diagnostyczne -->
   <div style="margin-bottom:15px;">
-    <button onclick="listBucketFiles()" style="background:#3498db; margin-right:10px;">
-      Sprawdź foldery w bucket
+    <button onclick="testAllFiles()" style="background:#e74c3c; margin-right:10px;">
+      🔍 Testuj wszystkie pliki
     </button>
-    <button onclick="checkAllFolders()" style="background:#9b59b6;">
-      Sprawdź wszystkie podfoldery
+    <button onclick="fixAllFileUrls()" style="background:#9b59b6;">
+      🔧 Napraw URL w bazie
     </button>
   </div>
   
@@ -210,173 +236,149 @@ function extractPathFromUrl(fullUrl) {
   }
 }
 
-/* ===== GENERUJ PEŁNY PUBLIC URL PLIKU ===== */
-function filePublicUrl(fullUrl) {
-  if (!fullUrl) return "";
+/* ===== GENERUJ PUBLICZNY URL ===== */
+function getPublicUrl(fullUrl) {
+  const path = extractPathFromUrl(fullUrl);
+  if (!path) return null;
   
-  // Wyciągnij ścieżkę z pełnego URL
-  const path = extractPathFromUrl(fullUrl.trim());
-  
-  if (!path) return "";
-  
-  // Zakoduj, ale zachowaj ukośniki (dla podfolderów)
+  // Zakoduj ścieżkę
   const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
   return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${encodedPath}`;
 }
 
-/* ===== LISTUJ FOLDERY W BUCKET ===== */
-async function listBucketFiles() {
-  log("=== SPRAWDZANIE FOLDERÓW W BUCKET 'uprawnienia' ===");
+/* ===== SPRAWDŹ CZY PLIK ISTNIEJE ===== */
+async function checkFileExists(publicUrl) {
+  if (!publicUrl) return false;
   
   try {
-    // Listuj tylko główny poziom
-    const { data, error } = await supabaseClient
-      .storage
-      .from('uprawnienia')
-      .list();
-      
-    if (error) {
-      log("❌ Błąd listowania: " + error.message);
-      return;
-    }
-    
-    if (!data || data.length === 0) {
-      log("ℹ️ Bucket 'uprawnienia' jest pusty!");
-      return;
-    }
-    
-    const folders = data.filter(item => item.id === null);
-    const files = data.filter(item => item.id !== null);
-    
-    log(`📊 Statystyka:`);
-    log(`   📁 Foldery: ${folders.length}`);
-    log(`   📄 Pliki w głównym folderze: ${files.length}`);
-    
-    if (folders.length > 0) {
-      log("📁 Lista folderów:");
-      folders.forEach((folder, index) => {
-        log(`   ${index + 1}. ${folder.name}/`);
-      });
-    }
-    
-    if (files.length > 0) {
-      log("📄 Pliki w głównym folderze:");
-      files.forEach((file, index) => {
-        log(`   ${index + 1}. ${file.name}`);
-      });
-    }
-    
-  } catch (err) {
-    log("❌ Nieoczekiwany błąd: " + err.message);
+    const response = await fetch(publicUrl, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    return false;
   }
 }
 
-/* ===== SPRAWDŹ WSZYSTKIE PODFOLDERY ===== */
-async function checkAllFolders() {
-  log("=== SPRAWDZANIE ZAWARTOŚCI WSZYSTKICH PODFOLDERÓW ===");
+/* ===== TESTUJ WSZYSTKIE PLIKI ===== */
+async function testAllFiles() {
+  log("=== TESTOWANIE WSZYSTKICH PLIKÓW ===");
   
-  try {
-    // Najpierw pobierz listę folderów
-    const { data: foldersData, error: foldersError } = await supabaseClient
-      .storage
-      .from('uprawnienia')
-      .list();
+  const { data, error } = await supabaseClient
+    .from("tabela_elektrykow")
+    .select("id, imie, nazwisko, plik")
+    .not('plik', 'is', null);
+  
+  if (error) {
+    log("❌ Błąd pobierania danych: " + error.message);
+    return;
+  }
+  
+  log(`Znaleziono ${data.length} rekordów z plikami`);
+  
+  let totalFiles = 0;
+  let workingFiles = 0;
+  let brokenFiles = 0;
+  
+  for (const row of data) {
+    if (!row.plik) continue;
     
-    if (foldersError) {
-      log("❌ Błąd listowania folderów: " + foldersError.message);
-      return;
-    }
+    const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
     
-    const folders = foldersData.filter(item => item.id === null);
-    
-    if (folders.length === 0) {
-      log("ℹ️ Brak folderów do sprawdzenia");
-      return;
-    }
-    
-    log(`Znaleziono ${folders.length} folderów:`);
-    
-    // Dla każdego folderu sprawdź jego zawartość
-    for (const folder of folders) {
-      log(`\n📁 Sprawdzam folder: ${folder.name}/`);
+    for (const part of parts) {
+      totalFiles++;
+      const publicUrl = getPublicUrl(part.trim());
       
-      const { data: filesData, error: filesError } = await supabaseClient
-        .storage
-        .from('uprawnienia')
-        .list(folder.name);
-      
-      if (filesError) {
-        log(`   ❌ Błąd listowania: ${filesError.message}`);
+      if (!publicUrl) {
+        log(`❌ ${row.imie} ${row.nazwisko}: Nie można wygenerować URL z: ${part.substring(0, 50)}...`);
+        brokenFiles++;
         continue;
       }
       
-      if (!filesData || filesData.length === 0) {
-        log(`   ℹ️ Folder pusty`);
+      const exists = await checkFileExists(publicUrl);
+      
+      if (exists) {
+        log(`✅ ${row.imie} ${row.nazwisko}: DZIAŁA - ${publicUrl}`);
+        workingFiles++;
       } else {
-        log(`   📄 Zawartość (${filesData.length} plików):`);
-        filesData.forEach((file, index) => {
-          log(`      ${index + 1}. ${file.name} (${Math.round(file.metadata?.size / 1024) || 0} KB)`);
-        });
+        log(`❌ ${row.imie} ${row.nazwisko}: NIE DZIAŁA - ${publicUrl}`);
+        brokenFiles++;
+      }
+    }
+  }
+  
+  log(`=== PODSUMOWANIE ===`);
+  log(`📊 Wszystkich plików: ${totalFiles}`);
+  log(`✅ Działających: ${workingFiles}`);
+  log(`❌ Niedziałających: ${brokenFiles}`);
+  log(`📈 Skuteczność: ${totalFiles > 0 ? Math.round((workingFiles / totalFiles) * 100) : 0}%`);
+}
+
+/* ===== NAPRAW URL W BAZIE (ZAMIEN NA PUBLICZNE) ===== */
+async function fixAllFileUrls() {
+  if (!confirm("Czy na pewno chcesz zamienić wszystkie URL na publiczne?\n\nUWAGA: Ta operacja zmieni dane w bazie!")) {
+    return;
+  }
+  
+  log("=== NAPRAWA URL W BAZIE DANYCH ===");
+  
+  const { data, error } = await supabaseClient
+    .from("tabela_elektrykow")
+    .select("id, imie, nazwisko, plik")
+    .not('plik', 'is', null);
+  
+  if (error) {
+    log("❌ Błąd pobierania danych: " + error.message);
+    return;
+  }
+  
+  log(`Znaleziono ${data.length} rekordów do naprawy`);
+  
+  let fixedCount = 0;
+  let errorCount = 0;
+  
+  for (const row of data) {
+    if (!row.plik) continue;
+    
+    const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
+    const fixedParts = [];
+    
+    for (const part of parts) {
+      const publicUrl = getPublicUrl(part.trim());
+      if (publicUrl) {
+        fixedParts.push(publicUrl);
+      } else {
+        fixedParts.push(part); // Zostaw oryginalny jeśli nie można naprawić
       }
     }
     
-  } catch (err) {
-    log("❌ Nieoczekiwany błąd: " + err.message);
-  }
-}
-
-/* ===== SPRAWDZENIE PLIKÓW - UPROSZCZONE ===== */
-async function renderLinksWithCheck(text, rowId) {
-  if (!text) {
-    return "<span style='color:#888'>Brak plików</span>";
-  }
-
-  // Czyszczenie i podział tekstu
-  text = text.replace(/[,;]/g, " ");
-  const parts = text.split(/\s+/).filter(t => t && t.trim());
-  
-  if (parts.length === 0) {
-    return "<span style='color:#888'>Brak poprawnych URL</span>";
-  }
-  
-  let result = [];
-  
-  for (let part of parts) {
-    const cleanPart = part.trim();
+    const fixedPlik = fixedParts.join(" ");
     
-    // Wyciągnij nazwę pliku do wyświetlenia
-    let displayName = cleanPart.split('/').pop() || cleanPart;
-    // Skróć bardzo długie nazwy
-    if (displayName.length > 30) {
-      displayName = displayName.substring(0, 30) + '...';
+    // Aktualizuj tylko jeśli się zmieniło
+    if (fixedPlik !== row.plik) {
+      const { error: updateError } = await supabaseClient
+        .from("tabela_elektrykow")
+        .update({ plik: fixedPlik })
+        .eq('id', row.id);
+      
+      if (updateError) {
+        log(`❌ Błąd aktualizacji ID ${row.id}: ${updateError.message}`);
+        errorCount++;
+      } else {
+        log(`✅ Naprawiono ID ${row.id}: ${row.imie} ${row.nazwisko}`);
+        fixedCount++;
+      }
     }
-    
-    // Wygeneruj publiczny URL
-    const publicUrl = filePublicUrl(cleanPart);
-    
-    // Użyj oryginalnego URL (z tokenem) jako linku - może działać jeśli token ważny
-    const directUrl = cleanPart;
-    
-    // Najpierw spróbuj bezpośrednio - używamy oryginalnego URL
-    result.push(`<div style="margin-bottom:4px;">
-      <a href="${directUrl}" target="_blank" rel="noopener" 
-         style="color:#3498db; text-decoration:none; font-size:11px;">
-        📄 ${displayName}
-      </a>
-      <br>
-      <span style="font-size:10px; color:#888;">
-        <a href="${publicUrl}" target="_blank" rel="noopener" 
-           style="color:#95a5a6; text-decoration:none;">
-          (publiczny link)
-        </a>
-      </span>
-    </div>`);
   }
   
-  return result.join("");
+  log(`=== PODSUMOWANIE NAPRAWY ===`);
+  log(`✅ Naprawionych rekordów: ${fixedCount}`);
+  log(`❌ Błędów: ${errorCount}`);
+  log(`🔄 Odświeżam tabelę...`);
+  
+  // Odśwież dane
+  setTimeout(() => loadData(), 1000);
 }
 
-/* ===== WCZYTANIE TABELI - UPROSZCZONE ===== */
+/* ===== WCZYTANIE TABELI Z TESTEM PLIKÓW ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
 
@@ -395,32 +397,48 @@ async function loadData() {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
-  // Najpierw utwórz wszystkie wiersze
-  data.forEach(row => {
+  // Dla każdego wiersza
+  for (const row of data) {
     const tr = document.createElement("tr");
     
-    // Wygeneruj linki od razu (bez asynchronicznego sprawdzania)
-    let linksHtml = "<span style='color:#888'>Ładowanie...</span>";
+    // Generuj HTML dla linków
+    let linksHtml = "<span style='color:#888'>Brak plików</span>";
+    
     if (row.plik) {
       const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
+      
       if (parts.length > 0) {
         linksHtml = "";
-        parts.forEach(part => {
+        
+        // Sprawdź każdy plik asynchronicznie
+        for (const part of parts) {
           const cleanPart = part.trim();
+          const publicUrl = getPublicUrl(cleanPart);
+          
+          // Wyświetlana nazwa pliku
           let displayName = cleanPart.split('/').pop() || cleanPart;
-          if (displayName.length > 30) displayName = displayName.substring(0, 30) + '...';
+          if (displayName.includes('?')) {
+            displayName = displayName.split('?')[0]; // Usuń query string
+          }
+          if (displayName.length > 25) {
+            displayName = displayName.substring(0, 25) + '...';
+          }
           
-          const publicUrl = filePublicUrl(cleanPart);
+          // Sprawdź czy plik istnieje
+          const fileExists = publicUrl ? await checkFileExists(publicUrl) : false;
           
-          linksHtml += `<div style="margin-bottom:4px;">
-            <a href="${cleanPart}" target="_blank" rel="noopener" 
-               style="color:#3498db; text-decoration:none; font-size:11px;">
-              📄 ${displayName}
+          // URL do użycia (jeśli publiczny istnieje, użyj go, w przeciwnym razie oryginalny)
+          const useUrl = fileExists && publicUrl ? publicUrl : cleanPart;
+          const linkClass = fileExists ? 'success' : 'error';
+          const icon = fileExists ? '✅' : '❌';
+          
+          linksHtml += `
+            <a href="${useUrl}" target="_blank" rel="noopener" 
+               class="file-link ${linkClass}" title="${cleanPart}">
+              ${icon} ${displayName}
             </a>
-          </div>`;
-        });
-      } else {
-        linksHtml = "<span style='color:#888'>Brak plików</span>";
+          `;
+        }
       }
     }
     
@@ -432,7 +450,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="word-break:break-all; max-height:100px; overflow-y:auto">
+        <div style="word-break:break-all; max-height:120px; overflow-y:auto; padding:5px;">
           ${linksHtml}
         </div>
       </td>
@@ -441,8 +459,9 @@ async function loadData() {
       </td>
       <td data-label="Akcja"><button class="save-btn" data-id="${row.id}">Zapisz</button></td>
     `;
+    
     tbody.appendChild(tr);
-  });
+  }
 
   // Dodaj event listenery do przycisków zapisu
   document.querySelectorAll('.save-btn').forEach(btn => {
@@ -475,6 +494,8 @@ async function loadData() {
       }
     };
   });
+  
+  log("✅ Tabela załadowana");
 }
 
 /* ===== AUTO CHECK ===== */
