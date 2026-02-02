@@ -37,17 +37,11 @@ th { background:#222; color:#fff }
     max-width: 100%;
   }
 
-}
-
-@media (max-width: 768px) {
-
   table, thead, tbody, th, tr {
     display:block;
   }
 
-  thead {
-    display:none;
-  }
+  thead { display:none; }
 
   tr {
     background:#fff;
@@ -95,6 +89,12 @@ th { background:#222; color:#fff }
     width:100%;
     padding:10px;
     font-size:15px;
+  }
+
+  /* Poprawa łamania linków w mobilnej tabeli */
+  td[data-label="Uprawnienia"] div {
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
 </style>
@@ -201,19 +201,14 @@ async function checkSession() {
   loadData();
 }
 
-/* ===== POPRAWIONE LINKI ===== */
 function renderLinks(text) {
   if (!text) return "";
-
-  // Zamień przecinki i średniki na spacje
-  text = text.replace(/[,;]/g, " ");
-
-  // Rozdziel po spacji lub nowej linii
-  const urls = text.split(/\s+/).filter(t => t.startsWith("http"));
-
-  if (!urls.length) return text;
-
-  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("<br>");
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urls = text.match(urlRegex);
+  if (!urls) return text;
+  return urls
+    .map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
+    .join("<br>");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -245,7 +240,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="word-break:break-all">
+        <div style="white-space: pre-wrap; word-break: break-word;">
           ${renderLinks(row.plik)}
         </div>
       </td>
@@ -257,7 +252,6 @@ async function loadData() {
 
     tr.querySelector("button").onclick = async () => {
       const i = tr.querySelectorAll("input");
-
       const payload = {
         lp: i[0].value,
         imie: i[1].value,
