@@ -37,6 +37,10 @@ th { background:#222; color:#fff }
     max-width: 100%;
   }
 
+}
+
+@media (max-width: 768px) {
+
   table, thead, tbody, th, tr {
     display:block;
   }
@@ -92,13 +96,6 @@ th { background:#222; color:#fff }
     padding:10px;
     font-size:15px;
   }
-}
-
-/* ===== LINKI UPRAWNIEŃ ===== */
-td[data-label="Uprawnienia"] a {
-  display:block;
-  word-break: break-word;
-  margin-bottom: 4px;
 }
 </style>
 </head>
@@ -204,19 +201,19 @@ async function checkSession() {
   loadData();
 }
 
-/* ===== RENDER LINKÓW ===== */
+/* ===== POPRAWIONE LINKI ===== */
 function renderLinks(text) {
   if (!text) return "";
-  const parts = text.split(/\s+/); // rozdziel po spacji lub nowej linii
-  return parts
-    .map(part => {
-      if (/^https?:\/\//.test(part)) {
-        return `<a href="${part}" target="_blank" rel="noopener">${part}</a>`;
-      } else {
-        return part;
-      }
-    })
-    .join("");
+
+  // Zamień przecinki i średniki na spacje
+  text = text.replace(/[,;]/g, " ");
+
+  // Rozdziel po spacji lub nowej linii
+  const urls = text.split(/\s+/).filter(t => t.startsWith("http"));
+
+  if (!urls.length) return text;
+
+  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("<br>");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -248,7 +245,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="word-break:break-word">
+        <div style="word-break:break-all">
           ${renderLinks(row.plik)}
         </div>
       </td>
