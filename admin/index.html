@@ -57,24 +57,6 @@ th { background:#222; color:#fff }
   border-color: #f5c6cb;
 }
 
-/* RAMKA dla Status */
-.status-section {
-  border: 3px solid #3498db;
-  border-radius: 8px;
-  padding: 10px;
-  background: #f8f9fa;
-  margin: 5px 0;
-}
-
-/* RAMKA dla Kontakt */
-.contact-section {
-  border: 3px solid #e74c3c;
-  border-radius: 8px;
-  padding: 10px;
-  background: #f8f9fa;
-  margin: 5px 0;
-}
-
 /* Styl dla statusów - tylko Gotowy jako przycisk */
 .status-container {
   display: flex;
@@ -296,7 +278,7 @@ th { background:#222; color:#fff }
         <th>Nazwisko</th>
         <th>Telefon</th>
         <th>Email</th>
-        <th>Uprawnienia</th>
+        <th>Uprawnienia</th> <!-- Przeniesione tuż po Email -->
         <th>Status</th>
         <th>Pokaż kontakt</th>
         <th>Zapisz</th>
@@ -518,6 +500,7 @@ async function loadData() {
     // Unikalny ID dla kontenera statusu
     const statusContainerId = `status-container-${row.id}`;
     
+    // ZMIENIONA KOLEJNOŚĆ: Uprawnienia zaraz po Email
     tr.innerHTML = `
       <td data-label="Lp">
         <input class="readonly-input" value="${row.lp || ""}" readonly>
@@ -528,44 +511,40 @@ async function loadData() {
       <td data-label="Email">
         <input class="readonly-input" value="${row.email || ""}" readonly>
       </td>
-      <td data-label="Uprawnienia">
+      <td data-label="Uprawnienia"> <!-- Zmienione: teraz tuż po Email -->
         <div id="links-${row.id}" style="word-break:break-all; max-height:120px; overflow-y:auto; padding:5px;">
           ${linksHtml}
         </div>
       </td>
       <td data-label="Status">
-        <div class="status-section">
-          <div id="${statusContainerId}">
-            <div class="status-container">
-              <div class="status-info">
-                <span class="status-icon">${currentStatus}</span>
-                <span class="current-status">${statusText}</span>
-              </div>
-              <button class="set-ready-btn" ${isAlreadyReady ? 'disabled' : ''}>
-                ${isAlreadyReady ? '👍 Super!' : '⚡ Ustaw jako gotowy'}
-              </button>
+        <div id="${statusContainerId}">
+          <div class="status-container">
+            <div class="status-info">
+              <span class="status-icon">${currentStatus}</span>
+              <span class="current-status">${statusText}</span>
             </div>
-            <!-- Tu będzie pojawiał się komunikat o zapisie -->
+            <button class="set-ready-btn" ${isAlreadyReady ? 'disabled' : ''}>
+              ${isAlreadyReady ? '👍 Super!' : '⚡ Ustaw jako gotowy'}
+            </button>
           </div>
+          <!-- Tu będzie pojawiał się komunikat o zapisie -->
         </div>
       </td>
       <td data-label="Pokaż kontakt">
-        <div class="contact-section">
-          <div class="show-contact-container">
-            <div class="contact-options">
-              <label class="contact-option">
-                <input type="radio" name="contact-${row.id}" value="true" class="contact-radio" ${isShowContactChecked ? "checked" : ""}>
-                <span class="contact-label">
-                  <span class="status-icon">👁️</span> Pokaż
-                </span>
-              </label>
-              <label class="contact-option">
-                <input type="radio" name="contact-${row.id}" value="false" class="contact-radio" ${!isShowContactChecked ? "checked" : ""}>
-                <span class="contact-label">
-                  <span class="status-icon">🚫</span> Ukryj
-                </span>
-              </label>
-            </div>
+        <div class="show-contact-container">
+          <div class="contact-options">
+            <label class="contact-option">
+              <input type="radio" name="contact-${row.id}" value="true" class="contact-radio" ${isShowContactChecked ? "checked" : ""}>
+              <span class="contact-label">
+                <span class="status-icon">👁️</span> Pokaż
+              </span>
+            </label>
+            <label class="contact-option">
+              <input type="radio" name="contact-${row.id}" value="false" class="contact-radio" ${!isShowContactChecked ? "checked" : ""}>
+              <span class="contact-label">
+                <span class="status-icon">🚫</span> Ukryj
+              </span>
+            </label>
           </div>
         </div>
       </td>
@@ -677,12 +656,13 @@ async function loadData() {
         }
       }
       
-      // Pomijamy pola Lp i Email w payloadzie, bo są readonly
+      // ZMIENIONA KOLEJNOŚĆ: teraz kolumna Uprawnienia jest na 6. pozycji (indeks 5)
+      // inputs[0] - Lp, [1] - Imię, [2] - Nazwisko, [3] - Telefon, [4] - Email
       const payload = {
-        imie: inputs[1].value,    // Pomijamy inputs[0] (Lp)
+        imie: inputs[1].value,
         nazwisko: inputs[2].value,
         telefon: inputs[3].value,
-        // Pomijamy inputs[4] (Email)
+        // inputs[4] to Email (pomijamy, bo readonly)
         status: currentStatus,
         show_contact: showContactValue
       };
