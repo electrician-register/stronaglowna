@@ -170,14 +170,54 @@ async function checkSession() {
   loadData();
 }
 
+/* ===== WYCIĄGNIJ ŚCIEŻKĘ Z URL ===== */
+function extractPathFromUrl(fullUrl) {
+  if (!fullUrl) return "";
+  
+  // Jeśli to już zwykła ścieżka (bez http), zwróć ją
+  if (!fullUrl.startsWith('http')) {
+    return fullUrl;
+  }
+  
+  try {
+    const url = new URL(fullUrl);
+    const pathname = url.pathname;
+    
+    // Usuń część '/storage/v1/object/sign/' ze ścieżki
+    const signPath = '/storage/v1/object/sign/';
+    if (pathname.includes(signPath)) {
+      // Wyciągnij część po 'sign/'
+      const startIndex = pathname.indexOf(signPath) + signPath.length;
+      return pathname.substring(startIndex);
+    }
+    
+    // Usuń część '/storage/v1/object/public/' ze ścieżki
+    const publicPath = '/storage/v1/object/public/';
+    if (pathname.includes(publicPath)) {
+      const startIndex = pathname.indexOf(publicPath) + publicPath.length;
+      return pathname.substring(startIndex);
+    }
+    
+    return pathname;
+  } catch (err) {
+    log(`Błąd parsowania URL: ${err.message}`);
+    return fullUrl;
+  }
+}
+
 /* ===== GENERUJ PEŁNY URL PLIKU ===== */
-function fileUrl(path) {
+function fileUrl(fullUrl) {
+  if (!fullUrl) return "";
+  
+  // Wyciągnij ścieżkę z pełnego URL
+  const path = extractPathFromUrl(fullUrl.trim());
+  log(`Wyciągnięta ścieżka z "${fullUrl.substring(0, 50)}...": ${path}`);
+  
   if (!path) return "";
-  // Usuń białe znaki i zakoduj specjalne znaki
-  path = path.trim();
+  
   // Zakoduj, ale zachowaj ukośniki (dla podfolderów)
   const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-  return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/uprawnienia/${encodedPath}`;
+  return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${encodedPath}`;
 }
 
 /* ===== FUNKCJA DIAGNOSTYCZNA - LISTUJ PLIKI W BUCKET ===== */
@@ -229,7 +269,10 @@ async function listBucketFiles() {
     
     if (tableData) {
       tableData.forEach(row => {
-        log(`ID ${row.id}: ${row.imie} ${row.nazwisko} - plik: "${row.plik}"`);
+        const path = extractPathFromUrl(row.plik);
+        log(`ID ${row.id}: ${row.imie} ${row.nazwisko}`);
+        log(`   Oryginalny URL: ${row.plik ? row.plik.substring(0, 80) + '...' : 'brak'}`);
+        log(`   Wyciągnięta ścieżka: ${path}`);
       });
     }
     
@@ -238,57 +281,78 @@ async function listBucketFiles() {
   }
 }
 
-/* ===== SPRAWDZENIE PLIKÓW Z LOGAMI ===== */
+/* ===== SPRAWDZENIE PLIKÓW ===== */
 async function renderLinksWithCheck(text, rowId) {
   if (!text) {
     log(`ID ${rowId}: Brak tekstu w kolumnie 'plik'`);
     return "<span style='color:#888'>Brak plików</span>";
   }
 
-  log(`ID ${rowId}: Oryginalny tekst: "${text}"`);
+  log(`ID ${rowId}: Oryginalny tekst: "${text.substring(0, 80)}..."`);
   
   // Czyszczenie i podział tekstu
   text = text.replace(/[,;]/g, " ");
   const parts = text.split(/\s+/).filter(t => t && t.trim());
   
-  log(`ID ${rowId}: Podzielone części: ${JSON.stringify(parts)}`);
+  log(`ID ${rowId}: Podzielone części: ${parts.length}`);
   
   if (parts.length === 0) {
-    return "<span style='color:#888'>Brak poprawnych nazw plików</span>";
+    return "<span style='color:#888'>Brak poprawnych URL</span>";
   }
   
   let result = [];
   
   for (let part of parts) {
     const cleanPart = part.trim();
-    const url = fileUrl(cleanPart);
     
-    log(`ID ${rowId}: Sprawdzam "${cleanPart}" → ${url}`);
+    // Dla wyświetlania pokaż tylko nazwę pliku
+    const displayName = cleanPart.split('/').pop() || cleanPart;
+    
+    // Użyj oryginalnego URL (z tokenem) jako linku - on działa!
+    const directUrl = cleanPart; // To jest pełny URL z tokenem
+    
+    // Spróbuj też wygenerować URL publiczny
+    const publicUrl = fileUrl(cleanPart);
+    
+    log(`ID ${rowId}: Przetwarzam "${displayName}"`);
+    log(`   Direct URL: ${directUrl.substring(0, 60)}...`);
+    log(`   Public URL: ${publicUrl.substring(0, 60)}...`);
     
     try {
-      // Sprawdź czy plik istnieje
-      const res = await fetch(url, { method: 'HEAD' });
+      // Sprawdź czy URL z tokenem działa
+      const res = await fetch(directUrl, { method: 'HEAD' });
       
       if (res.ok) {
-        log(`ID ${rowId}: ✅ "${cleanPart}" - OK (${res.status})`);
-        result.push(`<a href="${url}" target="_blank" rel="noopener" style="color:#2ecc71; text-decoration:none;">
-          ${cleanPart} ✅
+        log(`ID ${rowId}: ✅ "${displayName}" - URL z tokenem działa (${res.status})`);
+        result.push(`<a href="${directUrl}" target="_blank" rel="noopener" style="color:#2ecc71; text-decoration:none;">
+          ${displayName} ✅ (token)
         </a>`);
-      } else if (res.status === 404) {
-        log(`ID ${rowId}: ❌ "${cleanPart}" - NIE ZNALEZIONO (404)`);
-        result.push(`<span style="color:#e74c3c;">
-          ${cleanPart} ❌ (404 - nie znaleziono)
-        </span>`);
+      } else if (res.status === 400) {
+        // Token może wygasnąć - sprawdź publiczny URL
+        log(`ID ${rowId}: ⚠️ Token wygasł (${res.status}), sprawdzam publiczny URL...`);
+        
+        const publicRes = await fetch(publicUrl, { method: 'HEAD' });
+        if (publicRes.ok) {
+          log(`ID ${rowId}: ✅ "${displayName}" - Publiczny URL działa`);
+          result.push(`<a href="${publicUrl}" target="_blank" rel="noopener" style="color:#3498db; text-decoration:none;">
+            ${displayName} ✅ (public)
+          </a>`);
+        } else {
+          log(`ID ${rowId}: ❌ Publiczny URL też nie działa: ${publicRes.status}`);
+          result.push(`<span style="color:#e74c3c;">
+            ${displayName} ❌ (${res.status} + ${publicRes.status})
+          </span>`);
+        }
       } else {
-        log(`ID ${rowId}: ⚠️ "${cleanPart}" - Błąd HTTP: ${res.status}`);
+        log(`ID ${rowId}: ⚠️ "${displayName}" - Błąd HTTP: ${res.status}`);
         result.push(`<span style="color:#f39c12;">
-          ${cleanPart} ⚠️ (${res.status})
+          ${displayName} ⚠️ (${res.status})
         </span>`);
       }
     } catch (err) {
-      log(`ID ${rowId}: ❌ "${cleanPart}" - Błąd sieci: ${err.message}`);
+      log(`ID ${rowId}: ❌ "${displayName}" - Błąd sieci: ${err.message}`);
       result.push(`<span style="color:#e74c3c;">
-        ${cleanPart} ❌ (błąd)
+        ${displayName} ❌ (błąd)
       </span>`);
     }
   }
@@ -362,7 +426,6 @@ async function loadData() {
         email: inputs[4].value,
         status: inputs[5].value,
         show_contact: inputs[6].checked
-        // UWAGA: Nie aktualizujemy kolumny 'plik' przez ten formularz
       };
       
       log(`💾 Próba zapisu ID ${rowId}...`);
@@ -383,13 +446,6 @@ async function loadData() {
 
 /* ===== AUTO CHECK ===== */
 checkSession();
-
-/* ===== AUTOMATYCZNE SPRAWDZENIE BUCKET PO ZALOGOWANIU (opcjonalnie) ===== */
-// setTimeout(() => {
-//   if (document.getElementById("adminPanel").style.display !== "none") {
-//     listBucketFiles();
-//   }
-// }, 1000);
 </script>
 
 </body>
