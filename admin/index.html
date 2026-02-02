@@ -41,7 +41,9 @@ th { background:#222; color:#fff }
     display:block;
   }
 
-  thead { display:none; }
+  thead {
+    display:none;
+  }
 
   tr {
     background:#fff;
@@ -89,12 +91,6 @@ th { background:#222; color:#fff }
     width:100%;
     padding:10px;
     font-size:15px;
-  }
-
-  /* Poprawa łamania linków w mobilnej tabeli */
-  td[data-label="Uprawnienia"] div {
-    white-space: pre-wrap;
-    word-break: break-word;
   }
 }
 </style>
@@ -201,14 +197,15 @@ async function checkSession() {
   loadData();
 }
 
+/* ===== RENDER LINKÓW ===== */
 function renderLinks(text) {
   if (!text) return "";
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const urls = text.match(urlRegex);
   if (!urls) return text;
   return urls
-    .map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
-    .join("<br>");
+    .map(url => `<div><a href="${url}" target="_blank" rel="noopener">${url}</a></div>`)
+    .join("");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -240,7 +237,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="white-space: pre-wrap; word-break: break-word;">
+        <div style="word-break: break-word;">
           ${renderLinks(row.plik)}
         </div>
       </td>
@@ -252,6 +249,7 @@ async function loadData() {
 
     tr.querySelector("button").onclick = async () => {
       const i = tr.querySelectorAll("input");
+
       const payload = {
         lp: i[0].value,
         imie: i[1].value,
