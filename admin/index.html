@@ -1,685 +1,879 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zarządzanie Uprawnieniami i Kontaktami</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 900px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-        }
-        
-        .card-header {
-            padding: 25px 30px;
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .card-header h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
-        }
-        
-        .card-header i {
-            font-size: 1.8rem;
-        }
-        
-        .card-content {
-            padding: 30px;
-        }
-        
-        /* Sekcja Email - na górze */
-        .email-section {
-            border: 3px solid;
-            border-image: linear-gradient(45deg, #4b6cb7, #00c9ff) 1;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .email-section::before {
-            content: "EMAIL";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        
-        /* Sekcja Uprawnienia - pod emailem */
-        .permissions-section {
-            border: 3px solid;
-            border-image: linear-gradient(45deg, #2ecc71, #27ae60) 1;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .permissions-section::before {
-            content: "UPRAWNIENIA";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        
-        /* Sekcja Status */
-        .status-section {
-            border: 3px solid;
-            border-image: linear-gradient(45deg, #9b59b6, #8e44ad) 1;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .status-section::before {
-            content: "STATUS";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: linear-gradient(90deg, #9b59b6 0%, #8e44ad 100%);
-            color: white;
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        
-        /* Sekcja Kontakt */
-        .contact-section {
-            border: 3px solid;
-            border-image: linear-gradient(45deg, #ff7e5f, #feb47b) 1;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .contact-section::before {
-            content: "KONTAKT";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-            color: white;
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        
-        .email-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .email-label {
-            font-weight: 600;
-            color: #333;
-            font-size: 1.1rem;
-        }
-        
-        .email-display {
-            background-color: #f8fafc;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #4b6cb7;
-            font-weight: 600;
-            color: #182848;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .email-display i {
-            color: #4b6cb7;
-            font-size: 1.2rem;
-        }
-        
-        .permissions-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        
-        .permission-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px 15px;
-            background-color: #f8fafc;
-            border-radius: 10px;
-            border-left: 4px solid #2ecc71;
-        }
-        
-        .permission-item i {
-            color: #2ecc71;
-            font-size: 1.2rem;
-        }
-        
-        .status-info {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .status-item:last-child {
-            border-bottom: none;
-        }
-        
-        .status-label {
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .status-value {
-            font-weight: 600;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-        
-        .status-active {
-            background-color: #e7f7ef;
-            color: #2ecc71;
-        }
-        
-        .status-inactive {
-            background-color: #fef2f2;
-            color: #ef4444;
-        }
-        
-        .status-pending {
-            background-color: #fef9e7;
-            color: #f39c12;
-        }
-        
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .contact-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .contact-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 1.3rem;
-        }
-        
-        .contact-details {
-            flex: 1;
-        }
-        
-        .contact-label {
-            font-size: 0.9rem;
-            color: #777;
-            margin-bottom: 3px;
-        }
-        
-        .contact-value {
-            font-weight: 600;
-            color: #333;
-            font-size: 1.1rem;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-            color: white;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #4b6cb7;
-            color: #4b6cb7;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .section-title {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            color: #333;
-            font-weight: 600;
-        }
-        
-        .instructions {
-            background-color: #f0f7ff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 25px;
-            border-left: 4px solid #4b6cb7;
-            font-size: 0.95rem;
-            color: #444;
-        }
-        
-        .instructions h3 {
-            color: #182848;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 5px;
-        }
-        
-        .highlight {
-            background-color: #fffacd;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-        
-        .info-text {
-            color: #666;
-            font-size: 0.95rem;
-            margin-top: 10px;
-            font-style: italic;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Lewa karta - Email i Uprawnienia -->
-        <div class="card">
-            <div class="card-header">
-                <h2><i class="fas fa-user-shield"></i> Uprawnienia przypisane do email</h2>
-            </div>
-            <div class="card-content">
-                <!-- Sekcja EMAIL na górze -->
-                <div class="email-section">
-                    <div class="email-input-group">
-                        <div class="email-label">Adres e-mail:</div>
-                        <div class="email-display">
-                            <i class="fas fa-envelope"></i>
-                            admin@firma.pl
-                        </div>
-                        <p class="info-text">Uprawnienia są przypisane do tego adresu e-mail. Wszystkie zmiany będą dotyczyć tego konta.</p>
-                    </div>
-                </div>
-                
-                <!-- Sekcja UPRAWNIENIA pod emailem -->
-                <div class="permissions-section">
-                    <h3 class="section-title">Przypisane uprawnienia:</h3>
-                    <div class="permissions-list">
-                        <div class="permission-item">
-                            <i class="fas fa-envelope"></i>
-                            <span>Zarządzanie pocztą e-mail</span>
-                        </div>
-                        <div class="permission-item">
-                            <i class="fas fa-database"></i>
-                            <span>Dostęp do bazy danych</span>
-                        </div>
-                        <div class="permission-item">
-                            <i class="fas fa-users-cog"></i>
-                            <span>Zarządzanie użytkownikami</span>
-                        </div>
-                        <div class="permission-item">
-                            <i class="fas fa-file-contract"></i>
-                            <span>Przeglądanie dokumentów</span>
-                        </div>
-                        <div class="permission-item">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Generowanie raportów</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sekcja STATUS -->
-                <div class="status-section">
-                    <div class="status-info">
-                        <div class="status-item">
-                            <span class="status-label">Status uprawnień:</span>
-                            <span class="status-value status-active">AKTYWNE</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">Data ważności:</span>
-                            <span class="status-value status-pending">31.12.2024</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">Poziom dostępu:</span>
-                            <span class="status-value status-active">ADMINISTRATOR</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn btn-primary" id="showStatusBtn">
-                        <i class="fas fa-eye"></i> Pokaż status
-                    </button>
-                    <button class="btn btn-outline" id="hideStatusBtn">
-                        <i class="fas fa-eye-slash"></i> Ukryj status
-                    </button>
-                </div>
-                
-                <div class="instructions">
-                    <h3>Instrukcja:</h3>
-                    <ul>
-                        <li>Najpierw widzisz <span class="highlight">EMAIL</span>, a pod nim <span class="highlight">UPRAWNIENIA</span></li>
-                        <li>Kliknij <span class="highlight">"Pokaż status"</span> aby wyświetlić szczegóły statusu</li>
-                        <li>Kliknij <span class="highlight">"Ukryj status"</span> aby schować sekcję statusu</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Prawa karta - Kontakt -->
-        <div class="card">
-            <div class="card-header">
-                <h2><i class="fas fa-address-book"></i> Informacje Kontaktowe</h2>
-            </div>
-            <div class="card-content">
-                <div class="contact-section">
-                    <div class="contact-info">
-                        <div class="contact-row">
-                            <div class="contact-icon">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div class="contact-details">
-                                <div class="contact-label">E-mail główny</div>
-                                <div class="contact-value">admin@firma.pl</div>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-row">
-                            <div class="contact-icon">
-                                <i class="fas fa-phone-alt"></i>
-                            </div>
-                            <div class="contact-details">
-                                <div class="contact-label">Telefon kontaktowy</div>
-                                <div class="contact-value">+48 123 456 789</div>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-row">
-                            <div class="contact-icon">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                            <div class="contact-details">
-                                <div class="contact-label">Osoba kontaktowa</div>
-                                <div class="contact-value">Jan Kowalski</div>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-row">
-                            <div class="contact-icon">
-                                <i class="fas fa-building"></i>
-                            </div>
-                            <div class="contact-details">
-                                <div class="contact-label">Dział</div>
-                                <div class="contact-value">IT & Administracja</div>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-row">
-                            <div class="contact-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="contact-details">
-                                <div class="contact-label">Godziny dostępności</div>
-                                <div class="contact-value">8:00 - 16:00 (Pn-Pt)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn btn-secondary" id="showContactBtn">
-                        <i class="fas fa-eye"></i> Pokaż kontakt
-                    </button>
-                    <button class="btn btn-outline" id="hideContactBtn">
-                        <i class="fas fa-eye-slash"></i> Ukryj kontakt
-                    </button>
-                </div>
-                
-                <div class="instructions">
-                    <h3>Instrukcja:</h3>
-                    <ul>
-                        <li>Kontakt jest dostępny w godzinach pracy</li>
-                        <li>Kliknij <span class="highlight">"Pokaż kontakt"</span> aby wyświetlić dane kontaktowe</li>
-                        <li>Kliknij <span class="highlight">"Ukryj kontakt"</span> aby schować dane kontaktowe</li>
-                        <li>W przypadku pilnych spraw po godzinach pracy, użyj e-maila</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel admina</title>
+<meta name="robots" content="noindex, nofollow">
 
-    <script>
-        // Pobranie elementów DOM
-        const showStatusBtn = document.getElementById('showStatusBtn');
-        const hideStatusBtn = document.getElementById('hideStatusBtn');
-        const showContactBtn = document.getElementById('showContactBtn');
-        const hideContactBtn = document.getElementById('hideContactBtn');
-        const statusSection = document.querySelector('.status-section');
-        const contactSection = document.querySelector('.contact-section');
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
+
+#logBox {
+  background:#000;
+  color:#0f0;
+  padding:10px;
+  font-size:12px;
+  height:160px;
+  overflow:auto;
+  margin-bottom:15px;
+}
+
+input, button { width:100%; padding:8px; margin:5px 0 }
+button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
+
+table { width:100%; border-collapse:collapse; background:#fff }
+th, td { border:1px solid #ccc; padding:6px; font-size:12px }
+th { background:#222; color:#fff }
+
+/* Styl dla zablokowanych pól */
+.readonly-input {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.file-link {
+  display: block;
+  color: #3498db;
+  text-decoration: none;
+  font-size: 11px;
+  margin-bottom: 3px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+.file-link:hover {
+  background: #e3f2fd;
+  border-color: #3498db;
+}
+.file-link.error {
+  color: #e74c3c;
+  background: #fdeaea;
+  border-color: #f5c6cb;
+}
+
+/* STYL DLA SEKCJI STATUS Z RAMKĄ */
+.status-section {
+  border: 3px solid #3498db;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  margin: 5px 0;
+}
+
+/* STYL DLA SEKCJI KONTAKT Z RAMKĄ */
+.contact-section {
+  border: 3px solid #e74c3c;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  margin: 5px 0;
+}
+
+/* Kontener statusu - dopasowany do wysokości */
+.status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100%;
+  min-height: 60px;
+  justify-content: space-between;
+}
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #f8f9fa;
+  font-size: 12px;
+  min-height: 32px;
+}
+.current-status {
+  font-weight: bold;
+}
+.status-icon {
+  font-size: 14px;
+}
+
+/* Przyciski Status - wewnątrz ramki */
+.status-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.status-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  background: white;
+  color: #333;
+}
+.status-btn:hover {
+  background: #f0f0f0;
+}
+.status-btn.active {
+  background: #2ecc71;
+  color: white;
+  border-color: #2ecc71;
+}
+.status-btn:disabled {
+  background: #95a5a6;
+  color: white;
+  cursor: not-allowed;
+  border-color: #95a5a6;
+}
+
+/* Przycisk "Ustaw jako gotowy" w sekcji statusu */
+.set-ready-btn {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 36px;
+  transition: background 0.2s;
+  box-sizing: border-box;
+  margin-top: 8px;
+}
+.set-ready-btn:hover {
+  background: #27ae60;
+}
+.set-ready-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Kontener pokaż kontakt - dopasowany do wysokości */
+.show-contact-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100%;
+  min-height: 60px;
+  justify-content: center;
+}
+.contact-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.contact-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #f8f9fa;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+.contact-radio {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+.contact-label {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Przyciski Kontakt - wewnątrz ramki */
+.contact-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.contact-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  background: white;
+  color: #333;
+}
+.contact-btn:hover {
+  background: #f0f0f0;
+}
+.contact-btn.active {
+  background: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}
+
+/* Styl dla komunikatu o zapisie */
+.save-message {
+  font-size: 10px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  text-align: center;
+  margin-top: 5px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.save-message.show {
+  opacity: 1;
+}
+.save-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+.save-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Przycisk Zapisz - zachowuje oryginalny styl */
+.save-btn {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  height: auto;
+  margin-top: 5px;
+}
+.save-btn:hover {
+  background: #27ae60;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  td input,
+  td button {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+  
+  .set-ready-btn,
+  .contact-option {
+    height: auto;
+    min-height: 40px;
+  }
+  
+  .status-buttons,
+  .contact-buttons {
+    flex-direction: column;
+  }
+  
+  .status-btn,
+  .contact-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  table, thead, tbody, th, tr { display:block; }
+  thead { display:none; }
+  tr {
+    background:#fff;
+    margin-bottom:14px;
+    padding:12px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  }
+  td {
+    display:grid;
+    grid-template-columns: 120px 1fr;
+    align-items:center;
+    border:none;
+    padding:8px 0;
+    font-size:14px;
+  }
+  td::before { content: attr(data-label); font-weight:600; color:#444; }
+  td input[type="text"],
+  td input[type="email"] { width:100%; }
+  td[data-label="Akcja"] { grid-template-columns: 1fr; margin-top:8px; }
+  td[data-label="Akcja"]::before { display:none; }
+  td button { width:100%; padding:10px; font-size:15px; }
+  
+  /* Specjalny styl dla status na mobile */
+  td[data-label="Status"] {
+    grid-template-columns: 120px 1fr;
+    align-items: stretch;
+  }
+  
+  /* Specjalny styl dla pokaż kontakt na mobile */
+  td[data-label="Pokaż kontakt"] {
+    grid-template-columns: 120px 1fr;
+    align-items: stretch;
+  }
+  .contact-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .contact-option {
+    flex: 1;
+    min-width: 100px;
+  }
+  
+  .status-container,
+  .show-contact-container {
+    min-height: 80px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h2>Logi systemowe</h2>
+<div id="logBox"></div>
+
+<div id="loginBox">
+  <h2>Logowanie admin</h2>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Hasło">
+  <button id="loginBtn">Zaloguj</button>
+</div>
+
+<div id="adminPanel" style="display:none">
+  <h2>Panel admina – tabela_elektrykow</h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Lp</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Telefon</th>
+        <th>Email</th>
+        <th>Uprawnienia</th> <!-- Przeniesione za Email -->
+        <th>Status</th>
+        <th>Pokaż kontakt</th>
+        <th>Zapisz</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+/* ===== LOGI ===== */
+function log(txt) {
+  const box = document.getElementById("logBox");
+  const timestamp = new Date().toLocaleTimeString();
+  box.innerHTML += `[${timestamp}] ${txt}<br>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ===== SUPABASE ===== */
+log("Start JS");
+
+const supabaseClient = supabase.createClient(
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
+);
+
+log("Supabase OK");
+
+/* ===== LOGOWANIE ===== */
+document.getElementById("loginBtn").addEventListener("click", login);
+
+async function login() {
+  log("Klik ZALOGUJ");
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  log("Email: " + email);
+  log("Hasło wpisane: " + (password.length > 0));
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    log("BŁĄD LOGOWANIA: " + error.message);
+    return;
+  }
+
+  log("Zalogowano OK");
+  checkSession();
+}
+
+/* ===== SPRAWDZENIE ADMINA ===== */
+async function checkSession() {
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (!data.session) {
+    log("Brak sesji");
+    return;
+  }
+
+  const adminEmail = "piotr8040@gmail.com";
+
+  if (data.session.user.email !== adminEmail) {
+    log("Brak uprawnień admin");
+    await supabaseClient.auth.signOut();
+    return;
+  }
+
+  log("Admin potwierdzony");
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
+
+  loadData();
+}
+
+/* ===== NAPRAWIONA FUNKCJA - GENERUJ PUBLICZNY URL ===== */
+function getPublicUrl(fullUrl) {
+  if (!fullUrl) return null;
+  
+  try {
+    // Jeśli to już publiczny URL, zwróć go
+    if (fullUrl.includes('/object/public/')) {
+      return fullUrl;
+    }
+    
+    // Jeśli to URL z tokenem
+    if (fullUrl.includes('/object/sign/')) {
+      // 1. Wyciągnij ścieżkę po '/sign/'
+      const signIndex = fullUrl.indexOf('/object/sign/') + '/object/sign/'.length;
+      const pathWithQuery = fullUrl.substring(signIndex);
+      
+      // 2. Usuń query string (token)
+      const path = pathWithQuery.split('?')[0];
+      
+      // 3. DEKODUJ URL (zamień %20 na spacje i inne zakodowane znaki)
+      // Najpierw dekoduj całą ścieżkę
+      let decodedPath = decodeURIComponent(path);
+      
+      // 4. Teraz zakoduj ponownie, ale POPRAWNIE
+      // Podziel na części folder/plik
+      const parts = decodedPath.split('/');
+      const encodedParts = parts.map(part => encodeURIComponent(part));
+      const finalPath = encodedParts.join('/');
+      
+      return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${finalPath}`;
+    }
+    
+    // Jeśli to coś innego, zwróć oryginał
+    return fullUrl;
+  } catch (err) {
+    log(`Błąd przetwarzania URL: ${err.message}`);
+    return fullUrl;
+  }
+}
+
+/* ===== SPRAWDŹ CZY PLIK ISTNIEJE ===== */
+async function checkFileExists(url) {
+  if (!url) return false;
+  
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
+/* ===== FUNKCJA POKAZUJĄCA KOMUNIKAT ===== */
+function showSaveMessage(containerId, isSuccess, message) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  // Usuń poprzedni komunikat jeśli istnieje
+  const oldMsg = container.querySelector('.save-message');
+  if (oldMsg) {
+    oldMsg.remove();
+  }
+  
+  // Stwórz nowy komunikat
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `save-message ${isSuccess ? 'success' : 'error'} show`;
+  messageDiv.innerHTML = isSuccess ? `✅ ${message}` : `❌ ${message}`;
+  
+  // Dodaj do kontenera
+  container.appendChild(messageDiv);
+  
+  // Ukryj komunikat po 3 sekundach
+  setTimeout(() => {
+    messageDiv.classList.remove('show');
+    setTimeout(() => {
+      if (messageDiv.parentNode === container) {
+        container.removeChild(messageDiv);
+      }
+    }, 300);
+  }, 3000);
+}
+
+/* ===== FUNKCJA ZWRACAJĄCA TEKST STATUSU ===== */
+function getStatusText(statusIcon) {
+  const statusMap = {
+    "✅": "Gotowy",
+    "❌": "Odrzucony", 
+    "⌛️": "Oczekuje"
+  };
+  return statusMap[statusIcon] || statusIcon;
+}
+
+/* ===== WCZYTANIE TABELI Z SPRAWDZANIEM PLIKÓW ===== */
+async function loadData() {
+  log("=== POBRANIE DANYCH Z TABELI ===");
+
+  const { data, error } = await supabaseClient
+    .from("tabela_elektrykow")
+    .select("id, lp, imie, nazwisko, telefon, email, status, plik, show_contact")
+    .order("lp");
+
+  if (error) {
+    log("❌ BŁĄD BAZY: " + error.message);
+    return;
+  }
+
+  log(`✅ Pobrano ${data.length} rekordów`);
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  // Dla każdego wiersza asynchronicznie sprawdź pliki
+  for (const row of data) {
+    const tr = document.createElement("tr");
+    
+    // Ustal aktualny status
+    const currentStatus = row.status || "⌛️";
+    const isAlreadyReady = currentStatus.includes("✅");
+    const statusText = getStatusText(currentStatus);
+    
+    // Naprawione: Konwertuj boolean na string dla "Pokaż kontakt"
+    const showContactValue = row.show_contact;
+    let isShowContactChecked = false;
+    
+    if (typeof showContactValue === 'boolean') {
+      isShowContactChecked = showContactValue;
+    } else if (typeof showContactValue === 'string') {
+      isShowContactChecked = showContactValue.toLowerCase() === 'true' || showContactValue === '1';
+    } else if (typeof showContactValue === 'number') {
+      isShowContactChecked = showContactValue === 1;
+    }
+    
+    // Generuj HTML dla linków - początkowo pokaż "sprawdzanie"
+    let linksHtml = "<span style='color:#888'>Brak plików</span>";
+    
+    if (row.plik) {
+      const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
+      
+      if (parts.length > 0) {
+        linksHtml = "<span style='color:#888'>Sprawdzanie plików...</span>";
+      }
+    }
+    
+    // Unikalny ID dla kontenera statusu
+    const statusContainerId = `status-container-${row.id}`;
+    
+    tr.innerHTML = `
+      <td data-label="Lp">
+        <input class="readonly-input" value="${row.lp || ""}" readonly>
+      </td>
+      <td data-label="Imię"><input value="${row.imie || ""}"></td>
+      <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
+      <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
+      <td data-label="Email">
+        <input class="readonly-input" value="${row.email || ""}" readonly>
+      </td>
+      <td data-label="Uprawnienia">
+        <div id="links-${row.id}" style="word-break:break-all; max-height:120px; overflow-y:auto; padding:5px;">
+          ${linksHtml}
+        </div>
+      </td>
+      <td data-label="Status">
+        <div class="status-section">
+          <div id="${statusContainerId}">
+            <div class="status-container">
+              <div class="status-info">
+                <span class="status-icon">${currentStatus}</span>
+                <span class="current-status">${statusText}</span>
+              </div>
+              <div class="status-buttons">
+                <button class="status-btn ${statusText === 'Gotowy' ? 'active' : ''}" data-status="✅">
+                  ✅ Gotowy
+                </button>
+                <button class="status-btn ${statusText === 'Oczekuje' ? 'active' : ''}" data-status="⌛️">
+                  ⌛️ Oczekuje
+                </button>
+              </div>
+              <button class="set-ready-btn" ${isAlreadyReady ? 'disabled' : ''}>
+                ${isAlreadyReady ? '👍 Super!' : '⚡ Ustaw jako gotowy'}
+              </button>
+            </div>
+            <!-- Tu będzie pojawiał się komunikat o zapisie -->
+          </div>
+        </div>
+      </td>
+      <td data-label="Pokaż kontakt">
+        <div class="contact-section">
+          <div class="show-contact-container">
+            <div class="contact-options">
+              <label class="contact-option">
+                <input type="radio" name="contact-${row.id}" value="true" class="contact-radio" ${isShowContactChecked ? "checked" : ""}>
+                <span class="contact-label">
+                  <span class="status-icon">👁️</span> Pokaż
+                </span>
+              </label>
+              <label class="contact-option">
+                <input type="radio" name="contact-${row.id}" value="false" class="contact-radio" ${!isShowContactChecked ? "checked" : ""}>
+                <span class="contact-label">
+                  <span class="status-icon">🚫</span> Ukryj
+                </span>
+              </label>
+            </div>
+            <div class="contact-buttons">
+              <button class="contact-btn" data-contact="true">
+                👁️ Pokaż
+              </button>
+              <button class="contact-btn" data-contact="false">
+                🚫 Ukryj
+              </button>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td data-label="Akcja"><button class="save-btn" data-id="${row.id}">Zapisz</button></td>
+    `;
+    
+    tbody.appendChild(tr);
+    
+    // Dodaj event listener do przycisków statusu
+    const statusBtns = tr.querySelectorAll('.status-btn');
+    statusBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const statusIcon = this.getAttribute('data-status');
+        const statusInfo = tr.querySelector('.status-info');
+        const statusText = getStatusText(statusIcon);
         
-        // Funkcja pokazująca sekcję Status
-        function showStatus() {
-            statusSection.classList.remove('hidden');
-            showStatusBtn.disabled = true;
-            hideStatusBtn.disabled = false;
-            
-            // Dodanie animacji pojawiania się
-            statusSection.style.opacity = '0';
-            statusSection.style.transition = 'opacity 0.5s ease';
-            
-            setTimeout(() => {
-                statusSection.style.opacity = '1';
-            }, 10);
-            
-            // Informacja dla użytkownika
-            console.log("Status uprawnień został pokazany.");
+        // Aktualizuj UI
+        statusInfo.innerHTML = `<span class="status-icon">${statusIcon}</span><span class="current-status">${statusText}</span>`;
+        
+        // Zaktualizuj przyciski
+        statusBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Jeśli ustawiono na Gotowy, wyłącz przycisk "Ustaw jako gotowy"
+        const setReadyBtn = tr.querySelector('.set-ready-btn');
+        if (statusIcon === "✅") {
+          setReadyBtn.textContent = '👍 Super!';
+          setReadyBtn.disabled = true;
+        } else {
+          setReadyBtn.textContent = '⚡ Ustaw jako gotowy';
+          setReadyBtn.disabled = false;
         }
+      });
+    });
+    
+    // Dodaj event listener do przycisku "Ustaw jako gotowy"
+    const setReadyBtn = tr.querySelector('.set-ready-btn');
+    if (setReadyBtn && !isAlreadyReady) {
+      setReadyBtn.addEventListener('click', async function() {
+        // Aktualizuj UI od razu
+        const statusInfo = tr.querySelector('.status-info');
+        statusInfo.innerHTML = '<span class="status-icon">✅</span><span class="current-status">Gotowy</span>';
         
-        // Funkcja ukrywająca sekcję Status
-        function hideStatus() {
-            statusSection.classList.add('hidden');
-            showStatusBtn.disabled = false;
-            hideStatusBtn.disabled = true;
-            
-            // Informacja dla użytkownika
-            console.log("Status uprawnień został ukryty.");
+        // Aktualizuj przyciski statusu
+        statusBtns.forEach(b => b.classList.remove('active'));
+        tr.querySelector('.status-btn[data-status="✅"]').classList.add('active');
+        
+        setReadyBtn.textContent = '👍 Super!';
+        setReadyBtn.disabled = true;
+        
+        // Zaktualizuj w bazie danych
+        const { error } = await supabaseClient
+          .from("tabela_elektrykow")
+          .update({ status: "✅" })
+          .eq("id", row.id);
+        
+        if (error) {
+          log(`❌ Błąd ustawienia statusu gotowy dla ID ${row.id}: ${error.message}`);
+          showSaveMessage(statusContainerId, false, "Błąd ustawienia statusu");
+          // Cofnij zmiany w UI
+          statusInfo.innerHTML = `<span class="status-icon">${currentStatus}</span><span class="current-status">${statusText}</span>`;
+          statusBtns.forEach(b => {
+            if (b.getAttribute('data-status') === currentStatus) {
+              b.classList.add('active');
+            }
+          });
+          setReadyBtn.textContent = '⚡ Ustaw jako gotowy';
+          setReadyBtn.disabled = false;
+        } else {
+          log(`✅ Ustawiono status gotowy dla ID ${row.id}`);
+          showSaveMessage(statusContainerId, true, "Status ustawiony na Gotowy");
         }
+      });
+    }
+    
+    // Dodaj event listener do przycisków kontakt
+    const contactBtns = tr.querySelectorAll('.contact-btn');
+    const contactRadios = tr.querySelectorAll(`input[name="contact-${row.id}"]`);
+    
+    contactBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const contactValue = this.getAttribute('data-contact') === 'true';
         
-        // Funkcja pokazująca sekcję Kontakt
-        function showContact() {
-            contactSection.classList.remove('hidden');
-            showContactBtn.disabled = true;
-            hideContactBtn.disabled = false;
-            
-            // Dodanie animacji pojawiania się
-            contactSection.style.opacity = '0';
-            contactSection.style.transition = 'opacity 0.5s ease';
-            
-            setTimeout(() => {
-                contactSection.style.opacity = '1';
-            }, 10);
-            
-            // Informacja dla użytkownika
-            console.log("Dane kontaktowe zostały pokazane.");
-        }
-        
-        // Funkcja ukrywająca sekcję Kontakt
-        function hideContact() {
-            contactSection.classList.add('hidden');
-            showContactBtn.disabled = false;
-            hideContactBtn.disabled = true;
-            
-            // Informacja dla użytkownika
-            console.log("Dane kontaktowe zostały ukryte.");
-        }
-        
-        // Przypisanie event listenerów do przycisków
-        showStatusBtn.addEventListener('click', showStatus);
-        hideStatusBtn.addEventListener('click', hideStatus);
-        showContactBtn.addEventListener('click', showContact);
-        hideContactBtn.addEventListener('click', hideContact);
-        
-        // Inicjalizacja - ukrywamy sekcję statusu i kontaktu na starcie
-        document.addEventListener('DOMContentLoaded', function() {
-            // Na starcie pokazujemy tylko sekcje Email i Uprawnienia
-            // Ukrywamy sekcję Status i Kontakt
-            hideStatus();
-            hideContact();
-            
-            // Informacja startowa
-            console.log("System zarządzania uprawnieniami i kontaktami został załadowany.");
-            console.log("Kolejność: EMAIL → UPRAWNIENIA → STATUS → KONTAKT");
+        // Aktualizuj radio buttons
+        contactRadios.forEach(radio => {
+          radio.checked = (radio.value === contactValue.toString());
         });
         
-        // Dodatkowe funkcje pomocnicze
-        function toggleStatus() {
-            if (statusSection.classList.contains('hidden')) {
-                showStatus();
-            } else {
-                hideStatus();
+        // Aktualizuj przyciski
+        contactBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    
+    // Ustaw aktywny przycisk kontakt na podstawie wartości początkowej
+    contactBtns.forEach(btn => {
+      if (btn.getAttribute('data-contact') === isShowContactChecked.toString()) {
+        btn.classList.add('active');
+      }
+    });
+    
+    // Asynchronicznie sprawdź pliki dla tego wiersza
+    if (row.plik) {
+      const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
+      
+      if (parts.length > 0) {
+        // Opóźnij sprawdzanie, aby nie blokować interfejsu
+        setTimeout(async () => {
+          let finalLinksHtml = "";
+          
+          for (const part of parts) {
+            const cleanPart = part.trim();
+            const publicUrl = getPublicUrl(cleanPart);
+            const useUrl = publicUrl || cleanPart;
+            
+            // Wyświetlana nazwa pliku
+            let displayName = cleanPart.split('/').pop() || cleanPart;
+            if (displayName.includes('?')) {
+              displayName = displayName.split('?')[0];
             }
-        }
-        
-        function toggleContact() {
-            if (contactSection.classList.contains('hidden')) {
-                showContact();
-            } else {
-                hideContact();
-            }
-        }
-        
-        // Możliwość przełączania za pomocą klawiszy (dla demonstracji)
-        document.addEventListener('keydown', function(event) {
-            // Ctrl + S - przełącz status
-            if (event.ctrlKey && event.key === 's') {
-                event.preventDefault();
-                toggleStatus();
+            if (displayName.length > 25) {
+              displayName = displayName.substring(0, 25) + '...';
             }
             
-            // Ctrl + K - przełącz kontakt
-            if (event.ctrlKey && event.key === 'k') {
-                event.preventDefault();
-                toggleContact();
+            // Sprawdź czy plik istnieje
+            const fileExists = await checkFileExists(useUrl);
+            const linkClass = fileExists ? '' : 'error';
+            const icon = fileExists ? '📄' : '❌';
+            
+            finalLinksHtml += `
+              <a href="${useUrl}" target="_blank" rel="noopener" 
+                 class="file-link ${linkClass}" title="${cleanPart}">
+                ${icon} ${displayName}
+              </a>
+            `;
+            
+            // Loguj błędy
+            if (!fileExists) {
+              log(`❌ Plik nie istnieje lub błąd: ${displayName}`);
             }
-        });
-    </script>
+          }
+          
+          // Zaktualizuj HTML
+          const container = document.getElementById(`links-${row.id}`);
+          if (container) {
+            container.innerHTML = finalLinksHtml;
+          }
+        }, 100); // Małe opóźnienie dla lepszej responsywności
+      }
+    }
+  }
+
+  // Dodaj event listenery do przycisków zapisu
+  document.querySelectorAll('.save-btn').forEach(btn => {
+    btn.onclick = async function() {
+      const rowId = this.getAttribute('data-id');
+      const tr = this.closest('tr');
+      const inputs = tr.querySelectorAll('input');
+      
+      // Pobierz aktualny status z ikony
+      const statusIcon = tr.querySelector('.status-info .status-icon');
+      const currentStatus = statusIcon ? statusIcon.textContent : "⌛️";
+      
+      // Pobierz wartość radio button "Pokaż kontakt"
+      const contactRadios = tr.querySelectorAll(`input[name="contact-${rowId}"]`);
+      let showContactValue = false;
+      
+      for (const radio of contactRadios) {
+        if (radio.checked) {
+          showContactValue = radio.value === "true";
+          break;
+        }
+      }
+      
+      // Pomijamy pola Lp i Email w payloadzie, bo są readonly
+      const payload = {
+        imie: inputs[1].value,    // Pomijamy inputs[0] (Lp)
+        nazwisko: inputs[2].value,
+        telefon: inputs[3].value,
+        // Pomijamy inputs[4] (Email)
+        status: currentStatus,
+        show_contact: showContactValue
+      };
+      
+      log(`💾 Próba zapisu ID ${rowId}...`);
+      log(`   Status: ${currentStatus}`);
+      log(`   show_contact: ${showContactValue}`);
+      
+      const { error } = await supabaseClient
+        .from("tabela_elektrykow")
+        .update(payload)
+        .eq("id", rowId);
+      
+      const statusContainerId = `status-container-${rowId}`;
+      
+      if (error) {
+        log(`❌ Błąd zapisu ID ${rowId}: ${error.message}`);
+        showSaveMessage(statusContainerId, false, "Błąd zapisu");
+      } else {
+        log(`✅ Zapisano ID ${rowId}`);
+        showSaveMessage(statusContainerId, true, "Zapisano pomyślnie");
+      }
+    };
+  });
+  
+  log("✅ Tabela załadowana");
+}
+
+/* ===== AUTO CHECK ===== */
+checkSession();
+</script>
+
 </body>
 </html>
