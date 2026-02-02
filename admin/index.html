@@ -290,10 +290,10 @@ async function loadData() {
   const statusMap = {
     "✅": "done",
     "❌": "rejected", 
-    "⏳": "pending",
+    "⌛️": "pending",
     "done": "✅",
     "rejected": "❌",
-    "pending": "⏳"
+    "pending": "⌛️"
   };
 
   // Dla każdego wiersza asynchronicznie sprawdź pliki
@@ -301,15 +301,15 @@ async function loadData() {
     const tr = document.createElement("tr");
     
     // Ustal który radio button ma być zaznaczony na podstawie statusu
-    const currentStatus = row.status || "⏳";
-    let selectedStatus = "⏳"; // domyślnie ⏳
+    const currentStatus = row.status || "⌛️";
+    let selectedStatus = "⌛️"; // domyślnie ⌛️
     
     if (currentStatus.includes("✅") || statusMap[currentStatus] === "✅") {
       selectedStatus = "✅";
     } else if (currentStatus.includes("❌") || statusMap[currentStatus] === "❌") {
       selectedStatus = "❌";
-    } else if (currentStatus.includes("⏳") || statusMap[currentStatus] === "⏳") {
-      selectedStatus = "⏳";
+    } else if (currentStatus.includes("⌛️") || statusMap[currentStatus] === "⌛️") {
+      selectedStatus = "⌛️";
     }
     
     // Generuj HTML dla linków - początkowo pokaż "sprawdzanie"
@@ -340,8 +340,8 @@ async function loadData() {
             <span class="status-icon">❌</span> Odrzucony
           </label>
           <label class="status-option">
-            <input type="radio" name="status-${row.id}" value="⏳" class="status-radio" ${selectedStatus === "⏳" ? "checked" : ""}>
-            <span class="status-icon">⏳</span> Oczekuje
+            <input type="radio" name="status-${row.id}" value="⌛️" class="status-radio" ${selectedStatus === "⌛️" ? "checked" : ""}>
+            <span class="status-icon">⌛️</span> Oczekuje
           </label>
         </div>
       </td>
@@ -418,7 +418,7 @@ async function loadData() {
       
       // Znajdź zaznaczony radio button status
       const statusRadios = tr.querySelectorAll('input[type="radio"][name^="status-"]');
-      let selectedStatus = "⏳"; // domyślnie ⏳
+      let selectedStatus = "⌛️"; // domyślnie ⌛️
       
       for (const radio of statusRadios) {
         if (radio.checked) {
