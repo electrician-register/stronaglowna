@@ -28,6 +28,14 @@ table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
+/* Styl dla zablokowanego pola LP */
+.lp-input {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .file-link {
   display: block;
   color: #3498db;
@@ -448,7 +456,9 @@ async function loadData() {
     const statusContainerId = `status-container-${row.id}`;
     
     tr.innerHTML = `
-      <td data-label="LP"><input value="${row.lp || ""}"></td>
+      <td data-label="LP">
+        <input class="lp-input" value="${row.lp || ""}" readonly>
+      </td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
       <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
@@ -598,9 +608,9 @@ async function loadData() {
         }
       }
       
+      // Pomijamy pole LP w payloadzie, bo jest readonly
       const payload = {
-        lp: inputs[0].value,
-        imie: inputs[1].value,
+        imie: inputs[1].value, // Pomijamy inputs[0] (LP)
         nazwisko: inputs[2].value,
         telefon: inputs[3].value,
         email: inputs[4].value,
