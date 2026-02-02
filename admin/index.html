@@ -128,10 +128,7 @@ async function login() {
   log("Email: " + email);
   log("Hasło wpisane: " + (password.length > 0));
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if (error) {
     log("BŁĄD LOGOWANIA: " + error.message);
@@ -172,19 +169,34 @@ function fileUrl(path) {
   return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/uprawnienia/${path}`;
 }
 
-/* ===== POPRAWIONE LINKI ===== */
-function renderLinks(text) {
+/* ===== SPRAWDZENIE PLIKÓW Z LOGAMI ===== */
+async function renderLinksWithCheck(text, rowId) {
   if (!text) return "";
 
-  // Zamień przecinki i średniki na spacje
   text = text.replace(/[,;]/g, " ");
-
   const parts = text.split(/\s+/).filter(t => t);
+  let result = [];
 
-  return parts.map(part => {
+  for (let part of parts) {
     const url = fileUrl(part);
-    return `<a href="${url}" target="_blank" rel="noopener">${part}</a>`;
-  }).join("<br>");
+    let status = "";
+
+    try {
+      const res = await fetch(url, { method: 'HEAD' });
+      if (res.ok) {
+        status = "OK ✅";
+      } else {
+        status = `Błąd HTTP: ${res.status} ❌`;
+      }
+    } catch (err) {
+      status = "Błąd pobrania ❌";
+    }
+
+    log(`Plik: ${part} → ${url} | Status: ${status}`);
+    result.push(`<a href="${url}" target="_blank" rel="noopener">${part}</a>`);
+  }
+
+  return result.join("<br>");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -206,7 +218,7 @@ async function loadData() {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
-  data.forEach(row => {
+  data.forEach(async row => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
@@ -217,7 +229,7 @@ async function loadData() {
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
         <div style="word-break:break-all">
-          ${renderLinks(row.plik)}
+          <span id="links-${row.id}">Sprawdzanie plików...</span>
         </div>
       </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
@@ -249,6 +261,10 @@ async function loadData() {
     };
 
     tbody.appendChild(tr);
+
+    // Wywołanie asynchroniczne sprawdzające pliki
+    const htmlLinks = await renderLinksWithCheck(row.plik, row.id);
+    document.getElementById(`links-${row.id}`).innerHTML = htmlLinks;
   });
 }
 
