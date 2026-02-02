@@ -228,11 +228,11 @@ async function loadData() {
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
 <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
+<td data-label="Uprawnienia"><input value="${row.plik || ""}"></td>
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
-      <td data-label="Uprawnienia"><input value="${row.plik || ""}"></td>
-      <td data-label="Akcja"><button>Zapisz</button></td>
+       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
     tr.querySelector("button").onclick = async () => {
