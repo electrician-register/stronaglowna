@@ -11,15 +11,7 @@
 <style>
 body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
 
-#logBox {
-  background:#000;
-  color:#0f0;
-  padding:10px;
-  font-size:12px;
-  height:160px;
-  overflow:auto;
-  margin-bottom:15px;
-}
+#logBox { background:#000; color:#0f0; padding:10px; font-size:12px; height:160px; overflow:auto; margin-bottom:15px }
 
 input, button { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
@@ -31,71 +23,21 @@ th { background:#222; color:#fff }
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
 
-  td input,
-  td button {
-    box-sizing: border-box;
-    max-width: 100%;
-  }
+  td input, td button { box-sizing: border-box; max-width: 100% }
 
 }
-
 @media (max-width: 768px) {
 
-  table, thead, tbody, th, tr {
-    display:block;
-  }
-
-  thead {
-    display:none;
-  }
-
-  tr {
-    background:#fff;
-    margin-bottom:14px;
-    padding:12px;
-    border-radius:8px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
-  }
-
-  td {
-    display:grid;
-    grid-template-columns: 120px 1fr;
-    align-items:center;
-    border:none;
-    padding:6px 0;
-    font-size:14px;
-  }
-
-  td::before {
-    content: attr(data-label);
-    font-weight:600;
-    color:#444;
-  }
-
-  td input[type="text"],
-  td input[type="email"] {
-    width:100%;
-  }
-
-  td input[type="checkbox"] {
-    transform: scale(1.2);
-    justify-self:start;
-  }
-
-  td[data-label="Akcja"] {
-    grid-template-columns: 1fr;
-    margin-top:8px;
-  }
-
-  td[data-label="Akcja"]::before {
-    display:none;
-  }
-
-  td button {
-    width:100%;
-    padding:10px;
-    font-size:15px;
-  }
+  table, thead, tbody, th, tr { display:block }
+  thead { display:none }
+  tr { background:#fff; margin-bottom:14px; padding:12px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08) }
+  td { display:grid; grid-template-columns: 120px 1fr; align-items:center; border:none; padding:6px 0; font-size:14px }
+  td::before { content: attr(data-label); font-weight:600; color:#444 }
+  td input[type="text"], td input[type="email"] { width:100% }
+  td input[type="checkbox"] { transform: scale(1.2); justify-self:start }
+  td[data-label="Akcja"] { grid-template-columns: 1fr; margin-top:8px }
+  td[data-label="Akcja"]::before { display:none }
+  td button { width:100%; padding:10px; font-size:15px }
 }
 </style>
 </head>
@@ -155,23 +97,14 @@ document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
   log("Klik ZALOGUJ");
-
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   log("Email: " + email);
   log("Hasło wpisane: " + (password.length > 0));
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-  if (error) {
-    log("BŁĄD LOGOWANIA: " + error.message);
-    return;
-  }
-
+  if (error) { log("BŁĄD LOGOWANIA: " + error.message); return; }
   log("Zalogowano OK");
   checkSession();
 }
@@ -179,14 +112,9 @@ async function login() {
 /* ===== SPRAWDZENIE ADMINA ===== */
 async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
-
-  if (!data.session) {
-    log("Brak sesji");
-    return;
-  }
+  if (!data.session) { log("Brak sesji"); return; }
 
   const adminEmail = "piotr8040@gmail.com";
-
   if (data.session.user.email !== adminEmail) {
     log("Brak uprawnień admin");
     await supabaseClient.auth.signOut();
@@ -194,26 +122,28 @@ async function checkSession() {
   }
 
   log("Admin potwierdzony");
-
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("adminPanel").style.display = "block";
-
   loadData();
 }
 
-/* ===== POPRAWIONE LINKI ===== */
-function renderLinks(text) {
-  if (!text) return "";
+/* ===== FUNKCJA DO LINKÓW ===== */
+async function renderLinks(paths) {
+  if (!paths) return "";
+  // rozdziel ścieżki po przecinku/średniku/nowej linii
+  const arr = paths.split(/[\n,;]/).map(p => p.trim()).filter(p => p.length>0);
+  if (!arr.length) return "";
 
-  // Zamień przecinki i średniki na spacje
-  text = text.replace(/[,;]/g, " ");
+  // generuj link do każdego pliku
+  const links = await Promise.all(arr.map(async path => {
+    try {
+      const { data, error } = await supabaseClient.storage.from('uprawnienia').createSignedUrl(path, 60*60);
+      if (error) return path; // jeśli błąd, pokaż nazwę
+      return `<a href="${data.signedUrl}" target="_blank">${path}</a>`;
+    } catch(e) { return path; }
+  }));
 
-  // Rozdziel po spacji lub nowej linii
-  const urls = text.split(/\s+/).filter(t => t.startsWith("http"));
-
-  if (!urls.length) return text;
-
-  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("<br>");
+  return links.join("<br>");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -225,18 +155,18 @@ async function loadData() {
     .select("id, lp, imie, nazwisko, telefon, email,status, plik, show_contact")
     .order("lp");
 
-  if (error) {
-    log("BŁĄD BAZY: " + error.message);
-    return;
-  }
-
+  if (error) { log("BŁĄD BAZY: " + error.message); return; }
   log("Rekordów: " + data.length);
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
-  data.forEach(row => {
+  for (const row of data) {
     const tr = document.createElement("tr");
+
+    // generujemy linki do plików
+    const plikHTML = await renderLinks(row.plik);
+
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
@@ -244,20 +174,13 @@ async function loadData() {
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
-      <td data-label="Uprawnienia">
-        <div style="word-break:break-all">
-          ${renderLinks(row.plik)}
-        </div>
-      </td>
-      <td data-label="Pokaż kontakt" style="text-align:center">
-        <input type="checkbox" ${row.show_contact ? "checked" : ""}>
-      </td>
+      <td data-label="Uprawnienia"><div style="word-break:break-all">${plikHTML}</div></td>
+      <td data-label="Pokaż kontakt" style="text-align:center"><input type="checkbox" ${row.show_contact ? "checked" : ""}></td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
     tr.querySelector("button").onclick = async () => {
       const i = tr.querySelectorAll("input");
-
       const payload = {
         lp: i[0].value,
         imie: i[1].value,
@@ -267,18 +190,13 @@ async function loadData() {
         status: i[5].value,
         show_contact: i[6].checked
       };
-
-      const { error } = await supabaseClient
-        .from("tabela_elektrykow")
-        .update(payload)
-        .eq("id", row.id);
-
+      const { error } = await supabaseClient.from("tabela_elektrykow").update(payload).eq("id", row.id);
       if (error) log("Błąd zapisu");
       else log("Zapisano ID: " + row.id);
     };
 
     tbody.appendChild(tr);
-  });
+  }
 }
 
 /* ===== AUTO CHECK ===== */
@@ -287,3 +205,4 @@ checkSession();
 
 </body>
 </html>
+
