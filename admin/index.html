@@ -49,6 +49,19 @@ th { background:#222; color:#fff }
   border-color: #f5c6cb;
 }
 
+/* Styl dla checkboxa status */
+.status-checkbox {
+  transform: scale(1.5);
+  cursor: pointer;
+}
+.status-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
   td input,
@@ -83,6 +96,17 @@ th { background:#222; color:#fff }
   td[data-label="Akcja"] { grid-template-columns: 1fr; margin-top:8px; }
   td[data-label="Akcja"]::before { display:none; }
   td button { width:100%; padding:10px; font-size:15px; }
+  
+  /* Specjalny styl dla status na mobile */
+  td[data-label="Status"] {
+    grid-template-columns: 120px auto;
+  }
+  td[data-label="Status"]::before {
+    align-self: center;
+  }
+  .status-label {
+    justify-content: flex-start;
+  }
 }
 </style>
 </head>
@@ -261,6 +285,10 @@ async function loadData() {
   for (const row of data) {
     const tr = document.createElement("tr");
     
+    // Ustal status - checkbox będzie zaznaczony jeśli status to "aktywny" lub podobne
+    // Możesz dostosować te wartości do swoich potrzeb
+    const isActive = row.status === "aktywny" || row.status === "active" || row.status === "1" || row.status === "tak" || row.status === "true";
+    
     // Generuj HTML dla linków - początkowo pokaż "sprawdzanie"
     let linksHtml = "<span style='color:#888'>Brak plików</span>";
     let linksContainer = null;
@@ -279,7 +307,12 @@ async function loadData() {
       <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
-      <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
+      <td data-label="Status">
+        <div class="status-label">
+          <input type="checkbox" class="status-checkbox" ${isActive ? "checked" : ""}>
+          <span>${isActive ? "Aktywny" : "Nieaktywny"}</span>
+        </div>
+      </td>
       <td data-label="Uprawnienia">
         <div id="links-${row.id}" style="word-break:break-all; max-height:120px; overflow-y:auto; padding:5px;">
           ${linksHtml}
@@ -342,6 +375,14 @@ async function loadData() {
         }, 100); // Małe opóźnienie dla lepszej responsywności
       }
     }
+    
+    // Dodaj event listener do checkboxa status, aby aktualizować tekst
+    const statusCheckbox = tr.querySelector('.status-checkbox');
+    const statusText = tr.querySelector('.status-label span');
+    
+    statusCheckbox.addEventListener('change', function() {
+      statusText.textContent = this.checked ? "Aktywny" : "Nieaktywny";
+    });
   }
 
   // Dodaj event listenery do przycisków zapisu
@@ -351,13 +392,18 @@ async function loadData() {
       const tr = this.closest('tr');
       const inputs = tr.querySelectorAll('input');
       
+      // Pobierz wartość checkboxa status (true/false)
+      const isActive = inputs[5].checked;
+      // Konwertuj na tekstowy status (możesz zmienić na swoje wartości)
+      const statusValue = isActive ? "aktywny" : "nieaktywny";
+      
       const payload = {
         lp: inputs[0].value,
         imie: inputs[1].value,
         nazwisko: inputs[2].value,
         telefon: inputs[3].value,
         email: inputs[4].value,
-        status: inputs[5].value,
+        status: statusValue,
         show_contact: inputs[6].checked
       };
       
