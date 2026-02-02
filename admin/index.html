@@ -43,6 +43,11 @@ th { background:#222; color:#fff }
   background: #e3f2fd;
   border-color: #3498db;
 }
+.file-link.error {
+  color: #e74c3c;
+  background: #fdeaea;
+  border-color: #f5c6cb;
+}
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
@@ -181,7 +186,7 @@ async function checkSession() {
   loadData();
 }
 
-/* ===== GENERUJ PUBLICZNY URL ===== */
+/* ===== NAPRAWIONA FUNKCJA - GENERUJ PUBLICZNY URL ===== */
 function getPublicUrl(fullUrl) {
   if (!fullUrl) return null;
   
@@ -191,26 +196,49 @@ function getPublicUrl(fullUrl) {
       return fullUrl;
     }
     
-    // Jeśli to URL z tokenem, zamień na publiczny
+    // Jeśli to URL z tokenem
     if (fullUrl.includes('/object/sign/')) {
-      // Wyciągnij ścieżkę po '/sign/'
+      // 1. Wyciągnij ścieżkę po '/sign/'
       const signIndex = fullUrl.indexOf('/object/sign/') + '/object/sign/'.length;
       const pathWithQuery = fullUrl.substring(signIndex);
-      // Usuń query string (token)
+      
+      // 2. Usuń query string (token)
       const path = pathWithQuery.split('?')[0];
-      // Zakoduj ścieżkę
-      const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-      return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${encodedPath}`;
+      
+      // 3. DEKODUJ URL (zamień %20 na spacje i inne zakodowane znaki)
+      // Najpierw dekoduj całą ścieżkę
+      let decodedPath = decodeURIComponent(path);
+      
+      // 4. Teraz zakoduj ponownie, ale POPRAWNIE
+      // Podziel na części folder/plik
+      const parts = decodedPath.split('/');
+      const encodedParts = parts.map(part => encodeURIComponent(part));
+      const finalPath = encodedParts.join('/');
+      
+      return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${finalPath}`;
     }
     
     // Jeśli to coś innego, zwróć oryginał
     return fullUrl;
   } catch (err) {
+    log(`Błąd przetwarzania URL: ${err.message}`);
     return fullUrl;
   }
 }
 
-/* ===== WCZYTANIE TABELI ===== */
+/* ===== SPRAWDŹ CZY PLIK ISTNIEJE ===== */
+async function checkFileExists(url) {
+  if (!url) return false;
+  
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
+/* ===== WCZYTANIE TABELI Z SPRAWDZANIEM PLIKÓW ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
 
@@ -229,39 +257,19 @@ async function loadData() {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
-  data.forEach(row => {
+  // Dla każdego wiersza asynchronicznie sprawdź pliki
+  for (const row of data) {
     const tr = document.createElement("tr");
     
-    // Generuj HTML dla linków
+    // Generuj HTML dla linków - początkowo pokaż "sprawdzanie"
     let linksHtml = "<span style='color:#888'>Brak plików</span>";
+    let linksContainer = null;
     
     if (row.plik) {
       const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
       
       if (parts.length > 0) {
-        linksHtml = "";
-        
-        parts.forEach(part => {
-          const cleanPart = part.trim();
-          const publicUrl = getPublicUrl(cleanPart);
-          const useUrl = publicUrl || cleanPart;
-          
-          // Wyświetlana nazwa pliku
-          let displayName = cleanPart.split('/').pop() || cleanPart;
-          if (displayName.includes('?')) {
-            displayName = displayName.split('?')[0];
-          }
-          if (displayName.length > 25) {
-            displayName = displayName.substring(0, 25) + '...';
-          }
-          
-          linksHtml += `
-            <a href="${useUrl}" target="_blank" rel="noopener" 
-               class="file-link" title="Kliknij aby otworzyć plik">
-              📄 ${displayName}
-            </a>
-          `;
-        });
+        linksHtml = "<span style='color:#888'>Sprawdzanie plików...</span>";
       }
     }
     
@@ -273,7 +281,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="word-break:break-all; max-height:120px; overflow-y:auto; padding:5px;">
+        <div id="links-${row.id}" style="word-break:break-all; max-height:120px; overflow-y:auto; padding:5px;">
           ${linksHtml}
         </div>
       </td>
@@ -284,7 +292,57 @@ async function loadData() {
     `;
     
     tbody.appendChild(tr);
-  });
+    
+    // Asynchronicznie sprawdź pliki dla tego wiersza
+    if (row.plik) {
+      const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
+      
+      if (parts.length > 0) {
+        // Opóźnij sprawdzanie, aby nie blokować interfejsu
+        setTimeout(async () => {
+          let finalLinksHtml = "";
+          
+          for (const part of parts) {
+            const cleanPart = part.trim();
+            const publicUrl = getPublicUrl(cleanPart);
+            const useUrl = publicUrl || cleanPart;
+            
+            // Wyświetlana nazwa pliku
+            let displayName = cleanPart.split('/').pop() || cleanPart;
+            if (displayName.includes('?')) {
+              displayName = displayName.split('?')[0];
+            }
+            if (displayName.length > 25) {
+              displayName = displayName.substring(0, 25) + '...';
+            }
+            
+            // Sprawdź czy plik istnieje
+            const fileExists = await checkFileExists(useUrl);
+            const linkClass = fileExists ? '' : 'error';
+            const icon = fileExists ? '📄' : '❌';
+            
+            finalLinksHtml += `
+              <a href="${useUrl}" target="_blank" rel="noopener" 
+                 class="file-link ${linkClass}" title="${cleanPart}">
+                ${icon} ${displayName}
+              </a>
+            `;
+            
+            // Loguj błędy
+            if (!fileExists) {
+              log(`❌ Plik nie istnieje lub błąd: ${displayName}`);
+            }
+          }
+          
+          // Zaktualizuj HTML
+          const container = document.getElementById(`links-${row.id}`);
+          if (container) {
+            container.innerHTML = finalLinksHtml;
+          }
+        }, 100); // Małe opóźnienie dla lepszej responsywności
+      }
+    }
+  }
 
   // Dodaj event listenery do przycisków zapisu
   document.querySelectorAll('.save-btn').forEach(btn => {
