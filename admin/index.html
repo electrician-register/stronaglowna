@@ -10,27 +10,92 @@
 
 <style>
 body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
+
 #logBox {
-  background:#000; color:#0f0; padding:10px; font-size:12px;
-  height:160px; overflow:auto; margin-bottom:15px;
+  background:#000;
+  color:#0f0;
+  padding:10px;
+  font-size:12px;
+  height:160px;
+  overflow:auto;
+  margin-bottom:15px;
 }
+
 input, button { width:100%; padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
+
 table { width:100%; border-collapse:collapse; background:#fff }
 th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
-@media (max-width:768px){
-  table, thead, tbody, th, tr { display:block }
-  thead { display:none }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+
+  td input,
+  td button {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  table, thead, tbody, th, tr {
+    display:block;
+  }
+
+  thead {
+    display:none;
+  }
+
   tr {
-    background:#fff; margin-bottom:14px; padding:12px;
-    border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08)
+    background:#fff;
+    margin-bottom:14px;
+    padding:12px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
   }
+
   td {
-    display:grid; grid-template-columns:120px 1fr;
-    align-items:center; border:none; padding:6px 0
+    display:grid;
+    grid-template-columns: 120px 1fr;
+    align-items:center;
+    border:none;
+    padding:6px 0;
+    font-size:14px;
   }
-  td::before { content:attr(data-label); font-weight:600 }
+
+  td::before {
+    content: attr(data-label);
+    font-weight:600;
+    color:#444;
+  }
+
+  td input[type="text"],
+  td input[type="email"] {
+    width:100%;
+  }
+
+  td input[type="checkbox"] {
+    transform: scale(1.2);
+    justify-self:start;
+  }
+
+  td[data-label="Akcja"] {
+    grid-template-columns: 1fr;
+    margin-top:8px;
+  }
+
+  td[data-label="Akcja"]::before {
+    display:none;
+  }
+
+  td button {
+    width:100%;
+    padding:10px;
+    font-size:15px;
+  }
 }
 </style>
 </head>
@@ -52,9 +117,15 @@ th { background:#222; color:#fff }
   <table>
     <thead>
       <tr>
-        <th>LP</th><th>Imię</th><th>Nazwisko</th>
-        <th>Telefon</th><th>Email</th><th>Status</th>
-        <th>Uprawnienia</th><th>Pokaż kontakt</th><th>Zapisz</th>
+        <th>LP</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Telefon</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Uprawnienia</th>
+        <th>Pokaż kontakt</th>
+        <th>Zapisz</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -63,30 +134,37 @@ th { background:#222; color:#fff }
 
 <script>
 /* ===== LOGI ===== */
-function log(txt){
+function log(txt) {
   const box = document.getElementById("logBox");
   box.innerHTML += txt + "<br>";
   box.scrollTop = box.scrollHeight;
 }
 
 /* ===== SUPABASE ===== */
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co"; // <<< TU
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";       // <<< TU
+log("Start JS");
 
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  "https://tfbqqduxtsacvwfigsvt.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8"
 );
 
 log("Supabase OK");
 
 /* ===== LOGOWANIE ===== */
-document.getElementById("loginBtn").onclick = async () => {
-  const email = email.value;
-  const password = password.value;
+document.getElementById("loginBtn").addEventListener("click", login);
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email, password
+async function login() {
+  log("Klik ZALOGUJ");
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  log("Email: " + email);
+  log("Hasło wpisane: " + (password.length > 0));
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
   });
 
   if (error) {
@@ -96,56 +174,109 @@ document.getElementById("loginBtn").onclick = async () => {
 
   log("Zalogowano OK");
   checkSession();
-};
+}
 
 /* ===== SPRAWDZENIE ADMINA ===== */
-async function checkSession(){
+async function checkSession() {
   const { data } = await supabaseClient.auth.getSession();
-  if (!data.session) return log("Brak sesji");
 
-  if (data.session.user.email !== "piotr8040@gmail.com") {
-    await supabaseClient.auth.signOut();
-    return log("Brak uprawnień admin");
+  if (!data.session) {
+    log("Brak sesji");
+    return;
   }
+
+  const adminEmail = "piotr8040@gmail.com";
+
+  if (data.session.user.email !== adminEmail) {
+    log("Brak uprawnień admin");
+    await supabaseClient.auth.signOut();
+    return;
+  }
+
+  log("Admin potwierdzony");
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("adminPanel").style.display = "block";
+
   loadData();
 }
 
-/* ===== LINKI ===== */
-function renderLinks(text){
-  if(!text) return "";
-  const urls = text.match(/https?:\/\/[^\s]+/g);
-  if(!urls) return text;
-  return urls.map(u =>
-    `<a href="${u}" target="_blank">${u}</a>`
-  ).join("<br>");
+/* ===== POPRAWIONE LINKI ===== */
+function renderLinks(text) {
+  if (!text) return "";
+
+  // Zamień przecinki i średniki na spacje
+  text = text.replace(/[,;]/g, " ");
+
+  // Rozdziel po spacji lub nowej linii
+  const urls = text.split(/\s+/).filter(t => t.startsWith("http"));
+
+  if (!urls.length) return text;
+
+  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("<br>");
 }
 
-/* ===== WCZYTANIE DANYCH ===== */
-async function loadData(){
+/* ===== WCZYTANIE TABELI ===== */
+async function loadData() {
+  log("Pobieram dane...");
+
   const { data, error } = await supabaseClient
     .from("tabela_elektrykow")
-    .select("*")
+    .select("id, lp, imie, nazwisko, telefon, email,status, plik, show_contact")
     .order("lp");
 
-  if (error) return log(error.message);
+  if (error) {
+    log("BŁĄD BAZY: " + error.message);
+    return;
+  }
 
+  log("Rekordów: " + data.length);
+
+  const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
+
   data.forEach(row => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td data-label="LP"><input value="${row.lp||""}"></td>
-      <td data-label="Imię"><input value="${row.imie||""}"></td>
-      <td data-label="Nazwisko"><input value="${row.nazwisko||""}"></td>
-      <td data-label="Telefon"><input value="${row.telefon||""}"></td>
-      <td data-label="Email"><input value="${row.email||""}"></td>
-      <td data-label="Status"><input value="${row.status||""}"></td>
-      <td data-label="Uprawnienia">${renderLinks(row.plik)}</td>
-      <td data-label="Kontakt"><input type="checkbox" ${row.show_contact?"checked":""}></td>
-      <td><button>Zapisz</button></td>
+      <td data-label="LP"><input value="${row.lp || ""}"></td>
+      <td data-label="Imię"><input value="${row.imie || ""}"></td>
+      <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
+      <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
+      <td data-label="Email"><input value="${row.email || ""}"></td>
+      <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
+      <td data-label="Uprawnienia">
+        <div style="word-break:break-all">
+          ${renderLinks(row.plik)}
+        </div>
+      </td>
+      <td data-label="Pokaż kontakt" style="text-align:center">
+        <input type="checkbox" ${row.show_contact ? "checked" : ""}>
+      </td>
+      <td data-label="Akcja"><button>Zapisz</button></td>
     `;
+
+    tr.querySelector("button").onclick = async () => {
+      const i = tr.querySelectorAll("input");
+
+      const payload = {
+        lp: i[0].value,
+        imie: i[1].value,
+        nazwisko: i[2].value,
+        telefon: i[3].value,
+        email: i[4].value,
+        status: i[5].value,
+        show_contact: i[6].checked
+      };
+
+      const { error } = await supabaseClient
+        .from("tabela_elektrykow")
+        .update(payload)
+        .eq("id", row.id);
+
+      if (error) log("Błąd zapisu");
+      else log("Zapisano ID: " + row.id);
+    };
+
     tbody.appendChild(tr);
   });
 }
