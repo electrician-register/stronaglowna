@@ -43,16 +43,6 @@ th { background:#222; color:#fff }
   background: #e3f2fd;
   border-color: #3498db;
 }
-.file-link.error {
-  color: #e74c3c;
-  background: #fdeaea;
-  border-color: #f5c6cb;
-}
-.file-link.success {
-  color: #27ae60;
-  background: #eafaf1;
-  border-color: #c3e6cb;
-}
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
@@ -106,16 +96,6 @@ th { background:#222; color:#fff }
 
 <div id="adminPanel" style="display:none">
   <h2>Panel admina – tabela_elektrykow</h2>
-  
-  <!-- Przyciski diagnostyczne -->
-  <div style="margin-bottom:15px;">
-    <button onclick="testAllFiles()" style="background:#e74c3c; margin-right:10px;">
-      🔍 Testuj wszystkie pliki
-    </button>
-    <button onclick="fixAllFileUrls()" style="background:#9b59b6;">
-      🔧 Napraw URL w bazie
-    </button>
-  </div>
   
   <table>
     <thead>
@@ -201,184 +181,36 @@ async function checkSession() {
   loadData();
 }
 
-/* ===== WYCIĄGNIJ ŚCIEŻKĘ Z URL ===== */
-function extractPathFromUrl(fullUrl) {
-  if (!fullUrl) return "";
-  
-  // Jeśli to już zwykła ścieżka (bez http), zwróć ją
-  if (!fullUrl.startsWith('http')) {
-    return fullUrl;
-  }
-  
-  try {
-    const url = new URL(fullUrl);
-    const pathname = url.pathname;
-    
-    // Usuń część '/storage/v1/object/sign/' ze ścieżki
-    const signPath = '/storage/v1/object/sign/';
-    if (pathname.includes(signPath)) {
-      // Wyciągnij część po 'sign/'
-      const startIndex = pathname.indexOf(signPath) + signPath.length;
-      return pathname.substring(startIndex);
-    }
-    
-    // Usuń część '/storage/v1/object/public/' ze ścieżki
-    const publicPath = '/storage/v1/object/public/';
-    if (pathname.includes(publicPath)) {
-      const startIndex = pathname.indexOf(publicPath) + publicPath.length;
-      return pathname.substring(startIndex);
-    }
-    
-    return pathname;
-  } catch (err) {
-    log(`Błąd parsowania URL: ${err.message}`);
-    return fullUrl;
-  }
-}
-
 /* ===== GENERUJ PUBLICZNY URL ===== */
 function getPublicUrl(fullUrl) {
-  const path = extractPathFromUrl(fullUrl);
-  if (!path) return null;
-  
-  // Zakoduj ścieżkę
-  const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-  return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${encodedPath}`;
-}
-
-/* ===== SPRAWDŹ CZY PLIK ISTNIEJE ===== */
-async function checkFileExists(publicUrl) {
-  if (!publicUrl) return false;
+  if (!fullUrl) return null;
   
   try {
-    const response = await fetch(publicUrl, { method: 'HEAD' });
-    return response.ok;
-  } catch (error) {
-    return false;
+    // Jeśli to już publiczny URL, zwróć go
+    if (fullUrl.includes('/object/public/')) {
+      return fullUrl;
+    }
+    
+    // Jeśli to URL z tokenem, zamień na publiczny
+    if (fullUrl.includes('/object/sign/')) {
+      // Wyciągnij ścieżkę po '/sign/'
+      const signIndex = fullUrl.indexOf('/object/sign/') + '/object/sign/'.length;
+      const pathWithQuery = fullUrl.substring(signIndex);
+      // Usuń query string (token)
+      const path = pathWithQuery.split('?')[0];
+      // Zakoduj ścieżkę
+      const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
+      return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${encodedPath}`;
+    }
+    
+    // Jeśli to coś innego, zwróć oryginał
+    return fullUrl;
+  } catch (err) {
+    return fullUrl;
   }
 }
 
-/* ===== TESTUJ WSZYSTKIE PLIKI ===== */
-async function testAllFiles() {
-  log("=== TESTOWANIE WSZYSTKICH PLIKÓW ===");
-  
-  const { data, error } = await supabaseClient
-    .from("tabela_elektrykow")
-    .select("id, imie, nazwisko, plik")
-    .not('plik', 'is', null);
-  
-  if (error) {
-    log("❌ Błąd pobierania danych: " + error.message);
-    return;
-  }
-  
-  log(`Znaleziono ${data.length} rekordów z plikami`);
-  
-  let totalFiles = 0;
-  let workingFiles = 0;
-  let brokenFiles = 0;
-  
-  for (const row of data) {
-    if (!row.plik) continue;
-    
-    const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
-    
-    for (const part of parts) {
-      totalFiles++;
-      const publicUrl = getPublicUrl(part.trim());
-      
-      if (!publicUrl) {
-        log(`❌ ${row.imie} ${row.nazwisko}: Nie można wygenerować URL z: ${part.substring(0, 50)}...`);
-        brokenFiles++;
-        continue;
-      }
-      
-      const exists = await checkFileExists(publicUrl);
-      
-      if (exists) {
-        log(`✅ ${row.imie} ${row.nazwisko}: DZIAŁA - ${publicUrl}`);
-        workingFiles++;
-      } else {
-        log(`❌ ${row.imie} ${row.nazwisko}: NIE DZIAŁA - ${publicUrl}`);
-        brokenFiles++;
-      }
-    }
-  }
-  
-  log(`=== PODSUMOWANIE ===`);
-  log(`📊 Wszystkich plików: ${totalFiles}`);
-  log(`✅ Działających: ${workingFiles}`);
-  log(`❌ Niedziałających: ${brokenFiles}`);
-  log(`📈 Skuteczność: ${totalFiles > 0 ? Math.round((workingFiles / totalFiles) * 100) : 0}%`);
-}
-
-/* ===== NAPRAW URL W BAZIE (ZAMIEN NA PUBLICZNE) ===== */
-async function fixAllFileUrls() {
-  if (!confirm("Czy na pewno chcesz zamienić wszystkie URL na publiczne?\n\nUWAGA: Ta operacja zmieni dane w bazie!")) {
-    return;
-  }
-  
-  log("=== NAPRAWA URL W BAZIE DANYCH ===");
-  
-  const { data, error } = await supabaseClient
-    .from("tabela_elektrykow")
-    .select("id, imie, nazwisko, plik")
-    .not('plik', 'is', null);
-  
-  if (error) {
-    log("❌ Błąd pobierania danych: " + error.message);
-    return;
-  }
-  
-  log(`Znaleziono ${data.length} rekordów do naprawy`);
-  
-  let fixedCount = 0;
-  let errorCount = 0;
-  
-  for (const row of data) {
-    if (!row.plik) continue;
-    
-    const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
-    const fixedParts = [];
-    
-    for (const part of parts) {
-      const publicUrl = getPublicUrl(part.trim());
-      if (publicUrl) {
-        fixedParts.push(publicUrl);
-      } else {
-        fixedParts.push(part); // Zostaw oryginalny jeśli nie można naprawić
-      }
-    }
-    
-    const fixedPlik = fixedParts.join(" ");
-    
-    // Aktualizuj tylko jeśli się zmieniło
-    if (fixedPlik !== row.plik) {
-      const { error: updateError } = await supabaseClient
-        .from("tabela_elektrykow")
-        .update({ plik: fixedPlik })
-        .eq('id', row.id);
-      
-      if (updateError) {
-        log(`❌ Błąd aktualizacji ID ${row.id}: ${updateError.message}`);
-        errorCount++;
-      } else {
-        log(`✅ Naprawiono ID ${row.id}: ${row.imie} ${row.nazwisko}`);
-        fixedCount++;
-      }
-    }
-  }
-  
-  log(`=== PODSUMOWANIE NAPRAWY ===`);
-  log(`✅ Naprawionych rekordów: ${fixedCount}`);
-  log(`❌ Błędów: ${errorCount}`);
-  log(`🔄 Odświeżam tabelę...`);
-  
-  // Odśwież dane
-  setTimeout(() => loadData(), 1000);
-}
-
-/* ===== WCZYTANIE TABELI Z TESTEM PLIKÓW ===== */
+/* ===== WCZYTANIE TABELI ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
 
@@ -397,8 +229,7 @@ async function loadData() {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
-  // Dla każdego wiersza
-  for (const row of data) {
+  data.forEach(row => {
     const tr = document.createElement("tr");
     
     // Generuj HTML dla linków
@@ -410,35 +241,27 @@ async function loadData() {
       if (parts.length > 0) {
         linksHtml = "";
         
-        // Sprawdź każdy plik asynchronicznie
-        for (const part of parts) {
+        parts.forEach(part => {
           const cleanPart = part.trim();
           const publicUrl = getPublicUrl(cleanPart);
+          const useUrl = publicUrl || cleanPart;
           
           // Wyświetlana nazwa pliku
           let displayName = cleanPart.split('/').pop() || cleanPart;
           if (displayName.includes('?')) {
-            displayName = displayName.split('?')[0]; // Usuń query string
+            displayName = displayName.split('?')[0];
           }
           if (displayName.length > 25) {
             displayName = displayName.substring(0, 25) + '...';
           }
           
-          // Sprawdź czy plik istnieje
-          const fileExists = publicUrl ? await checkFileExists(publicUrl) : false;
-          
-          // URL do użycia (jeśli publiczny istnieje, użyj go, w przeciwnym razie oryginalny)
-          const useUrl = fileExists && publicUrl ? publicUrl : cleanPart;
-          const linkClass = fileExists ? 'success' : 'error';
-          const icon = fileExists ? '✅' : '❌';
-          
           linksHtml += `
             <a href="${useUrl}" target="_blank" rel="noopener" 
-               class="file-link ${linkClass}" title="${cleanPart}">
-              ${icon} ${displayName}
+               class="file-link" title="Kliknij aby otworzyć plik">
+              📄 ${displayName}
             </a>
           `;
-        }
+        });
       }
     }
     
@@ -461,7 +284,7 @@ async function loadData() {
     `;
     
     tbody.appendChild(tr);
-  }
+  });
 
   // Dodaj event listenery do przycisków zapisu
   document.querySelectorAll('.save-btn').forEach(btn => {
