@@ -57,7 +57,7 @@ th { background:#222; color:#fff }
   border-color: #f5c6cb;
 }
 
-/* STYL DLA SEKCJI STATUS Z RAMKĄ */
+/* RAMKA dla Status */
 .status-section {
   border: 3px solid #3498db;
   border-radius: 8px;
@@ -66,7 +66,7 @@ th { background:#222; color:#fff }
   margin: 5px 0;
 }
 
-/* STYL DLA SEKCJI KONTAKT Z RAMKĄ */
+/* RAMKA dla Kontakt */
 .contact-section {
   border: 3px solid #e74c3c;
   border-radius: 8px;
@@ -75,7 +75,7 @@ th { background:#222; color:#fff }
   margin: 5px 0;
 }
 
-/* Kontener statusu - dopasowany do wysokości */
+/* Styl dla statusów - tylko Gotowy jako przycisk */
 .status-container {
   display: flex;
   flex-direction: column;
@@ -101,45 +101,7 @@ th { background:#222; color:#fff }
   font-size: 14px;
 }
 
-/* Przyciski Status - wewnątrz ramki */
-.status-buttons {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-.status-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  height: 36px;
-  transition: all 0.2s;
-  box-sizing: border-box;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
-}
-.status-btn:hover {
-  background: #f0f0f0;
-}
-.status-btn.active {
-  background: #2ecc71;
-  color: white;
-  border-color: #2ecc71;
-}
-.status-btn:disabled {
-  background: #95a5a6;
-  color: white;
-  cursor: not-allowed;
-  border-color: #95a5a6;
-}
-
-/* Przycisk "Ustaw jako gotowy" w sekcji statusu */
+/* Przycisk "Ustaw jako gotowy" - dopasowany do wysokości */
 .set-ready-btn {
   background: #2ecc71;
   color: white;
@@ -156,7 +118,6 @@ th { background:#222; color:#fff }
   height: 36px;
   transition: background 0.2s;
   box-sizing: border-box;
-  margin-top: 8px;
 }
 .set-ready-btn:hover {
   background: #27ae60;
@@ -166,7 +127,7 @@ th { background:#222; color:#fff }
   cursor: not-allowed;
 }
 
-/* Kontener pokaż kontakt - dopasowany do wysokości */
+/* Styl dla "Pokaż kontakt" - dopasowany do wysokości */
 .show-contact-container {
   display: flex;
   flex-direction: column;
@@ -200,38 +161,6 @@ th { background:#222; color:#fff }
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-/* Przyciski Kontakt - wewnątrz ramki */
-.contact-buttons {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-.contact-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  height: 36px;
-  transition: all 0.2s;
-  box-sizing: border-box;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
-}
-.contact-btn:hover {
-  background: #f0f0f0;
-}
-.contact-btn.active {
-  background: #e74c3c;
-  color: white;
-  border-color: #e74c3c;
 }
 
 /* Styl dla komunikatu o zapisie */
@@ -287,16 +216,6 @@ th { background:#222; color:#fff }
   .contact-option {
     height: auto;
     min-height: 40px;
-  }
-  
-  .status-buttons,
-  .contact-buttons {
-    flex-direction: column;
-  }
-  
-  .status-btn,
-  .contact-btn {
-    width: 100%;
   }
 }
 
@@ -377,7 +296,7 @@ th { background:#222; color:#fff }
         <th>Nazwisko</th>
         <th>Telefon</th>
         <th>Email</th>
-        <th>Uprawnienia</th> <!-- Przeniesione za Email -->
+        <th>Uprawnienia</th>
         <th>Status</th>
         <th>Pokaż kontakt</th>
         <th>Zapisz</th>
@@ -622,14 +541,6 @@ async function loadData() {
                 <span class="status-icon">${currentStatus}</span>
                 <span class="current-status">${statusText}</span>
               </div>
-              <div class="status-buttons">
-                <button class="status-btn ${statusText === 'Gotowy' ? 'active' : ''}" data-status="✅">
-                  ✅ Gotowy
-                </button>
-                <button class="status-btn ${statusText === 'Oczekuje' ? 'active' : ''}" data-status="⌛️">
-                  ⌛️ Oczekuje
-                </button>
-              </div>
               <button class="set-ready-btn" ${isAlreadyReady ? 'disabled' : ''}>
                 ${isAlreadyReady ? '👍 Super!' : '⚡ Ustaw jako gotowy'}
               </button>
@@ -655,14 +566,6 @@ async function loadData() {
                 </span>
               </label>
             </div>
-            <div class="contact-buttons">
-              <button class="contact-btn" data-contact="true">
-                👁️ Pokaż
-              </button>
-              <button class="contact-btn" data-contact="false">
-                🚫 Ukryj
-              </button>
-            </div>
           </div>
         </div>
       </td>
@@ -671,33 +574,6 @@ async function loadData() {
     
     tbody.appendChild(tr);
     
-    // Dodaj event listener do przycisków statusu
-    const statusBtns = tr.querySelectorAll('.status-btn');
-    statusBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const statusIcon = this.getAttribute('data-status');
-        const statusInfo = tr.querySelector('.status-info');
-        const statusText = getStatusText(statusIcon);
-        
-        // Aktualizuj UI
-        statusInfo.innerHTML = `<span class="status-icon">${statusIcon}</span><span class="current-status">${statusText}</span>`;
-        
-        // Zaktualizuj przyciski
-        statusBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        
-        // Jeśli ustawiono na Gotowy, wyłącz przycisk "Ustaw jako gotowy"
-        const setReadyBtn = tr.querySelector('.set-ready-btn');
-        if (statusIcon === "✅") {
-          setReadyBtn.textContent = '👍 Super!';
-          setReadyBtn.disabled = true;
-        } else {
-          setReadyBtn.textContent = '⚡ Ustaw jako gotowy';
-          setReadyBtn.disabled = false;
-        }
-      });
-    });
-    
     // Dodaj event listener do przycisku "Ustaw jako gotowy"
     const setReadyBtn = tr.querySelector('.set-ready-btn');
     if (setReadyBtn && !isAlreadyReady) {
@@ -705,11 +581,6 @@ async function loadData() {
         // Aktualizuj UI od razu
         const statusInfo = tr.querySelector('.status-info');
         statusInfo.innerHTML = '<span class="status-icon">✅</span><span class="current-status">Gotowy</span>';
-        
-        // Aktualizuj przyciski statusu
-        statusBtns.forEach(b => b.classList.remove('active'));
-        tr.querySelector('.status-btn[data-status="✅"]').classList.add('active');
-        
         setReadyBtn.textContent = '👍 Super!';
         setReadyBtn.disabled = true;
         
@@ -724,11 +595,6 @@ async function loadData() {
           showSaveMessage(statusContainerId, false, "Błąd ustawienia statusu");
           // Cofnij zmiany w UI
           statusInfo.innerHTML = `<span class="status-icon">${currentStatus}</span><span class="current-status">${statusText}</span>`;
-          statusBtns.forEach(b => {
-            if (b.getAttribute('data-status') === currentStatus) {
-              b.classList.add('active');
-            }
-          });
           setReadyBtn.textContent = '⚡ Ustaw jako gotowy';
           setReadyBtn.disabled = false;
         } else {
@@ -737,32 +603,6 @@ async function loadData() {
         }
       });
     }
-    
-    // Dodaj event listener do przycisków kontakt
-    const contactBtns = tr.querySelectorAll('.contact-btn');
-    const contactRadios = tr.querySelectorAll(`input[name="contact-${row.id}"]`);
-    
-    contactBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const contactValue = this.getAttribute('data-contact') === 'true';
-        
-        // Aktualizuj radio buttons
-        contactRadios.forEach(radio => {
-          radio.checked = (radio.value === contactValue.toString());
-        });
-        
-        // Aktualizuj przyciski
-        contactBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-      });
-    });
-    
-    // Ustaw aktywny przycisk kontakt na podstawie wartości początkowej
-    contactBtns.forEach(btn => {
-      if (btn.getAttribute('data-contact') === isShowContactChecked.toString()) {
-        btn.classList.add('active');
-      }
-    });
     
     // Asynchronicznie sprawdź pliki dla tego wiersza
     if (row.plik) {
@@ -822,9 +662,9 @@ async function loadData() {
       const tr = this.closest('tr');
       const inputs = tr.querySelectorAll('input');
       
-      // Pobierz aktualny status z ikony
-      const statusIcon = tr.querySelector('.status-info .status-icon');
-      const currentStatus = statusIcon ? statusIcon.textContent : "⌛️";
+      // Pobierz aktualny status (może być zmieniony przez przycisk)
+      const statusInfo = tr.querySelector('.status-info .status-icon');
+      const currentStatus = statusInfo ? statusInfo.textContent : "⌛️";
       
       // Pobierz wartość radio button "Pokaż kontakt"
       const contactRadios = tr.querySelectorAll(`input[name="contact-${rowId}"]`);
