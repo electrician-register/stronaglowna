@@ -461,7 +461,7 @@ async function loadData() {
               <span class="current-status">${statusText}</span>
             </div>
             <button class="set-ready-btn" ${isAlreadyReady ? 'disabled' : ''}>
-              ${isAlreadyReady ? '✅ Już gotowy' : '⚡ Ustaw jako gotowy'}
+              ${isAlreadyReady ? '👍 Super!' : '⚡ Ustaw jako gotowy'}
             </button>
           </div>
           <!-- Tu będzie pojawiał się komunikat o zapisie -->
@@ -502,7 +502,7 @@ async function loadData() {
         // Aktualizuj UI od razu
         const statusInfo = tr.querySelector('.status-info');
         statusInfo.innerHTML = '<span class="status-icon">✅</span><span class="current-status">Gotowy</span>';
-        setReadyBtn.textContent = '✅ Już gotowy';
+        setReadyBtn.textContent = '👍 Super!';
         setReadyBtn.disabled = true;
         
         // Zaktualizuj w bazie danych
