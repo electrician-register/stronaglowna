@@ -29,7 +29,7 @@ th, td { border:1px solid #ccc; padding:6px; font-size:12px }
 th { background:#222; color:#fff }
 
 /* ===== MOBILE ===== */
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
 
   td input,
   td button {
@@ -38,6 +38,7 @@ th { background:#222; color:#fff }
   }
 
 }
+
 @media (max-width: 768px) {
 
   table, thead, tbody, th, tr {
@@ -58,7 +59,7 @@ th { background:#222; color:#fff }
 
   td {
     display:grid;
-    grid-template-columns: 120px 1fr; /* etykiety i input */
+    grid-template-columns: 120px 1fr;
     align-items:center;
     border:none;
     padding:6px 0;
@@ -121,10 +122,10 @@ th { background:#222; color:#fff }
         <th>Nazwisko</th>
         <th>Telefon</th>
         <th>Email</th>
-       <th>Status</th>
+        <th>Status</th>
         <th>Uprawnienia</th>
         <th>Pokaż kontakt</th>
-       <th>Zapisz</th>
+        <th>Zapisz</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -199,22 +200,21 @@ async function checkSession() {
 
   loadData();
 }
+
+/* ===== POPRAWIONE LINKI ===== */
 function renderLinks(text) {
   if (!text) return "";
 
-  // regex na URL
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  // Zamień przecinki i średniki na spacje
+  text = text.replace(/[,;]/g, " ");
 
-  // wyciągnij wszystkie URL
-  const urls = text.match(urlRegex);
-  if (!urls) return text;
+  // Rozdziel po spacji lub nowej linii
+  const urls = text.split(/\s+/).filter(t => t.startsWith("http"));
 
-  // zwróć linki jeden pod drugim
-  return urls
-    .map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
-    .join("<br>");
+  if (!urls.length) return text;
+
+  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("<br>");
 }
-
 
 /* ===== WCZYTANIE TABELI ===== */
 async function loadData() {
@@ -243,18 +243,16 @@ async function loadData() {
       <td data-label="Nazwisko"><input value="${row.nazwisko || ""}"></td>
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
-<td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
-
-<td data-label="Uprawnienia">
-  <div style="word-break:break-all">
-    ${renderLinks(row.plik)}
-  </div>
-</td>
-
+      <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
+      <td data-label="Uprawnienia">
+        <div style="word-break:break-all">
+          ${renderLinks(row.plik)}
+        </div>
+      </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
-       <td data-label="Akcja"><button>Zapisz</button></td>
+      <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
     tr.querySelector("button").onclick = async () => {
@@ -289,4 +287,3 @@ checkSession();
 
 </body>
 </html>
-    
