@@ -199,6 +199,23 @@ async function checkSession() {
 
   loadData();
 }
+<script>
+function renderLinks(text) {
+  if (!text) return "";
+
+  // regex na URL
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  // wyciągnij wszystkie URL
+  const urls = text.match(urlRegex);
+  if (!urls) return text;
+
+  // zwróć linki jeden pod drugim
+  return urls
+    .map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
+    .join("<br>");
+}
+
 
 /* ===== WCZYTANIE TABELI ===== */
 async function loadData() {
@@ -228,7 +245,13 @@ async function loadData() {
       <td data-label="Telefon"><input value="${row.telefon || ""}"></td>
       <td data-label="Email"><input value="${row.email || ""}"></td>
 <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
-<td data-label="Uprawnienia"><input value="${row.plik || ""}"></td>
+
+<td data-label="Uprawnienia">
+  <div style="word-break:break-all">
+    ${renderLinks(row.plik)}
+  </div>
+</td>
+
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
