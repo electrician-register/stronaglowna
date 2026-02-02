@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <link rel="icon" href="/favicon.png">
-  <meta name="robots" content="noindex, nofollow">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload plików</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
+
 <form id="register-form">
-  <input id="email" readonly>
-  <input type="file" id="plik" multiple>
+  <label>Email</label><br>
+  <input id="email" type="email" readonly><br><br>
+
+  <label>Pliki</label><br>
+  <input type="file" id="plik" multiple><br><br>
+
   <button type="submit">Zapisz</button>
-  <div id="loading"></div>
-  <div id="result"></div>
 </form>
+
+<p id="loading"></p>
+<p id="result"></p>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -31,9 +34,12 @@ let currentUser = null
 
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return location.href = '/logowanie'
+  if (!user) {
+    alert('Brak logowania')
+    return
+  }
   currentUser = user
-  email.value = user.email
+  document.getElementById('email').value = user.email
 })
 
 document.getElementById('register-form').addEventListener('submit', async e => {
@@ -42,35 +48,31 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   loading.textContent = 'Zapisywanie...'
   result.textContent = ''
 
-  /* ===== KROK 1: sprawdź czy rekord istnieje ===== */
+  /* 1️⃣ sprawdzenie rekordu */
   const { data: existing } = await supabase
     .from('tabela_elektrykow')
     .select('id')
     .eq('email', currentUser.email)
     .maybeSingle()
 
-  /* ===== KROK 2: ustal recordId ===== */
-  let recordId
-  if (existing) {
-    recordId = existing.id
-  } else {
-    recordId = crypto.randomUUID()
-  }
+  /* 2️⃣ ID rekordu */
+  const recordId = existing?.id ?? crypto.randomUUID()
 
-  /* ===== KROK 3: upload plików (krótkie nazwy) ===== */
-  let plikUrls = []
+  /* 3️⃣ upload plików */
+  let urls = []
 
-  for (let file of plik.files) {
-    const ext = file.name.split('.').pop().toLowerCase()
+  for (const file of plik.files) {
+    const ext = file.name.split('.').pop()
     const shortId = recordId.slice(0, 8)
     const path = `${shortId}/${Date.now()}.${ext}`
 
-    const { error: upErr } = await supabase
+    const { error } = await supabase
       .storage.from('uprawnienia')
       .upload(path, file, { upsert: true })
 
-    if (upErr) {
-      result.textContent = upErr.message
+    if (error) {
+      result.textContent = error.message
+      loading.textContent = ''
       return
     }
 
@@ -78,40 +80,30 @@ document.getElementById('register-form').addEventListener('submit', async e => {
       .storage.from('uprawnienia')
       .createSignedUrl(path, 3600)
 
-    plikUrls.push(data.signedUrl)
+    urls.push(data.signedUrl)
   }
 
+  /* 4️⃣ zapis do bazy */
   const payload = {
     id: recordId,
     email: currentUser.email,
-    plik: plikUrls.join(',')
+    plik: urls.join(',')
   }
 
-  /* ===== KROK 4: insert / update na tym samym ID ===== */
-  let error
-  if (existing) {
-    const { error: e1 } = await supabase
-      .from('tabela_elektrykow')
-      .update(payload)
-      .eq('id', recordId)
-    error = e1
-  } else {
-    const { error: e2 } = await supabase
-      .from('tabela_elektrykow')
-      .insert(payload)
-    error = e2
-  }
+  const { error: dbError } = existing
+    ? await supabase.from('tabela_elektrykow').update(payload).eq('id', recordId)
+    : await supabase.from('tabela_elektrykow').insert(payload)
 
   loading.textContent = ''
 
-  if (error) {
-    result.textContent = error.message
+  if (dbError) {
+    result.textContent = dbError.message
     return
   }
 
-  /* ===== KROK 5: GOTOWE ===== */
   result.textContent = 'Zapisano poprawnie'
 })
 </script>
+
 </body>
 </html>
