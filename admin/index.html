@@ -92,13 +92,13 @@ th { background:#222; color:#fff }
     padding:10px;
     font-size:15px;
   }
+}
 
-  /* linki w kolumnie Uprawnienia */
-  td[data-label="Uprawnienia"] a {
-    display:block;
-    word-break: break-word;
-    margin-bottom:4px;
-  }
+/* ===== LINKI UPRAWNIEŃ ===== */
+td[data-label="Uprawnienia"] a {
+  display:block;
+  word-break: break-word;
+  margin-bottom: 4px;
 }
 </style>
 </head>
@@ -207,10 +207,16 @@ async function checkSession() {
 /* ===== RENDER LINKÓW ===== */
 function renderLinks(text) {
   if (!text) return "";
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const urls = text.match(urlRegex);
-  if (!urls) return text;
-  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("");
+  const parts = text.split(/\s+/); // rozdziel po spacji lub nowej linii
+  return parts
+    .map(part => {
+      if (/^https?:\/\//.test(part)) {
+        return `<a href="${part}" target="_blank" rel="noopener">${part}</a>`;
+      } else {
+        return part;
+      }
+    })
+    .join("");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -242,7 +248,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div>
+        <div style="word-break:break-word">
           ${renderLinks(row.plik)}
         </div>
       </td>
