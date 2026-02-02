@@ -92,6 +92,13 @@ th { background:#222; color:#fff }
     padding:10px;
     font-size:15px;
   }
+
+  /* linki w kolumnie Uprawnienia */
+  td[data-label="Uprawnienia"] a {
+    display:block;
+    word-break: break-word;
+    margin-bottom:4px;
+  }
 }
 </style>
 </head>
@@ -203,9 +210,7 @@ function renderLinks(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const urls = text.match(urlRegex);
   if (!urls) return text;
-  return urls
-    .map(url => `<div><a href="${url}" target="_blank" rel="noopener">${url}</a></div>`)
-    .join("");
+  return urls.map(url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`).join("");
 }
 
 /* ===== WCZYTANIE TABELI ===== */
@@ -237,7 +242,7 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="word-break: break-word;">
+        <div>
           ${renderLinks(row.plik)}
         </div>
       </td>
