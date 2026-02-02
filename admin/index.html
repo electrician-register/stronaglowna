@@ -49,36 +49,80 @@ th { background:#222; color:#fff }
   border-color: #f5c6cb;
 }
 
-/* Styl dla radio buttons status */
-.status-options {
+/* Styl dla statusów - tylko Gotowy jako przycisk */
+.status-container {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-bottom: 5px;
 }
-.status-option {
+.status-info {
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f8f9fa;
+  font-size: 12px;
 }
-.status-radio {
-  transform: scale(1.2);
-  cursor: pointer;
+.current-status {
+  font-weight: bold;
 }
 .status-icon {
   font-size: 14px;
 }
 
-/* Styl dla checkboxa "Pokaż kontakt" */
-.show-contact-checkbox {
-  transform: scale(1.5);
+/* Przycisk "Ustaw jako gotowy" */
+.set-ready-btn {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
   cursor: pointer;
-}
-.show-contact-label {
+  font-size: 11px;
   display: flex;
   align-items: center;
+  gap: 5px;
+  width: 100%;
   justify-content: center;
+  transition: background 0.2s;
+}
+.set-ready-btn:hover {
+  background: #27ae60;
+}
+.set-ready-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Styl dla "Pokaż kontakt" - podobny do statusu */
+.show-contact-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.contact-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.contact-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+.contact-radio {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+.contact-label {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 
@@ -144,15 +188,15 @@ th { background:#222; color:#fff }
   td[data-label="Status"] {
     grid-template-columns: 120px 1fr;
   }
-  .status-options {
+  
+  /* Specjalny styl dla pokaż kontakt na mobile */
+  td[data-label="Pokaż kontakt"] {
+    grid-template-columns: 120px 1fr;
+  }
+  .contact-options {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
-  }
-  
-  /* Styl dla checkboxa na mobile */
-  td[data-label="Pokaż kontakt"] {
-    grid-template-columns: 120px auto;
   }
 }
 </style>
@@ -339,6 +383,16 @@ function showSaveMessage(containerId, isSuccess, message) {
   }, 3000);
 }
 
+/* ===== FUNKCJA ZWRACAJĄCA TEKST STATUSU ===== */
+function getStatusText(statusIcon) {
+  const statusMap = {
+    "✅": "Gotowy",
+    "❌": "Odrzucony", 
+    "⌛️": "Oczekuje"
+  };
+  return statusMap[statusIcon] || statusIcon;
+}
+
 /* ===== WCZYTANIE TABELI Z SPRAWDZANIEM PLIKÓW ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
@@ -358,34 +412,16 @@ async function loadData() {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
 
-  // Mapowanie statusów na ikony
-  const statusMap = {
-    "✅": "done",
-    "❌": "rejected", 
-    "⌛️": "pending",
-    "done": "✅",
-    "rejected": "❌",
-    "pending": "⌛️"
-  };
-
   // Dla każdego wiersza asynchronicznie sprawdź pliki
   for (const row of data) {
     const tr = document.createElement("tr");
     
-    // Ustal który radio button ma być zaznaczony na podstawie statusu
+    // Ustal aktualny status
     const currentStatus = row.status || "⌛️";
-    let selectedStatus = "⌛️"; // domyślnie ⌛️
+    const isAlreadyReady = currentStatus.includes("✅");
+    const statusText = getStatusText(currentStatus);
     
-    if (currentStatus.includes("✅") || statusMap[currentStatus] === "✅") {
-      selectedStatus = "✅";
-    } else if (currentStatus.includes("❌") || statusMap[currentStatus] === "❌") {
-      selectedStatus = "❌";
-    } else if (currentStatus.includes("⌛️") || statusMap[currentStatus] === "⌛️") {
-      selectedStatus = "⌛️";
-    }
-    
-    // Naprawione: Konwertuj boolean na string dla checkboxa
-    // Supabase może zwracać true/false jako boolean lub string
+    // Naprawione: Konwertuj boolean na string dla "Pokaż kontakt"
     const showContactValue = row.show_contact;
     let isShowContactChecked = false;
     
@@ -419,19 +455,14 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status">
         <div id="${statusContainerId}">
-          <div class="status-options">
-            <label class="status-option">
-              <input type="radio" name="status-${row.id}" value="✅" class="status-radio" ${selectedStatus === "✅" ? "checked" : ""}>
-              <span class="status-icon">✅</span> Gotowy
-            </label>
-            <label class="status-option">
-              <input type="radio" name="status-${row.id}" value="❌" class="status-radio" ${selectedStatus === "❌" ? "checked" : ""}>
-              <span class="status-icon">❌</span> Odrzucony
-            </label>
-            <label class="status-option">
-              <input type="radio" name="status-${row.id}" value="⌛️" class="status-radio" ${selectedStatus === "⌛️" ? "checked" : ""}>
-              <span class="status-icon">⌛️</span> Oczekuje
-            </label>
+          <div class="status-container">
+            <div class="status-info">
+              <span class="status-icon">${currentStatus}</span>
+              <span class="current-status">${statusText}</span>
+            </div>
+            <button class="set-ready-btn" ${isAlreadyReady ? 'disabled' : ''}>
+              ${isAlreadyReady ? '✅ Już gotowy' : '⚡ Ustaw jako gotowy'}
+            </button>
           </div>
           <!-- Tu będzie pojawiał się komunikat o zapisie -->
         </div>
@@ -441,15 +472,58 @@ async function loadData() {
           ${linksHtml}
         </div>
       </td>
-      <td data-label="Pokaż kontakt" style="text-align:center">
-        <div class="show-contact-label">
-          <input type="checkbox" class="show-contact-checkbox" ${isShowContactChecked ? "checked" : ""}>
+      <td data-label="Pokaż kontakt">
+        <div class="show-contact-container">
+          <div class="contact-options">
+            <label class="contact-option">
+              <input type="radio" name="contact-${row.id}" value="true" class="contact-radio" ${isShowContactChecked ? "checked" : ""}>
+              <span class="contact-label">
+                <span class="status-icon">👁️</span> Pokaż
+              </span>
+            </label>
+            <label class="contact-option">
+              <input type="radio" name="contact-${row.id}" value="false" class="contact-radio" ${!isShowContactChecked ? "checked" : ""}>
+              <span class="contact-label">
+                <span class="status-icon">🚫</span> Ukryj
+              </span>
+            </label>
+          </div>
         </div>
       </td>
       <td data-label="Akcja"><button class="save-btn" data-id="${row.id}">Zapisz</button></td>
     `;
     
     tbody.appendChild(tr);
+    
+    // Dodaj event listener do przycisku "Ustaw jako gotowy"
+    const setReadyBtn = tr.querySelector('.set-ready-btn');
+    if (setReadyBtn && !isAlreadyReady) {
+      setReadyBtn.addEventListener('click', async function() {
+        // Aktualizuj UI od razu
+        const statusInfo = tr.querySelector('.status-info');
+        statusInfo.innerHTML = '<span class="status-icon">✅</span><span class="current-status">Gotowy</span>';
+        setReadyBtn.textContent = '✅ Już gotowy';
+        setReadyBtn.disabled = true;
+        
+        // Zaktualizuj w bazie danych
+        const { error } = await supabaseClient
+          .from("tabela_elektrykow")
+          .update({ status: "✅" })
+          .eq("id", row.id);
+        
+        if (error) {
+          log(`❌ Błąd ustawienia statusu gotowy dla ID ${row.id}: ${error.message}`);
+          showSaveMessage(statusContainerId, false, "Błąd ustawienia statusu");
+          // Cofnij zmiany w UI
+          statusInfo.innerHTML = `<span class="status-icon">${currentStatus}</span><span class="current-status">${statusText}</span>`;
+          setReadyBtn.textContent = '⚡ Ustaw jako gotowy';
+          setReadyBtn.disabled = false;
+        } else {
+          log(`✅ Ustawiono status gotowy dla ID ${row.id}`);
+          showSaveMessage(statusContainerId, true, "Status ustawiony na Gotowy");
+        }
+      });
+    }
     
     // Asynchronicznie sprawdź pliki dla tego wiersza
     if (row.plik) {
@@ -509,34 +583,34 @@ async function loadData() {
       const tr = this.closest('tr');
       const inputs = tr.querySelectorAll('input');
       
-      // Znajdź zaznaczony radio button status
-      const statusRadios = tr.querySelectorAll('input[type="radio"][name^="status-"]');
-      let selectedStatus = "⌛️"; // domyślnie ⌛️
+      // Pobierz aktualny status (może być zmieniony przez przycisk)
+      const statusInfo = tr.querySelector('.status-info .status-icon');
+      const currentStatus = statusInfo ? statusInfo.textContent : "⌛️";
       
-      for (const radio of statusRadios) {
+      // Pobierz wartość radio button "Pokaż kontakt"
+      const contactRadios = tr.querySelectorAll(`input[name="contact-${rowId}"]`);
+      let showContactValue = false;
+      
+      for (const radio of contactRadios) {
         if (radio.checked) {
-          selectedStatus = radio.value;
+          showContactValue = radio.value === "true";
           break;
         }
       }
       
-      // Pobierz wartość checkboxa "Pokaż kontakt"
-      const showContactCheckbox = tr.querySelector('.show-contact-checkbox');
-      const showContactValue = showContactCheckbox ? showContactCheckbox.checked : false;
-      
-      // Przygotuj payload - Supabase oczekuje boolean dla show_contact
       const payload = {
         lp: inputs[0].value,
         imie: inputs[1].value,
         nazwisko: inputs[2].value,
         telefon: inputs[3].value,
         email: inputs[4].value,
-        status: selectedStatus,
-        show_contact: showContactValue  // Wysyłamy boolean
+        status: currentStatus,
+        show_contact: showContactValue
       };
       
       log(`💾 Próba zapisu ID ${rowId}...`);
-      log(`   show_contact: ${showContactValue} (typ: ${typeof showContactValue})`);
+      log(`   Status: ${currentStatus}`);
+      log(`   show_contact: ${showContactValue}`);
       
       const { error } = await supabaseClient
         .from("tabela_elektrykow")
