@@ -81,10 +81,15 @@ th { background:#222; color:#fff }
 <div id="adminPanel" style="display:none">
   <h2>Panel admina – tabela_elektrykow</h2>
   
-  <!-- Przycisk diagnostyczny -->
-  <button onclick="listBucketFiles()" style="margin-bottom:15px; background:#3498db;">
-    Sprawdź pliki w bucket
-  </button>
+  <!-- Przyciski diagnostyczne -->
+  <div style="margin-bottom:15px;">
+    <button onclick="listBucketFiles()" style="background:#3498db; margin-right:10px;">
+      Sprawdź foldery w bucket
+    </button>
+    <button onclick="checkAllFolders()" style="background:#9b59b6;">
+      Sprawdź wszystkie podfoldery
+    </button>
+  </div>
   
   <table>
     <thead>
@@ -205,13 +210,12 @@ function extractPathFromUrl(fullUrl) {
   }
 }
 
-/* ===== GENERUJ PEŁNY URL PLIKU ===== */
-function fileUrl(fullUrl) {
+/* ===== GENERUJ PEŁNY PUBLIC URL PLIKU ===== */
+function filePublicUrl(fullUrl) {
   if (!fullUrl) return "";
   
   // Wyciągnij ścieżkę z pełnego URL
   const path = extractPathFromUrl(fullUrl.trim());
-  log(`Wyciągnięta ścieżka z "${fullUrl.substring(0, 50)}...": ${path}`);
   
   if (!path) return "";
   
@@ -220,11 +224,12 @@ function fileUrl(fullUrl) {
   return `https://tfbqqduxtsacvwfigsvt.supabase.co/storage/v1/object/public/${encodedPath}`;
 }
 
-/* ===== FUNKCJA DIAGNOSTYCZNA - LISTUJ PLIKI W BUCKET ===== */
+/* ===== LISTUJ FOLDERY W BUCKET ===== */
 async function listBucketFiles() {
-  log("=== ROZPOCZYNAM SPRAWDZANIE ZAWARTOŚCI BUCKET 'uprawnienia' ===");
+  log("=== SPRAWDZANIE FOLDERÓW W BUCKET 'uprawnienia' ===");
   
   try {
+    // Listuj tylko główny poziom
     const { data, error } = await supabaseClient
       .storage
       .from('uprawnienia')
@@ -240,39 +245,24 @@ async function listBucketFiles() {
       return;
     }
     
-    log(`✅ Znaleziono ${data.length} plików/ folderów:`);
-    
-    // Podziel na foldery i pliki
     const folders = data.filter(item => item.id === null);
     const files = data.filter(item => item.id !== null);
     
+    log(`📊 Statystyka:`);
+    log(`   📁 Foldery: ${folders.length}`);
+    log(`   📄 Pliki w głównym folderze: ${files.length}`);
+    
     if (folders.length > 0) {
-      log("📁 Foldery:");
-      folders.forEach(folder => {
-        log(`   📂 ${folder.name}/`);
+      log("📁 Lista folderów:");
+      folders.forEach((folder, index) => {
+        log(`   ${index + 1}. ${folder.name}/`);
       });
     }
     
     if (files.length > 0) {
-      log("📄 Pliki:");
+      log("📄 Pliki w głównym folderze:");
       files.forEach((file, index) => {
-        log(`   ${index + 1}. ${file.name} (${Math.round(file.metadata?.size / 1024) || 0} KB)`);
-      });
-    }
-    
-    // Pobierz pierwsze kilka rekordów z tabeli do porównania
-    log("=== PORÓWNANIE Z DANYMI W TABELI ===");
-    const { data: tableData } = await supabaseClient
-      .from("tabela_elektrykow")
-      .select("id, imie, nazwisko, plik")
-      .limit(5);
-    
-    if (tableData) {
-      tableData.forEach(row => {
-        const path = extractPathFromUrl(row.plik);
-        log(`ID ${row.id}: ${row.imie} ${row.nazwisko}`);
-        log(`   Oryginalny URL: ${row.plik ? row.plik.substring(0, 80) + '...' : 'brak'}`);
-        log(`   Wyciągnięta ścieżka: ${path}`);
+        log(`   ${index + 1}. ${file.name}`);
       });
     }
     
@@ -281,20 +271,69 @@ async function listBucketFiles() {
   }
 }
 
-/* ===== SPRAWDZENIE PLIKÓW ===== */
+/* ===== SPRAWDŹ WSZYSTKIE PODFOLDERY ===== */
+async function checkAllFolders() {
+  log("=== SPRAWDZANIE ZAWARTOŚCI WSZYSTKICH PODFOLDERÓW ===");
+  
+  try {
+    // Najpierw pobierz listę folderów
+    const { data: foldersData, error: foldersError } = await supabaseClient
+      .storage
+      .from('uprawnienia')
+      .list();
+    
+    if (foldersError) {
+      log("❌ Błąd listowania folderów: " + foldersError.message);
+      return;
+    }
+    
+    const folders = foldersData.filter(item => item.id === null);
+    
+    if (folders.length === 0) {
+      log("ℹ️ Brak folderów do sprawdzenia");
+      return;
+    }
+    
+    log(`Znaleziono ${folders.length} folderów:`);
+    
+    // Dla każdego folderu sprawdź jego zawartość
+    for (const folder of folders) {
+      log(`\n📁 Sprawdzam folder: ${folder.name}/`);
+      
+      const { data: filesData, error: filesError } = await supabaseClient
+        .storage
+        .from('uprawnienia')
+        .list(folder.name);
+      
+      if (filesError) {
+        log(`   ❌ Błąd listowania: ${filesError.message}`);
+        continue;
+      }
+      
+      if (!filesData || filesData.length === 0) {
+        log(`   ℹ️ Folder pusty`);
+      } else {
+        log(`   📄 Zawartość (${filesData.length} plików):`);
+        filesData.forEach((file, index) => {
+          log(`      ${index + 1}. ${file.name} (${Math.round(file.metadata?.size / 1024) || 0} KB)`);
+        });
+      }
+    }
+    
+  } catch (err) {
+    log("❌ Nieoczekiwany błąd: " + err.message);
+  }
+}
+
+/* ===== SPRAWDZENIE PLIKÓW - UPROSZCZONE ===== */
 async function renderLinksWithCheck(text, rowId) {
   if (!text) {
-    log(`ID ${rowId}: Brak tekstu w kolumnie 'plik'`);
     return "<span style='color:#888'>Brak plików</span>";
   }
 
-  log(`ID ${rowId}: Oryginalny tekst: "${text.substring(0, 80)}..."`);
-  
   // Czyszczenie i podział tekstu
   text = text.replace(/[,;]/g, " ");
   const parts = text.split(/\s+/).filter(t => t && t.trim());
-  
-  log(`ID ${rowId}: Podzielone części: ${parts.length}`);
   
   if (parts.length === 0) {
     return "<span style='color:#888'>Brak poprawnych URL</span>";
@@ -305,62 +344,39 @@ async function renderLinksWithCheck(text, rowId) {
   for (let part of parts) {
     const cleanPart = part.trim();
     
-    // Dla wyświetlania pokaż tylko nazwę pliku
-    const displayName = cleanPart.split('/').pop() || cleanPart;
-    
-    // Użyj oryginalnego URL (z tokenem) jako linku - on działa!
-    const directUrl = cleanPart; // To jest pełny URL z tokenem
-    
-    // Spróbuj też wygenerować URL publiczny
-    const publicUrl = fileUrl(cleanPart);
-    
-    log(`ID ${rowId}: Przetwarzam "${displayName}"`);
-    log(`   Direct URL: ${directUrl.substring(0, 60)}...`);
-    log(`   Public URL: ${publicUrl.substring(0, 60)}...`);
-    
-    try {
-      // Sprawdź czy URL z tokenem działa
-      const res = await fetch(directUrl, { method: 'HEAD' });
-      
-      if (res.ok) {
-        log(`ID ${rowId}: ✅ "${displayName}" - URL z tokenem działa (${res.status})`);
-        result.push(`<a href="${directUrl}" target="_blank" rel="noopener" style="color:#2ecc71; text-decoration:none;">
-          ${displayName} ✅ (token)
-        </a>`);
-      } else if (res.status === 400) {
-        // Token może wygasnąć - sprawdź publiczny URL
-        log(`ID ${rowId}: ⚠️ Token wygasł (${res.status}), sprawdzam publiczny URL...`);
-        
-        const publicRes = await fetch(publicUrl, { method: 'HEAD' });
-        if (publicRes.ok) {
-          log(`ID ${rowId}: ✅ "${displayName}" - Publiczny URL działa`);
-          result.push(`<a href="${publicUrl}" target="_blank" rel="noopener" style="color:#3498db; text-decoration:none;">
-            ${displayName} ✅ (public)
-          </a>`);
-        } else {
-          log(`ID ${rowId}: ❌ Publiczny URL też nie działa: ${publicRes.status}`);
-          result.push(`<span style="color:#e74c3c;">
-            ${displayName} ❌ (${res.status} + ${publicRes.status})
-          </span>`);
-        }
-      } else {
-        log(`ID ${rowId}: ⚠️ "${displayName}" - Błąd HTTP: ${res.status}`);
-        result.push(`<span style="color:#f39c12;">
-          ${displayName} ⚠️ (${res.status})
-        </span>`);
-      }
-    } catch (err) {
-      log(`ID ${rowId}: ❌ "${displayName}" - Błąd sieci: ${err.message}`);
-      result.push(`<span style="color:#e74c3c;">
-        ${displayName} ❌ (błąd)
-      </span>`);
+    // Wyciągnij nazwę pliku do wyświetlenia
+    let displayName = cleanPart.split('/').pop() || cleanPart;
+    // Skróć bardzo długie nazwy
+    if (displayName.length > 30) {
+      displayName = displayName.substring(0, 30) + '...';
     }
+    
+    // Wygeneruj publiczny URL
+    const publicUrl = filePublicUrl(cleanPart);
+    
+    // Użyj oryginalnego URL (z tokenem) jako linku - może działać jeśli token ważny
+    const directUrl = cleanPart;
+    
+    // Najpierw spróbuj bezpośrednio - używamy oryginalnego URL
+    result.push(`<div style="margin-bottom:4px;">
+      <a href="${directUrl}" target="_blank" rel="noopener" 
+         style="color:#3498db; text-decoration:none; font-size:11px;">
+        📄 ${displayName}
+      </a>
+      <br>
+      <span style="font-size:10px; color:#888;">
+        <a href="${publicUrl}" target="_blank" rel="noopener" 
+           style="color:#95a5a6; text-decoration:none;">
+          (publiczny link)
+        </a>
+      </span>
+    </div>`);
   }
   
-  return result.join("<br>");
+  return result.join("");
 }
 
-/* ===== WCZYTANIE TABELI ===== */
+/* ===== WCZYTANIE TABELI - UPROSZCZONE ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
 
@@ -382,6 +398,32 @@ async function loadData() {
   // Najpierw utwórz wszystkie wiersze
   data.forEach(row => {
     const tr = document.createElement("tr");
+    
+    // Wygeneruj linki od razu (bez asynchronicznego sprawdzania)
+    let linksHtml = "<span style='color:#888'>Ładowanie...</span>";
+    if (row.plik) {
+      const parts = row.plik.replace(/[,;]/g, " ").split(/\s+/).filter(t => t && t.trim());
+      if (parts.length > 0) {
+        linksHtml = "";
+        parts.forEach(part => {
+          const cleanPart = part.trim();
+          let displayName = cleanPart.split('/').pop() || cleanPart;
+          if (displayName.length > 30) displayName = displayName.substring(0, 30) + '...';
+          
+          const publicUrl = filePublicUrl(cleanPart);
+          
+          linksHtml += `<div style="margin-bottom:4px;">
+            <a href="${cleanPart}" target="_blank" rel="noopener" 
+               style="color:#3498db; text-decoration:none; font-size:11px;">
+              📄 ${displayName}
+            </a>
+          </div>`;
+        });
+      } else {
+        linksHtml = "<span style='color:#888'>Brak plików</span>";
+      }
+    }
+    
     tr.innerHTML = `
       <td data-label="LP"><input value="${row.lp || ""}"></td>
       <td data-label="Imię"><input value="${row.imie || ""}"></td>
@@ -390,8 +432,8 @@ async function loadData() {
       <td data-label="Email"><input value="${row.email || ""}"></td>
       <td data-label="Status ✅ ⌛"><input value="${row.status || ""}"></td>
       <td data-label="Uprawnienia">
-        <div style="word-break:break-all">
-          <span id="links-${row.id}">Sprawdzanie plików...</span>
+        <div style="word-break:break-all; max-height:100px; overflow-y:auto">
+          ${linksHtml}
         </div>
       </td>
       <td data-label="Pokaż kontakt" style="text-align:center">
@@ -400,15 +442,6 @@ async function loadData() {
       <td data-label="Akcja"><button class="save-btn" data-id="${row.id}">Zapisz</button></td>
     `;
     tbody.appendChild(tr);
-  });
-
-  // Teraz asynchronicznie sprawdź wszystkie pliki
-  data.forEach(async row => {
-    const htmlLinks = await renderLinksWithCheck(row.plik, row.id);
-    const linkElement = document.getElementById(`links-${row.id}`);
-    if (linkElement) {
-      linkElement.innerHTML = htmlLinks;
-    }
   });
 
   // Dodaj event listenery do przycisków zapisu
