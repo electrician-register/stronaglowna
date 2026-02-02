@@ -123,6 +123,7 @@ th { background:#222; color:#fff }
         <th>Email</th>
        <th>Status</th>
         <th>Pokaż kontakt</th>
+        <th>Uprawnienia</th>
         <th>Zapisz</th>
       </tr>
     </thead>
@@ -205,7 +206,7 @@ async function loadData() {
 
   const { data, error } = await supabaseClient
     .from("tabela_elektrykow")
-    .select("id, lp, imie, nazwisko, telefon, email,status, show_contact")
+    .select("id, lp, imie, nazwisko, telefon, email,status, plik, show_contact")
     .order("lp");
 
   if (error) {
@@ -230,6 +231,7 @@ async function loadData() {
       <td data-label="Pokaż kontakt" style="text-align:center">
         <input type="checkbox" ${row.show_contact ? "checked" : ""}>
       </td>
+      <td data-label="Uprawnienia"><input value="${row.plik || ""}"></td>
       <td data-label="Akcja"><button>Zapisz</button></td>
     `;
 
