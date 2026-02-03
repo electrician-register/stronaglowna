@@ -358,31 +358,31 @@ woj.addEventListener("change", async () => {
     // Próba 1: wojewodztwo_id
     query = query.eq("wojewodztwo_id", selectedWojId)
     
-    const { data, error } = await query
+    let { data, error } = await query
     
-    if (error) {
+    if (error || !data || data.length === 0) {
       // Próba 2: woj_id
-      const { data: data2, error: error2 } = await supabase
+      const response2 = await supabase
         .from("miasta")
         .select("id,nazwa")
         .eq("woj_id", selectedWojId)
         .order("nazwa")
       
-      if (error2) {
+      if (response2.error || !response2.data || response2.data.length === 0) {
         // Próba 3: wojewodztwo
-        const { data: data3, error: error3 } = await supabase
+        const response3 = await supabase
           .from("miasta")
           .select("id,nazwa")
           .eq("wojewodztwo", selectedWojId)
           .order("nazwa")
         
-        if (error3) {
+        if (response3.error) {
           throw new Error("Nie znaleziono odpowiedniej kolumny w tabeli miasta")
         }
         
-        data = data3
+        data = response3.data
       } else {
-        data = data2
+        data = response2.data
       }
     }
 
@@ -476,9 +476,10 @@ async function search() {
   szukajBtn.textContent = "Szukam..."
 
   try {
+    // Pobierz wszystkie kolumny potrzebne do filtrowania
     let query = supabase
       .from("tabela_elektrykow")
-      .select("id,imie,nazwisko,gwiazdki,status,telefon,email", { 
+      .select("id,imie,nazwisko,gwiazdki,status,telefon,email,wojewodztwo,miasto,show_contact", { 
         count: "exact" 
       })
 
@@ -486,8 +487,8 @@ async function search() {
     if (woj.value) query = query.eq("wojewodztwo", woj.value)
     if (miasto.value) query = query.eq("miasto", miasto.value)
     
-    // Uwaga: w bazie gwiazdki są przechowywane jako liczba (1,2,3)
-    if (gwiazdki.value) query = query.eq("gwiazdki", parseInt(gwiazdki.value))
+    // WAŻNE: Teraz gwiazdki są porównywane jako tekst
+    if (gwiazdki.value) query = query.eq("gwiazdki", gwiazdki.value)
     
     if (status.value) query = query.eq("status", status.value)
     if (show_contact.checked) query = query.eq("show_contact", true)
@@ -512,17 +513,13 @@ async function search() {
       const d = document.createElement("div")
       d.className = "card"
       
-      // Konwersja liczby gwiazdek na emoji
-      let stars = ""
-      if (e.gwiazdki) {
-        stars = " ".repeat(e.gwiazdki).split("").map(() => "⭐").join("")
-      }
-      
       d.innerHTML = `
         <div class="lp">${from + i + 1}</div>
         <div class="person">
-          <div class="name">${e.imie} ${e.nazwisko}${stars}</div>
+          <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki || ''}</div>
           <div class="small">Status: ${e.status || 'Nie podano'}</div>
+          ${e.telefon ? `<div class="small">Tel: ${e.telefon}</div>` : ''}
+          ${e.email ? `<div class="small">Email: ${e.email}</div>` : ''}
         </div>
         <div>
           <button onclick="window.location.href='/profil/index.html?id=${e.id}'">
@@ -543,8 +540,39 @@ async function search() {
   }
 }
 
+// --- Funkcja do debugowania struktury tabeli ---
+async function debugTableStructure() {
+  try {
+    // Sprawdź strukturę tabeli elektryków
+    const { data: sampleData, error: sampleError } = await supabase
+      .from("tabela_elektrykow")
+      .select("*")
+      .limit(1)
+    
+    if (!sampleError && sampleData && sampleData.length > 0) {
+      console.log("Przykładowy rekord z tabeli elektryków:", sampleData[0])
+      console.log("Typ pola gwiazdki:", typeof sampleData[0].gwiazdki, "Wartość:", sampleData[0].gwiazdki)
+    }
+    
+    // Sprawdź strukturę tabeli miast
+    const { data: miastaSample, error: miastaError } = await supabase
+      .from("miasta")
+      .select("*")
+      .limit(1)
+    
+    if (!miastaError && miastaSample && miastaSample.length > 0) {
+      console.log("Przykładowy rekord z tabeli miast:", miastaSample[0])
+    }
+  } catch (err) {
+    console.error("Błąd debugowania:", err)
+  }
+}
+
 // --- Inicjalizacja ---
 document.addEventListener("DOMContentLoaded", async () => {
+  // Uruchom debugowanie struktury
+  await debugTableStructure()
+  
   await loadWoj()
   
   // Event listener dla przycisku szukaj
@@ -565,12 +593,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   // Auto-wyszukiwanie po zmianie miasta
   miasto.addEventListener("change", () => {
-    if (miasto.value) {
+    if (miasto.value && woj.value) {
+      currentPage = 1
+      search()
+    }
+  })
+  
+  // Auto-wyszukiwanie po zmianie innych filtrów
+  gwiazdki.addEventListener("change", () => {
+    if (miasto.value && woj.value) {
+      currentPage = 1
+      search()
+    }
+  })
+  
+  status.addEventListener("change", () => {
+    if (miasto.value && woj.value) {
+      currentPage = 1
+      search()
+    }
+  })
+  
+  show_contact.addEventListener("change", () => {
+    if (miasto.value && woj.value) {
       currentPage = 1
       search()
     }
   })
 })
+
+// --- Funkcja pomocnicza do czyszczenia tekstu z gwiazdek ---
+function cleanStarText(text) {
+  if (!text) return 0
+  // Liczy tylko gwiazdki emoji (⭐)
+  const starsCount = (text.match(/⭐/g) || []).length
+  return starsCount
+}
 </script>
 
 <p id="p1" class="przypis"><br>
