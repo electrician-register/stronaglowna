@@ -364,13 +364,46 @@ woj.addEventListener("change", async () => {
   }
 
   try {
-    let { data, error } = await supabase
+    // Prosimy o próbę z różnymi nazwami kolumn sekwencyjnie
+    let data = null;
+    let error = null;
+    
+    // Próba 1: wojewodztwo_id (najbardziej prawdopodobne)
+    let response = await supabase
       .from("miasta")
       .select("id,nazwa")
-      .or(`wojewodztwo_id.eq.${selectedWojId},woj_id.eq.${selectedWojId},wojewodztwo.eq.${selectedWojId}`)
+      .eq("wojewodztwo_id", selectedWojId)
       .order("nazwa")
-
-    if (error) throw error;
+    
+    data = response.data;
+    error = response.error;
+    
+    // Jeśli nie ma danych lub błąd, spróbuj wojewodztwo (bez _id)
+    if ((error || !data || data.length === 0) && !error?.message?.includes('column')) {
+      response = await supabase
+        .from("miasta")
+        .select("id,nazwa")
+        .eq("wojewodztwo", selectedWojId)
+        .order("nazwa")
+      
+      data = response.data;
+      error = response.error;
+    }
+    
+    // Jeśli nadal błąd, pokaż komunikat
+    if (error) {
+      console.error("Błąd ładowania miast:", error);
+      
+      // Sprawdźmy strukturę tabeli
+      const { data: tableInfo } = await supabase
+        .from("miasta")
+        .select('*')
+        .limit(1)
+      
+      console.log("Struktura tabeli miasta:", tableInfo);
+      
+      throw new Error(`Błąd bazy danych: ${error.message}`);
+    }
 
     miasto.innerHTML = '<option value="">Wybierz miasto</option>'
     
@@ -390,7 +423,13 @@ woj.addEventListener("change", async () => {
     console.error("Błąd ładowania miast:", err)
     miasto.innerHTML = '<option value="">Błąd ładowania miast</option>'
     miasto.disabled = true
-    showError(results, `Nie udało się załadować miast: ${err.message}`)
+    
+    // Mniej techniczny komunikat dla użytkownika
+    if (err.message.includes('column')) {
+      showError(results, "Problem z połączeniem z bazą miast. Spróbuj odświeżyć stronę.")
+    } else {
+      showError(results, `Nie udało się załadować miast: ${err.message}`)
+    }
   }
 })
 
@@ -587,29 +626,40 @@ async function search() {
   }
 }
 
-// --- Funkcja do debugowania struktury tabeli ---
-async function debugTableStructure() {
+// --- Funkcja do sprawdzenia struktury tabeli miasta ---
+async function checkCityTableStructure() {
   try {
-    // Sprawdź strukturę tabeli elektryków
-    const { data: sampleData, error: sampleError } = await supabase
-      .from("tabela_elektrykow")
-      .select("*")
+    // Pobierz pierwszy rekord z tabeli miasta, żeby zobaczyć strukturę
+    const { data, error } = await supabase
+      .from("miasta")
+      .select('*')
       .limit(1)
     
-    if (!sampleError && sampleData && sampleData.length > 0) {
-      console.log("Przykładowy rekord z tabeli elektryków:", sampleData[0])
-      console.log("Pole status:", sampleData[0].status)
-      console.log("Pole show_contact:", sampleData[0].show_contact)
+    if (error) {
+      console.error("Błąd sprawdzania struktury tabeli miasta:", error)
+      return null
     }
+    
+    if (data && data.length > 0) {
+      console.log("Struktura rekordu z tabeli 'miasta':", data[0])
+      console.log("Dostępne kolumny:", Object.keys(data[0]))
+      return data[0]
+    }
+    
+    return null
   } catch (err) {
-    console.error("Błąd debugowania:", err)
+    console.error("Błąd:", err)
+    return null
   }
 }
 
 // --- Inicjalizacja ---
 document.addEventListener("DOMContentLoaded", async () => {
-  // Uruchom debugowanie struktury
-  await debugTableStructure()
+  // Sprawdź strukturę tabeli miasta
+  const cityStructure = await checkCityTableStructure()
+  if (cityStructure) {
+    console.log("Nazwa kolumny z województwem powinna być jedną z:", Object.keys(cityStructure).filter(k => k.toLowerCase().includes('woj')))
+  }
   
   await loadWoj()
   
