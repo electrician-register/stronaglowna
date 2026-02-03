@@ -21,7 +21,7 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
   margin-bottom:15px;
 }
 
-input, button { width:100%; padding:8px; margin:5px 0 }
+input, button { padding:8px; margin:5px 0 }
 button { background:#2ecc71; border:0; color:#fff; cursor:pointer }
 
 table { width:100%; border-collapse:collapse; background:#fff }
@@ -186,6 +186,57 @@ th { background:#222; color:#fff }
   background: #27ae60;
 }
 
+/* ===== NOWE STYLE DLA PAGINACJI I WYSZUKIWARKI ===== */
+.controls-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-box input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-width: 200px;
+}
+
+.pagination {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  background: #3498db;
+  border-radius: 4px;
+  min-width: 40px;
+}
+
+.pagination button.active {
+  background: #2ecc71;
+  font-weight: bold;
+}
+
+.pagination button:hover:not(.active) {
+  background: #2980b9;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+  margin-left: 10px;
+}
+
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
   td input,
@@ -198,6 +249,25 @@ th { background:#222; color:#fff }
   .contact-option {
     height: auto;
     min-height: 40px;
+  }
+  
+  .controls-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box input {
+    min-width: unset;
+  }
+  
+  .pagination {
+    justify-content: center;
+    margin-top: 10px;
   }
 }
 
@@ -270,6 +340,23 @@ th { background:#222; color:#fff }
 <div id="adminPanel" style="display:none">
   <h2>Panel admina – tabela_elektrykow</h2>
   
+  <!-- KONTROLE WYSZUKIWANIA I PAGINACJI -->
+  <div class="controls-container">
+    <div class="search-box">
+      <input type="text" id="searchLp" placeholder="Szukaj po Lp...">
+      <input type="text" id="searchNazwisko" placeholder="Szukaj po nazwisku...">
+      <button id="searchBtn">Szukaj</button>
+      <button id="clearSearchBtn">Wyczyść</button>
+    </div>
+    
+    <div class="pagination">
+      <button id="prevPage">‹</button>
+      <div id="pageNumbers"></div>
+      <button id="nextPage">›</button>
+      <span class="pagination-info" id="pageInfo"></span>
+    </div>
+  </div>
+  
   <table>
     <thead>
       <tr>
@@ -306,6 +393,16 @@ const supabaseClient = supabase.createClient(
 );
 
 log("Supabase OK");
+
+/* ===== ZMIENNE PAGINACJI I WYSZUKIWANIA ===== */
+let currentPage = 1;
+const recordsPerPage = 10;
+let totalRecords = 0;
+let totalPages = 1;
+let currentSearch = {
+  lp: '',
+  nazwisko: ''
+};
 
 /* ===== LOGOWANIE ===== */
 document.getElementById("loginBtn").addEventListener("click", login);
@@ -350,6 +447,51 @@ async function checkSession() {
   log("Admin potwierdzony");
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("adminPanel").style.display = "block";
+
+  // Dodaj event listenery dla wyszukiwania
+  document.getElementById("searchBtn").addEventListener("click", function() {
+    currentSearch.lp = document.getElementById("searchLp").value.trim();
+    currentSearch.nazwisko = document.getElementById("searchNazwisko").value.trim();
+    currentPage = 1;
+    loadData();
+  });
+
+  document.getElementById("clearSearchBtn").addEventListener("click", function() {
+    document.getElementById("searchLp").value = '';
+    document.getElementById("searchNazwisko").value = '';
+    currentSearch.lp = '';
+    currentSearch.nazwisko = '';
+    currentPage = 1;
+    loadData();
+  });
+
+  // Dodaj event listenery dla paginacji
+  document.getElementById("prevPage").addEventListener("click", function() {
+    if (currentPage > 1) {
+      currentPage--;
+      loadData();
+    }
+  });
+
+  document.getElementById("nextPage").addEventListener("click", function() {
+    if (currentPage < totalPages) {
+      currentPage++;
+      loadData();
+    }
+  });
+
+  // Obsługa Enter w polach wyszukiwania
+  document.getElementById("searchLp").addEventListener("keypress", function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById("searchBtn").click();
+    }
+  });
+
+  document.getElementById("searchNazwisko").addEventListener("keypress", function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById("searchBtn").click();
+    }
+  });
 
   loadData();
 }
@@ -446,21 +588,76 @@ function getStatusText(statusIcon) {
   return statusMap[statusIcon] || statusIcon;
 }
 
-/* ===== WCZYTANIE TABELI Z SPRAWDZANIEM PLIKÓW ===== */
+/* ===== FUNKCJA AKTUALIZUJĄCA PAGINACJĘ ===== */
+function updatePagination() {
+  const pageNumbers = document.getElementById("pageNumbers");
+  const pageInfo = document.getElementById("pageInfo");
+  
+  if (!pageNumbers || !pageInfo) return;
+  
+  // Aktualizuj informacje o stronie
+  pageInfo.textContent = `Strona ${currentPage} z ${totalPages} (razem: ${totalRecords})`;
+  
+  // Generuj przyciski numerów stron
+  pageNumbers.innerHTML = '';
+  
+  // Pokaż maksymalnie 5 numerów stron
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, currentPage + 2);
+  
+  // Dostosuj zakres, jeśli jesteśmy blisko początku lub końca
+  if (currentPage <= 3) {
+    endPage = Math.min(5, totalPages);
+  }
+  if (currentPage >= totalPages - 2) {
+    startPage = Math.max(1, totalPages - 4);
+  }
+  
+  for (let i = startPage; i <= endPage; i++) {
+    const pageBtn = document.createElement("button");
+    pageBtn.textContent = i;
+    if (i === currentPage) {
+      pageBtn.classList.add("active");
+    }
+    pageBtn.addEventListener("click", function() {
+      currentPage = i;
+      loadData();
+    });
+    pageNumbers.appendChild(pageBtn);
+  }
+}
+
+/* ===== WCZYTANIE TABELI Z PAGINACJĄ I WYSZUKIWANIEM ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
 
-  const { data, error } = await supabaseClient
+  // Buduj zapytanie z filtrami
+  let query = supabaseClient
     .from("tabela_elektrykow")
-    .select("id, lp, imie, nazwisko, telefon, email, status, plik, show_contact")
-    .order("lp");
+    .select("id, lp, imie, nazwisko, telefon, email, status, plik, show_contact", { count: 'exact' });
+
+  // Dodaj filtry wyszukiwania
+  if (currentSearch.lp) {
+    query = query.ilike('lp', `%${currentSearch.lp}%`);
+  }
+  if (currentSearch.nazwisko) {
+    query = query.ilike('nazwisko', `%${currentSearch.nazwisko}%`);
+  }
+
+  // Dodaj sortowanie i paginację
+  query = query.order("lp").range((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage - 1);
+
+  const { data, error, count } = await query;
 
   if (error) {
     log("❌ BŁĄD BAZY: " + error.message);
     return;
   }
 
-  log(`✅ Pobrano ${data.length} rekordów`);
+  totalRecords = count || 0;
+  totalPages = Math.ceil(totalRecords / recordsPerPage);
+  
+  log(`✅ Pobrano ${data.length} rekordów (strona ${currentPage}/${totalPages})`);
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
@@ -686,6 +883,9 @@ async function loadData() {
       }
     };
   });
+  
+  // Aktualizuj paginację
+  updatePagination();
   
   log("✅ Tabela załadowana");
 }
