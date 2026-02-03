@@ -67,7 +67,7 @@ header p {
 /* Stylowanie dla sformatowanego tekstu z Quilla */
 #opis strong, #opis b {
   font-weight: 700;
-  color: #0B5FA5;
+  /* USUWAM zmianę koloru */
 }
 
 #opis em, #opis i {
@@ -221,82 +221,6 @@ const statusMap = {
 };
 
 /* === BEZPIECZNE CZYSZCZENIE I RENDEROWANIE HTML === */
-function sanitizeHTML(html) {
-  if (!html) return "";
-  
-  // Tworzymy tymczasowy element
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
-  
-  // Lista dozwolonych tagów i atrybutów
-  const allowedTags = ['b', 'strong', 'i', 'em', 'u', 'a', 'ul', 'ol', 'li', 'br', 'p', 'div'];
-  const allowedAttributes = {
-    'a': ['href', 'title', 'target']
-  };
-  
-  // Funkcja rekurencyjna do czyszczenia
-  function cleanNode(node) {
-    // Jeśli to tekst, zostawiamy
-    if (node.nodeType === 3) {
-      return node.textContent;
-    }
-    
-    // Jeśli to element
-    if (node.nodeType === 1) {
-      const tagName = node.tagName.toLowerCase();
-      
-      // Sprawdzamy czy tag jest dozwolony
-      if (!allowedTags.includes(tagName)) {
-        // Jeśli nie, zamieniamy na tekst
-        return Array.from(node.childNodes).map(cleanNode).join('');
-      }
-      
-      // Tworzymy nowy element z dozwolonymi atrybutami
-      const newNode = document.createElement(tagName);
-      
-      // Dodajemy dozwolone atrybuty
-      if (allowedAttributes[tagName]) {
-        Array.from(node.attributes).forEach(attr => {
-          if (allowedAttributes[tagName].includes(attr.name.toLowerCase())) {
-            newNode.setAttribute(attr.name, attr.value);
-          }
-        });
-      }
-      
-      // Dodajemy dzieci
-      Array.from(node.childNodes).forEach(child => {
-        const cleanedChild = cleanNode(child);
-        if (typeof cleanedChild === 'string') {
-          newNode.appendChild(document.createTextNode(cleanedChild));
-        } else if (cleanedChild) {
-          newNode.appendChild(cleanedChild);
-        }
-      });
-      
-      // Specjalna obsługa linków - dodajemy target="_blank" jeśli nie ma
-      if (tagName === 'a' && !newNode.hasAttribute('target')) {
-        newNode.setAttribute('target', '_blank');
-      }
-      
-      return newNode;
-    }
-    
-    return '';
-  }
-  
-  // Czyścimy wszystkie dzieci
-  const cleanedChildren = Array.from(temp.childNodes).map(cleanNode);
-  
-  // Zwracamy jako HTML string
-  return cleanedChildren.map(child => {
-    if (typeof child === 'string') {
-      return child;
-    }
-    return child.outerHTML;
-  }).join('');
-}
-
-/* === ALTERNATYWNA WERSJA - PROSTSZE CZYSZCZENIE === */
 function cleanOpis(html) {
   if (!html) return "";
   
