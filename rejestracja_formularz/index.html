@@ -7,6 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
 
+  <!-- Quill Editor CSS -->
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -107,6 +110,30 @@
       gap: 10px;
     }
     .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
+
+    /* Quill Editor styling */
+    #zajmujeSie-editor-container {
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .ql-toolbar {
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      background-color: #f9f9f9;
+      border-bottom: 1px solid #ccc;
+    }
+    .ql-container {
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+      min-height: 150px;
+      font-size: 16px;
+    }
+    .ql-editor {
+      min-height: 150px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 
@@ -168,7 +195,12 @@
   <input id="telefon" type="tel">
 
   <label>Zajmuje się</label>
-  <textarea id="zajmujeSie"></textarea>
+  <!-- Quill Editor container -->
+  <div id="zajmujeSie-editor-container">
+    <!-- Toolbar will be inserted here by Quill -->
+  </div>
+  <!-- Hidden input to store HTML content -->
+  <input type="hidden" id="zajmujeSie">
 
   <label>Załącz skan uprawnień</label>
   <input type="file" id="plik" multiple>
@@ -185,6 +217,9 @@
 </form>
 </div>
 
+<!-- Quill Editor JS -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -195,6 +230,30 @@ const supabase = createClient(
 
 let currentUser = null
 const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
+
+// ========== QUILL EDITOR INITIALIZATION ==========
+let quill = null;
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Quill editor
+  quill = new Quill('#zajmujeSie-editor-container', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        ['link'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['clean']
+      ]
+    },
+    placeholder: 'Opisz czym się zajmujesz...',
+  });
+
+  // Update hidden input with HTML content on change
+  quill.on('text-change', () => {
+    const content = quill.root.innerHTML;
+    document.getElementById('zajmujeSie').value = content;
+  });
+});
 
 function bindValidity(inputId, labelId, dateId) {
   const input = document.getElementById(inputId)
@@ -276,7 +335,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (data) {
     document.getElementById('form-title').textContent = 'Aktualizacja danych'
     document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
-    fields.forEach(f => data[f] && (document.getElementById(f).value = data[f]))
+    fields.forEach(f => {
+      if (data[f] && document.getElementById(f)) {
+        document.getElementById(f).value = data[f]
+      }
+    })
+    
+    // Load Quill editor content if exists
+    if (data.zajmujeSie && quill) {
+      quill.root.innerHTML = data.zajmujeSie;
+      document.getElementById('zajmujeSie').value = data.zajmujeSie;
+    }
+    
     if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
     if (data.miasto) document.getElementById('miasto').value = data.miasto
 
@@ -356,7 +426,15 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   payload.nre_valid_to = nrEValidTo.value || null
   payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
   payload.nrd_valid_to = nrDValidTo.value || null
-  fields.forEach(f => payload[f] = document.getElementById(f).value.trim())
+  
+  // Get values from all fields including Quill editor
+  fields.forEach(f => {
+    const element = document.getElementById(f);
+    if (element) {
+      payload[f] = element.value.trim();
+    }
+  });
+  
   if (plikUrls.length) payload.plik = plikUrls.join(',')
 
   const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
@@ -407,35 +485,54 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   window.location.href = 'https://orep.pl/logowanie'
 })
 
-/* === BLOKADA EMAILA I TELEFONU W INNYCH POLACH === */
+/* === BLOKADA EMAILA I TELEFONU W QUILL EDITOR === */
 
-const zajmujeSieInput = document.getElementById('zajmujeSie');
-
-zajmujeSieInput.addEventListener('input', () => {
-  let value = zajmujeSieInput.value;
-
-  // Ograniczenie do maksymalnie 2 cyfr
-  let digitsCount = 0;
-  value = value.replace(/\d/g, (d) => {
-    digitsCount++;
-    if (digitsCount > 2) {
+// Listen for input in Quill editor to block emails and phone numbers
+if (quill) {
+  quill.on('text-change', () => {
+    const text = quill.getText(); // Get plain text
+    
+    // Count digits
+    const digitCount = (text.match(/\d/g) || []).length;
+    if (digitCount > 2) {
       alert('W tym polu nie można wpisać więcej niż 2 cyfr.');
-      return ''; // trzecia i kolejne cyfry są blokowane
+      
+      // Remove excess digits
+      let newText = text;
+      let digitsRemoved = 0;
+      newText = newText.replace(/\d/g, (match) => {
+        if (digitsRemoved < 2) {
+          digitsRemoved++;
+          return match;
+        }
+        return '';
+      });
+      
+      // Update editor with cleaned text
+      const currentSelection = quill.getSelection();
+      quill.setText(newText);
+      if (currentSelection) {
+        quill.setSelection(currentSelection);
+      }
     }
-    return d; // pierwsze 2 cyfry zostają
+    
+    // Check for email patterns and remove them
+    const html = quill.root.innerHTML;
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
+    const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
+    
+    let cleanedHtml = html.replace(emailRegex, '');
+    cleanedHtml = cleanedHtml.replace(phoneRegex, '');
+    
+    if (cleanedHtml !== html) {
+      const selection = quill.getSelection();
+      quill.root.innerHTML = cleanedHtml;
+      if (selection) {
+        quill.setSelection(selection);
+      }
+    }
   });
-
-  // Usuwamy adresy e-mail
-  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
-  value = value.replace(emailRegex, '');
-
-  // Usuwamy numery telefonu
-  const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
-  value = value.replace(phoneRegex, '');
-
-  zajmujeSieInput.value = value;
-});
-
+}
 </script>
 </body>
 </html>
