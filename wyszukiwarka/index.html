@@ -600,18 +600,21 @@ function formatStatus(statusValue) {
     case '✅':
     case 'verified':
       return { 
+        style="color:#16a34a;font-weight:bold;
         text: '✔️ Zweryfikowany', 
         className: 'status-verified' 
       }
     case '⌛':
     case 'pending':
       return { 
+        style="color:#f97316;font-weight:bold;
         text: '⌛ Elektryk w trakcie weryfikacji', 
         className: 'status-pending' 
       }
     case '❌':
     case 'unconfirmed':
       return { 
+        style="color:#dc2626;font-weight:bold;
         text: '❌ Status nie potwierdzony', 
         className: 'status-unconfirmed' 
       }
