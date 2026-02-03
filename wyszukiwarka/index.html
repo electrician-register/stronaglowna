@@ -180,55 +180,19 @@ sup a:hover {
 }
 
 /* KOLOROWE OPCJE W SELECT */
-option.verified {
-  color: #16a34a;
-  font-weight: bold;
-}
-
-option.pending {
-  color: #f97316;
-  font-weight: bold;
-}
-
-option.unconfirmed {
-  color: #dc2626;
-  font-weight: bold;
-}
-
-/* Styl dla opcji w select na różnych przeglądarkach */
-#status option {
-  color: #333;
-  background: white;
-}
-
 #status option.verified {
-  color: #16a34a;
-  background: white;
+  color: #16a34a !important;
+  font-weight: bold;
 }
 
 #status option.pending {
-  color: #f97316;
-  background: white;
+  color: #f97316 !important;
+  font-weight: bold;
 }
 
 #status option.unconfirmed {
-  color: #dc2626;
-  background: white;
-}
-
-/* Dla przeglądarek które nie obsługują stylowania option */
-.select-wrapper {
-  position: relative;
-}
-
-.select-wrapper::after {
-  content: "▼";
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #666;
+  color: #dc2626 !important;
+  font-weight: bold;
 }
 
 /* PAGINATION */
@@ -340,9 +304,9 @@ option.unconfirmed {
     Status
     <select id="status">
       <option value="">Wszystkie statusy</option>
-      <option value="verified" class="verified">✔️ Zweryfikowany</option>
-      <option value="pending" class="pending">⌛ Weryfikacja w toku</option>
-      <option value="unconfirmed" class="unconfirmed">❌ Status nie potwierdzony</option>
+      <option value="verified" style="color:#16a34a;font-weight:bold;">✔️ Zweryfikowany</option>
+      <option value="pending" style="color:#f97316;font-weight:bold;">⌛ Weryfikacja w toku</option>
+      <option value="unconfirmed" style="color:#dc2626;font-weight:bold;">❌ Status nie potwierdzony</option>
     </select>
   </label>
 
@@ -378,15 +342,72 @@ let currentPage = 1
 const pageSize = 10
 let totalCount = 0
 
+// --- Funkcja debugowania struktury tabel ---
+async function debugTables() {
+  console.log("=== DEBUGOWANIE STRUKTURY TABEL ===")
+  
+  try {
+    // Sprawdź strukturę tabeli wojewodztwa
+    const { data: wojData, error: wojError } = await supabase
+      .from("wojewodztwa")
+      .select("*")
+      .limit(2)
+    
+    if (!wojError && wojData && wojData.length > 0) {
+      console.log("Struktura tabeli 'wojewodztwa':", wojData[0])
+      console.log("ID pierwszego województwa:", wojData[0].id)
+      console.log("Nazwa pierwszego województwa:", wojData[0].nazwa)
+    } else {
+      console.error("Błąd pobierania wojewodztw:", wojError)
+    }
+    
+    // Sprawdź strukturę tabeli miasta
+    const { data: miastaData, error: miastaError } = await supabase
+      .from("miasta")
+      .select("*")
+      .limit(5)
+    
+    if (!miastaError && miastaData && miastaData.length > 0) {
+      console.log("Struktura tabeli 'miasta' (pierwsze 5 rekordów):", miastaData)
+      console.log("Kolumny w tabeli 'miasta':", Object.keys(miastaData[0]))
+      
+      // Sprawdź jakie wartości są w kolumnie z województwem
+      const wojColumnName = Object.keys(miastaData[0]).find(key => 
+        key.toLowerCase().includes('woj') || 
+        key.toLowerCase().includes('id_woj') ||
+        key.toLowerCase().includes('wojewodztwo')
+      )
+      
+      if (wojColumnName) {
+        console.log(`Znaleziono kolumnę z województwem: ${wojColumnName}`)
+        console.log(`Przykładowa wartość: ${miastaData[0][wojColumnName]}`)
+      } else {
+        console.log("Nie znaleziono kolumny z województwem w tabeli miasta")
+      }
+    } else {
+      console.error("Błąd pobierania miast:", miastaError)
+    }
+    
+  } catch (err) {
+    console.error("Błąd debugowania:", err)
+  }
+}
+
 // --- Ładowanie województw ---
 async function loadWoj() {
   try {
+    console.log("Ładowanie województw z tabeli 'wojewodztwa'...")
     const { data, error } = await supabase
       .from("wojewodztwa")
       .select("id,nazwa")
       .order("nazwa")
     
-    if (error) throw error;
+    if (error) {
+      console.error("Błąd pobierania województw:", error)
+      throw error;
+    }
+    
+    console.log(`Pobrano ${data.length} województw`)
     
     woj.innerHTML = '<option value="">Wybierz województwo</option>'
     data.forEach(w => {
@@ -395,6 +416,8 @@ async function loadWoj() {
       o.textContent = w.nazwa
       woj.appendChild(o)
     })
+    
+    console.log("Województwa załadowane pomyślnie")
   } catch (err) {
     console.error("Błąd ładowania województw:", err)
     woj.innerHTML = '<option value="">Błąd ładowania danych</option>'
@@ -406,7 +429,9 @@ async function loadWoj() {
 woj.addEventListener("change", async () => {
   const selectedWojId = woj.value
   
-  miasto.innerHTML = '<option value="">Ładowanie...</option>'
+  console.log(`Wybrano województwo ID: ${selectedWojId}`)
+  
+  miasto.innerHTML = '<option value="">Ładowanie miast...</option>'
   miasto.disabled = true
   
   if (!selectedWojId) {
@@ -416,33 +441,106 @@ woj.addEventListener("change", async () => {
   }
 
   try {
-    let { data, error } = await supabase
-      .from("miasta")
-      .select("id,nazwa")
-      .or(`wojewodztwo_id.eq.${selectedWojId},woj_id.eq.${selectedWojId},wojewodztwo.eq.${selectedWojId}`)
-      .order("nazwa")
-
-    if (error) throw error;
-
-    miasto.innerHTML = '<option value="">Wybierz miasto</option>'
+    console.log(`Pobieranie miast z tabeli 'miasta' dla województwa ID: ${selectedWojId}`)
     
-    if (data && data.length > 0) {
-      data.forEach(m => {
-        const o = document.createElement("option")
-        o.value = String(m.id)
-        o.textContent = m.nazwa
-        miasto.appendChild(o)
-      })
-      miasto.disabled = false
-    } else {
-      miasto.innerHTML = '<option value="">Brak miast w wybranym województwie</option>'
-      miasto.disabled = true
+    // Najpierw sprawdźmy strukturę tabeli
+    const { data: sampleData, error: sampleError } = await supabase
+      .from("miasta")
+      .select("*")
+      .limit(1)
+    
+    if (sampleError) {
+      throw sampleError
     }
+    
+    if (sampleData && sampleData.length > 0) {
+      console.log("Przykładowy rekord z 'miasta':", sampleData[0])
+      
+      // Znajdź kolumnę z województwem
+      const columns = Object.keys(sampleData[0])
+      console.log("Dostępne kolumny:", columns)
+      
+      // Możliwe nazwy kolumn dla województwa
+      const possibleWojColumns = columns.filter(col => 
+        col.toLowerCase().includes('woj') || 
+        col === 'wojewodztwo_id' ||
+        col === 'woj_id' ||
+        col === 'id_wojewodztwo' ||
+        col === 'id_woj'
+      )
+      
+      console.log("Możliwe kolumny z województwem:", possibleWojColumns)
+      
+      if (possibleWojColumns.length === 0) {
+        throw new Error("Nie znaleziono kolumny z województwem w tabeli 'miasta'")
+      }
+      
+      // Próbuj każdą możliwą kolumnę
+      let miastaData = null
+      let foundColumn = null
+      
+      for (const column of possibleWojColumns) {
+        console.log(`Próba pobrania z kolumną: ${column} = ${selectedWojId}`)
+        
+        const { data, error } = await supabase
+          .from("miasta")
+          .select("id,nazwa")
+          .eq(column, selectedWojId)
+          .order("nazwa")
+        
+        if (!error && data && data.length > 0) {
+          console.log(`SUKCES! Znaleziono kolumnę: ${column}, pobrano ${data.length} miast`)
+          miastaData = data
+          foundColumn = column
+          break
+        } else if (error) {
+          console.error(`Błąd dla kolumny ${column}:`, error)
+        } else {
+          console.log(`Brak danych dla kolumny ${column}`)
+        }
+      }
+      
+      if (!miastaData) {
+        // Jeśli nie znaleziono, pobierz wszystkie miasta
+        console.log("Próba pobrania wszystkich miast...")
+        const { data, error } = await supabase
+          .from("miasta")
+          .select("id,nazwa")
+          .order("nazwa")
+          .limit(100)
+        
+        if (error) throw error
+        
+        console.log("Pobrano wszystkie miasta:", data)
+        miastaData = data
+      }
+      
+      miasto.innerHTML = '<option value="">Wybierz miasto</option>'
+      
+      if (miastaData && miastaData.length > 0) {
+        console.log(`Wyświetlam ${miastaData.length} miast`)
+        miastaData.forEach(m => {
+          const o = document.createElement("option")
+          o.value = String(m.id)
+          o.textContent = m.nazwa
+          miasto.appendChild(o)
+        })
+        miasto.disabled = false
+      } else {
+        console.log("Brak miast dla wybranego województwa")
+        miasto.innerHTML = '<option value="">Brak miast w wybranym województwie</option>'
+        miasto.disabled = true
+      }
+      
+    } else {
+      throw new Error("Tabela 'miasta' jest pusta lub nie istnieje")
+    }
+    
   } catch (err) {
     console.error("Błąd ładowania miast:", err)
     miasto.innerHTML = '<option value="">Błąd ładowania miast</option>'
     miasto.disabled = true
-    showError(results, `Nie udało się załadować miast: ${err.message}`)
+    showError(results, `Nie udało się załadować listy miast: ${err.message}`)
   }
 })
 
@@ -639,29 +737,10 @@ async function search() {
   }
 }
 
-// --- Funkcja do debugowania struktury tabeli ---
-async function debugTableStructure() {
-  try {
-    // Sprawdź strukturę tabeli elektryków
-    const { data: sampleData, error: sampleError } = await supabase
-      .from("tabela_elektrykow")
-      .select("*")
-      .limit(1)
-    
-    if (!sampleError && sampleData && sampleData.length > 0) {
-      console.log("Przykładowy rekord z tabeli elektryków:", sampleData[0])
-      console.log("Pole status:", sampleData[0].status)
-      console.log("Pole show_contact:", sampleData[0].show_contact)
-    }
-  } catch (err) {
-    console.error("Błąd debugowania:", err)
-  }
-}
-
 // --- Inicjalizacja ---
 document.addEventListener("DOMContentLoaded", async () => {
   // Uruchom debugowanie struktury
-  await debugTableStructure()
+  await debugTables()
   
   await loadWoj()
   
