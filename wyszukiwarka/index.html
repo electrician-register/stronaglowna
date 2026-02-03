@@ -179,6 +179,58 @@ sup a:hover {
   margin: 4px 0;
 }
 
+/* KOLOROWE OPCJE W SELECT */
+option.verified {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+option.pending {
+  color: #f97316;
+  font-weight: bold;
+}
+
+option.unconfirmed {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+/* Styl dla opcji w select na różnych przeglądarkach */
+#status option {
+  color: #333;
+  background: white;
+}
+
+#status option.verified {
+  color: #16a34a;
+  background: white;
+}
+
+#status option.pending {
+  color: #f97316;
+  background: white;
+}
+
+#status option.unconfirmed {
+  color: #dc2626;
+  background: white;
+}
+
+/* Dla przeglądarek które nie obsługują stylowania option */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #666;
+}
+
 /* PAGINATION */
 #pagination button {
   width:auto;
@@ -288,9 +340,9 @@ sup a:hover {
     Status
     <select id="status">
       <option value="">Wszystkie statusy</option>
-      <option value="verified">✔️ Zweryfikowany</option>
-      <option value="pending">⌛ Weryfikacja w toku</option>
-      <option value="unconfirmed">❌ Status nie potwierdzony</option>
+      <option value="verified" class="verified">✔️ Zweryfikowany</option>
+      <option value="pending" class="pending">⌛ Weryfikacja w toku</option>
+      <option value="unconfirmed" class="unconfirmed">❌ Status nie potwierdzony</option>
     </select>
   </label>
 
@@ -318,7 +370,7 @@ const woj = document.getElementById("wojewodztwo")
 const miasto = document.getElementById("miasto")
 const results = document.getElementById("results")
 const gwiazdki = document.getElementById("gwiazdki")
-const status = document.getElementById("status")
+const statusSelect = document.getElementById("status")
 const show_contact = document.getElementById("show_contact")
 const szukajBtn = document.getElementById("szukaj")
 
@@ -364,46 +416,13 @@ woj.addEventListener("change", async () => {
   }
 
   try {
-    // Prosimy o próbę z różnymi nazwami kolumn sekwencyjnie
-    let data = null;
-    let error = null;
-    
-    // Próba 1: wojewodztwo_id (najbardziej prawdopodobne)
-    let response = await supabase
+    let { data, error } = await supabase
       .from("miasta")
       .select("id,nazwa")
-      .eq("wojewodztwo_id", selectedWojId)
+      .or(`wojewodztwo_id.eq.${selectedWojId},woj_id.eq.${selectedWojId},wojewodztwo.eq.${selectedWojId}`)
       .order("nazwa")
-    
-    data = response.data;
-    error = response.error;
-    
-    // Jeśli nie ma danych lub błąd, spróbuj wojewodztwo (bez _id)
-    if ((error || !data || data.length === 0) && !error?.message?.includes('column')) {
-      response = await supabase
-        .from("miasta")
-        .select("id,nazwa")
-        .eq("wojewodztwo", selectedWojId)
-        .order("nazwa")
-      
-      data = response.data;
-      error = response.error;
-    }
-    
-    // Jeśli nadal błąd, pokaż komunikat
-    if (error) {
-      console.error("Błąd ładowania miast:", error);
-      
-      // Sprawdźmy strukturę tabeli
-      const { data: tableInfo } = await supabase
-        .from("miasta")
-        .select('*')
-        .limit(1)
-      
-      console.log("Struktura tabeli miasta:", tableInfo);
-      
-      throw new Error(`Błąd bazy danych: ${error.message}`);
-    }
+
+    if (error) throw error;
 
     miasto.innerHTML = '<option value="">Wybierz miasto</option>'
     
@@ -423,13 +442,7 @@ woj.addEventListener("change", async () => {
     console.error("Błąd ładowania miast:", err)
     miasto.innerHTML = '<option value="">Błąd ładowania miast</option>'
     miasto.disabled = true
-    
-    // Mniej techniczny komunikat dla użytkownika
-    if (err.message.includes('column')) {
-      showError(results, "Problem z połączeniem z bazą miast. Spróbuj odświeżyć stronę.")
-    } else {
-      showError(results, `Nie udało się załadować miast: ${err.message}`)
-    }
+    showError(results, `Nie udało się załadować miast: ${err.message}`)
   }
 })
 
@@ -555,15 +568,15 @@ async function search() {
     if (gwiazdki.value) query = query.eq("gwiazdki", gwiazdki.value)
     
     // Filtrowanie po statusie - obsługa różnych formatów
-    if (status.value) {
-      if (status.value === 'verified') {
+    if (statusSelect.value) {
+      if (statusSelect.value === 'verified') {
         query = query.eq("status", '✅')
-      } else if (status.value === 'pending') {
+      } else if (statusSelect.value === 'pending') {
         query = query.eq("status", '⌛')
-      } else if (status.value === 'unconfirmed') {
+      } else if (statusSelect.value === 'unconfirmed') {
         query = query.eq("status", '❌')
       } else {
-        query = query.eq("status", status.value)
+        query = query.eq("status", statusSelect.value)
       }
     }
     
@@ -626,40 +639,29 @@ async function search() {
   }
 }
 
-// --- Funkcja do sprawdzenia struktury tabeli miasta ---
-async function checkCityTableStructure() {
+// --- Funkcja do debugowania struktury tabeli ---
+async function debugTableStructure() {
   try {
-    // Pobierz pierwszy rekord z tabeli miasta, żeby zobaczyć strukturę
-    const { data, error } = await supabase
-      .from("miasta")
-      .select('*')
+    // Sprawdź strukturę tabeli elektryków
+    const { data: sampleData, error: sampleError } = await supabase
+      .from("tabela_elektrykow")
+      .select("*")
       .limit(1)
     
-    if (error) {
-      console.error("Błąd sprawdzania struktury tabeli miasta:", error)
-      return null
+    if (!sampleError && sampleData && sampleData.length > 0) {
+      console.log("Przykładowy rekord z tabeli elektryków:", sampleData[0])
+      console.log("Pole status:", sampleData[0].status)
+      console.log("Pole show_contact:", sampleData[0].show_contact)
     }
-    
-    if (data && data.length > 0) {
-      console.log("Struktura rekordu z tabeli 'miasta':", data[0])
-      console.log("Dostępne kolumny:", Object.keys(data[0]))
-      return data[0]
-    }
-    
-    return null
   } catch (err) {
-    console.error("Błąd:", err)
-    return null
+    console.error("Błąd debugowania:", err)
   }
 }
 
 // --- Inicjalizacja ---
 document.addEventListener("DOMContentLoaded", async () => {
-  // Sprawdź strukturę tabeli miasta
-  const cityStructure = await checkCityTableStructure()
-  if (cityStructure) {
-    console.log("Nazwa kolumny z województwem powinna być jedną z:", Object.keys(cityStructure).filter(k => k.toLowerCase().includes('woj')))
-  }
+  // Uruchom debugowanie struktury
+  await debugTableStructure()
   
   await loadWoj()
   
@@ -695,7 +697,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   })
   
-  status.addEventListener("change", () => {
+  statusSelect.addEventListener("change", () => {
     if (miasto.value && woj.value) {
       currentPage = 1
       search()
