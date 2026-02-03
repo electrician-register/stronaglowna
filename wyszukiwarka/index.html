@@ -47,12 +47,12 @@ main{
   box-shadow:0 10px 25px rgba(0,0,0,.1);
 }
 
-/* NOWE STYLES DLA JEDNAKOWEJ WYSOKOŚCI */
+/* JEDNOLITA WYSOKOŚĆ */
 .search-card select,
 .search-card button {
-  height: 48px;       /* jednolita wysokość */
-  font-size: 16px;    /* spójny rozmiar tekstu */
-  padding: 0 12px;    /* padding poziomy */
+  height: 48px;
+  font-size: 16px;
+  padding: 0 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
   box-sizing: border-box;
@@ -64,7 +64,7 @@ main{
 }
 
 .search-card label span {
-  margin-left: 3px; /* gwiazdka nie przykleja się do tekstu */
+  margin-left: 3px;
 }
 
 select,button{
@@ -77,6 +77,21 @@ button{
   color:white;
   border:none;
   cursor:pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background:#083f6b;
+}
+
+button:disabled {
+  background:#ccc;
+  cursor:not-allowed;
+}
+
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 sup a {
@@ -96,8 +111,9 @@ sup a:hover {
   background: #f6f8fa;
   border-left: 4px solid #0077ff;
   border-radius: 6px;
- font-size: 10px;
+  font-size: 10px;
 }
+
 /* RESULTS CARDS */
 #results{
   margin-top:20px;
@@ -111,16 +127,24 @@ sup a:hover {
   border-radius:10px;
   background:white;
   box-shadow:0 4px 12px rgba(0,0,0,.08);
+  transition: transform 0.2s;
+}
+
+.card:hover{
+  transform: translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
 }
 
 .lp{
   font-weight:bold;
   text-align:center;
+  align-self:center;
 }
 
 .person .name{
   font-weight:bold;
   font-size:16px;
+  margin-bottom:5px;
 }
 .person .small{
   font-size:14px;
@@ -139,6 +163,41 @@ sup a:hover {
   text-align:center;
 }
 
+/* PAGINATION */
+#pagination button {
+  width:auto;
+  padding:10px 20px;
+  margin:0 5px;
+  display:inline-block;
+}
+
+/* LOADING SPINNER */
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0B5FA5;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin:20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ERROR MESSAGE */
+.error {
+  background:#fee;
+  border:1px solid #f99;
+  color:#c00;
+  padding:15px;
+  border-radius:8px;
+  text-align:center;
+  margin:20px 0;
+}
+
 /* --- RESPONSYWNE GRIDY --- */
 @media (max-width: 700px) {
   .card {
@@ -146,7 +205,7 @@ sup a:hover {
     grid-template-columns: none;
   }
 
-  .card div {
+  .card > div {
     display: flex;
     justify-content: space-between;
     padding: 8px 12px;
@@ -164,6 +223,12 @@ sup a:hover {
   .lp {
     margin-bottom: 5px;
     text-align: left;
+  }
+  
+  #pagination button {
+    display:block;
+    width:100%;
+    margin:10px 0;
   }
 }
 </style>
@@ -189,8 +254,8 @@ sup a:hover {
 
   <label>
     Miasto <span style="color:orange;">*</span>
-    <select id="miasto">
-      <option value="">Wybierz miasto</option>
+    <select id="miasto" disabled>
+      <option value="">Najpierw wybierz województwo</option>
     </select>
   </label>
 
@@ -198,9 +263,9 @@ sup a:hover {
     Uprawnienia
     <select id="gwiazdki">
       <option value="">Wszystkie uprawnienia</option>
-      <option value="⭐">⭐</option>
-      <option value="⭐⭐">⭐⭐</option>
-      <option value="⭐⭐⭐">⭐⭐⭐</option>
+      <option value="1">⭐</option>
+      <option value="2">⭐⭐</option>
+      <option value="3">⭐⭐⭐</option>
     </select>
   </label>
 
@@ -240,60 +305,152 @@ const results = document.getElementById("results")
 const gwiazdki = document.getElementById("gwiazdki")
 const status = document.getElementById("status")
 const show_contact = document.getElementById("show_contact")
+const szukajBtn = document.getElementById("szukaj")
 
 let currentPage = 1
 const pageSize = 10
+let totalCount = 0
 
 // --- Ładowanie województw ---
-async function loadWoj(){
-  const { data } = await supabase.from("wojewodztwa").select("id,nazwa").order("nazwa")
-  data.forEach(w=>{
-    const o = document.createElement("option")
-    o.value = String(w.id)
-    o.textContent = w.nazwa
-    woj.appendChild(o)
-  })
+async function loadWoj() {
+  try {
+    const { data, error } = await supabase
+      .from("wojewodztwa")
+      .select("id,nazwa")
+      .order("nazwa")
+    
+    if (error) throw error;
+    
+    woj.innerHTML = '<option value="">Wybierz województwo</option>'
+    data.forEach(w => {
+      const o = document.createElement("option")
+      o.value = String(w.id)
+      o.textContent = w.nazwa
+      woj.appendChild(o)
+    })
+  } catch (err) {
+    console.error("Błąd ładowania województw:", err)
+    woj.innerHTML = '<option value="">Błąd ładowania danych</option>'
+    showError(results, "Nie udało się załadować listy województw")
+  }
 }
-loadWoj()
 
 // --- Ładowanie miast ---
-woj.addEventListener("change", async ()=>{
-  miasto.innerHTML = "<option value=''>Wybierz miasto</option>"
-  if(!woj.value) return
+woj.addEventListener("change", async () => {
+  const selectedWojId = woj.value
+  
+  miasto.innerHTML = '<option value="">Ładowanie...</option>'
+  miasto.disabled = true
+  
+  if (!selectedWojId) {
+    miasto.innerHTML = '<option value="">Najpierw wybierz województwo</option>'
+    miasto.disabled = true
+    return
+  }
 
-  const { data } = await supabase
-    .from("miasta")
-    .select("id,nazwa")
-    .eq("wojewodztwo_id", woj.value)
+  try {
+    // Spróbuj różnych nazw kolumn - dostosuj do swojej struktury bazy
+    let query = supabase
+      .from("miasta")
+      .select("id,nazwa")
+      .order("nazwa")
+    
+    // Próba 1: wojewodztwo_id
+    query = query.eq("wojewodztwo_id", selectedWojId)
+    
+    const { data, error } = await query
+    
+    if (error) {
+      // Próba 2: woj_id
+      const { data: data2, error: error2 } = await supabase
+        .from("miasta")
+        .select("id,nazwa")
+        .eq("woj_id", selectedWojId)
+        .order("nazwa")
+      
+      if (error2) {
+        // Próba 3: wojewodztwo
+        const { data: data3, error: error3 } = await supabase
+          .from("miasta")
+          .select("id,nazwa")
+          .eq("wojewodztwo", selectedWojId)
+          .order("nazwa")
+        
+        if (error3) {
+          throw new Error("Nie znaleziono odpowiedniej kolumny w tabeli miasta")
+        }
+        
+        data = data3
+      } else {
+        data = data2
+      }
+    }
 
-  data.forEach(m=>{
-    const o = document.createElement("option")
-    o.value = String(m.id)
-    o.textContent = m.nazwa
-    miasto.appendChild(o)
-  })
+    miasto.innerHTML = '<option value="">Wybierz miasto</option>'
+    
+    if (data && data.length > 0) {
+      data.forEach(m => {
+        const o = document.createElement("option")
+        o.value = String(m.id)
+        o.textContent = m.nazwa
+        miasto.appendChild(o)
+      })
+      miasto.disabled = false
+    } else {
+      miasto.innerHTML = '<option value="">Brak miast w wybranym województwie</option>'
+      miasto.disabled = true
+    }
+  } catch (err) {
+    console.error("Błąd ładowania miast:", err)
+    miasto.innerHTML = '<option value="">Błąd ładowania miast</option>'
+    miasto.disabled = true
+    showError(results, `Nie udało się załadować miast: ${err.message}`)
+  }
 })
 
+// --- Wyświetlanie błędu ---
+function showError(element, message) {
+  element.innerHTML = `<div class="error">${message}</div>`
+}
+
+// --- Wyświetlanie spinnera ---
+function showSpinner(element) {
+  element.innerHTML = '<div class="spinner"></div>'
+}
+
 // --- Render pagination ---
-function renderPagination(hasMore){
+function renderPagination(hasMore) {
   const p = document.getElementById("pagination")
   p.innerHTML = ""
 
-  if(currentPage > 1){
+  if (totalCount === 0) return
+
+  const totalPages = Math.ceil(totalCount / pageSize)
+  const startItem = (currentPage - 1) * pageSize + 1
+  const endItem = Math.min(currentPage * pageSize, totalCount)
+
+  // Informacja o wynikach
+  const info = document.createElement("div")
+  info.style.marginBottom = "10px"
+  info.style.color = "#666"
+  info.innerHTML = `Wyświetlono ${startItem}-${endItem} z ${totalCount} wyników`
+  p.appendChild(info)
+
+  if (currentPage > 1) {
     const prev = document.createElement("button")
-    prev.textContent = "← Poprzednia strona"
-    prev.onclick = ()=>{
+    prev.textContent = "← Poprzednia"
+    prev.onclick = () => {
       currentPage--
       search()
     }
     p.appendChild(prev)
   }
 
-  if(hasMore){
+  if (hasMore && currentPage < totalPages) {
     const next = document.createElement("button")
-    next.textContent = "Następna strona →"
+    next.textContent = "Następna →"
     next.style.marginLeft = "10px"
-    next.onclick = ()=>{
+    next.onclick = () => {
       currentPage++
       search()
     }
@@ -302,65 +459,122 @@ function renderPagination(hasMore){
 }
 
 // --- Szukanie ---
-async function search(){
-  results.innerHTML = "Szukam..."
-
-  let query = supabase
-    .from("tabela_elektrykow")
-    .select("id,imie,nazwisko,gwiazdki,status,telefon,email", { count: "exact" })
-
-  if(woj.value) query = query.eq("wojewodztwo", woj.value)
-  if(miasto.value) query = query.eq("miasto", miasto.value)
-  if(gwiazdki.value) query = query.eq("gwiazdki",gwiazdki.value)
-  if(status.value) query = query.eq("status", status.value)
-  if(show_contact.checked) query = query.eq("show_contact", true)
-
-  const from = (currentPage - 1) * pageSize
-  const to   = from + pageSize - 1
-
-  const { data, error, count } = await query.range(from, to)
-
-  if(error){
-    results.innerHTML = "Błąd pobierania danych"
-    console.error(error)
+async function search() {
+  // Walidacja
+  if (!woj.value) {
+    showError(results, "Wybierz województwo aby wyszukać")
     return
   }
 
-  if(!data || data.length === 0){
-    results.innerHTML = "Brak wyników"
+  if (!miasto.value) {
+    showError(results, "Wybierz miasto aby wyszukać")
     return
   }
 
-  results.innerHTML = ""
-  data.forEach((e,i)=>{
-    const d = document.createElement("div")
-    d.className="card"
-    d.innerHTML = `
-      <div class="lp">${from + i + 1}</div>
-      <div class="person">
-        <div class="name">${e.imie} ${e.nazwisko} ${'⭐'.repeat(e.gwiazdki)}</div>
-        <div class="small">Status: ${e.status}</div>
-      </div>
-      <div>
-        <button onclick="window.location.href='/profil/index.html?id=${e.id}'">
-          Zobacz profil
-        </button>
-      </div>
-    `
-    results.appendChild(d)
-  })
+  showSpinner(results)
+  szukajBtn.disabled = true
+  szukajBtn.textContent = "Szukam..."
 
-  renderPagination(to + 1 < count)
+  try {
+    let query = supabase
+      .from("tabela_elektrykow")
+      .select("id,imie,nazwisko,gwiazdki,status,telefon,email", { 
+        count: "exact" 
+      })
+
+    // Filtrowanie
+    if (woj.value) query = query.eq("wojewodztwo", woj.value)
+    if (miasto.value) query = query.eq("miasto", miasto.value)
+    
+    // Uwaga: w bazie gwiazdki są przechowywane jako liczba (1,2,3)
+    if (gwiazdki.value) query = query.eq("gwiazdki", parseInt(gwiazdki.value))
+    
+    if (status.value) query = query.eq("status", status.value)
+    if (show_contact.checked) query = query.eq("show_contact", true)
+
+    const from = (currentPage - 1) * pageSize
+    const to = from + pageSize - 1
+
+    const { data, error, count } = await query.range(from, to)
+
+    if (error) throw error;
+
+    totalCount = count || 0
+
+    if (!data || data.length === 0) {
+      results.innerHTML = '<div style="text-align:center;padding:30px;color:#666;">Nie znaleziono elektryków spełniających kryteria wyszukiwania</div>'
+      document.getElementById("pagination").innerHTML = ""
+      return
+    }
+
+    results.innerHTML = ""
+    data.forEach((e, i) => {
+      const d = document.createElement("div")
+      d.className = "card"
+      
+      // Konwersja liczby gwiazdek na emoji
+      let stars = ""
+      if (e.gwiazdki) {
+        stars = " ".repeat(e.gwiazdki).split("").map(() => "⭐").join("")
+      }
+      
+      d.innerHTML = `
+        <div class="lp">${from + i + 1}</div>
+        <div class="person">
+          <div class="name">${e.imie} ${e.nazwisko}${stars}</div>
+          <div class="small">Status: ${e.status || 'Nie podano'}</div>
+        </div>
+        <div>
+          <button onclick="window.location.href='/profil/index.html?id=${e.id}'">
+            Zobacz profil
+          </button>
+        </div>
+      `
+      results.appendChild(d)
+    })
+
+    renderPagination(to + 1 < totalCount)
+  } catch (err) {
+    console.error("Błąd wyszukiwania:", err)
+    showError(results, "Wystąpił błąd podczas wyszukiwania. Spróbuj ponownie.")
+  } finally {
+    szukajBtn.disabled = false
+    szukajBtn.textContent = "Szukaj"
+  }
 }
 
-document.getElementById("szukaj").addEventListener("click", ()=>{
-  currentPage = 1
-  search()
+// --- Inicjalizacja ---
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadWoj()
+  
+  // Event listener dla przycisku szukaj
+  szukajBtn.addEventListener("click", () => {
+    currentPage = 1
+    search()
+  })
+  
+  // Event listener dla klawisza Enter
+  document.querySelectorAll("select").forEach(select => {
+    select.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        currentPage = 1
+        search()
+      }
+    })
+  })
+  
+  // Auto-wyszukiwanie po zmianie miasta
+  miasto.addEventListener("change", () => {
+    if (miasto.value) {
+      currentPage = 1
+      search()
+    }
+  })
 })
 </script>
 
 <p id="p1" class="przypis"><br>
-  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b><br><br>⭐ elektryk posiada uprawnienia Eksploatacja.<br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem. wykonywania pomiarów ochronnych.<br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.<br><br> ✅ Elektryk udostepnił uprawnienia i został pozytywnie zweryfikowany.<br><br> ⌛ Elektryk udostepnił uprawnienia i oczekuję na weryfikację.<br><br>❌ Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydanę przez komisję do tego uprawnione zgodnie z URE .<br></p>
+  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b><br><br>⭐ elektryk posiada uprawnienia Eksploatacja.<br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem wykonywania pomiarów ochronnych.<br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.<br><br> ✅ Elektryk udostępnił uprawnienia i został pozytywnie zweryfikowany.<br><br> ⌛ Elektryk udostępnił uprawnienia i oczekuje na weryfikację.<br><br>❌ Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydane przez komisję do tego uprawnioną zgodnie z URE.<br></p>
 
 </body>
 </html>
