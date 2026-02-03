@@ -2,20 +2,167 @@
 <html lang="pl">
 <head>
 
-<!-- DYNAMICZNE META TAGI - zostaw puste, wypełni JavaScript -->
+<!-- Puste meta tagi - wypełni JavaScript -->
 <meta property="og:title" content="">
 <meta property="og:description" content="">
 <meta property="og:image" content="https://orep.pl/oreppl.jpg">
 <meta property="og:type" content="website">
 <meta property="og:url" content="">
-
 <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title></title> <!-- Pusty tytuł, wypełni JavaScript -->
+<title></title>
 
 <style>
-/* ... reszta CSS bez zmian ... */
+body {
+  margin:0;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background:#f4f6f8;
+  color:#333;
+}
+
+header {
+  background: linear-gradient(135deg, #0B5FA5, #0f72c1);
+  color:#fff;
+  text-align:center;
+  padding:70px 20px;
+}
+
+header h1 {
+  font-size:2.6rem;
+  margin:0 0 10px;
+}
+
+header p {
+  font-size:1.2rem;
+  max-width:700px;
+  margin:0 auto 25px;
+  opacity:0.9;
+  color:#f4f4f5;
+}
+
+/* === WIZYTÓWKA ELEKTRYKA === */
+.about-box {
+  margin:30px auto;
+  padding:25px 30px;
+  max-width:720px;
+  background:#f8fafc;
+  border-left:5px solid #0B5FA5;
+  border-radius:10px;
+  text-align:left;
+}
+
+.about-box h3 {
+  margin:0 0 12px;
+  font-size:18px;
+  font-weight:700;
+  color:#0B5FA5;
+}
+
+#opis {
+  font-size:16.5px;
+  line-height:1.7;
+  color:#1f2937;
+}
+
+/* Stylowanie dla sformatowanego tekstu z Quilla */
+#opis strong, #opis b {
+  font-weight: 700;
+}
+
+#opis em, #opis i {
+  font-style: italic;
+}
+
+#opis u {
+  text-decoration: underline;
+}
+
+#opis a {
+  color: #0f72c1;
+  text-decoration: none;
+}
+
+#opis a:hover {
+  text-decoration: underline;
+}
+
+#opis ul, #opis ol {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+#opis li {
+  margin-bottom: 5px;
+}
+
+/* PRZYCISK UDOSTĘPNIJ */
+.share-btn {
+  background-color:#0B5FA5;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:12px 20px;
+  font-size:16px;
+  cursor:pointer;
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition:background 0.3s ease;
+}
+
+.share-btn:hover {
+  background-color:#094c84;
+}
+
+/* LINIA POD HEADEREM */
+.header-line {
+  width:100%;
+  height:56px;
+  font-size:24px;
+  letter-spacing:3px;
+  background:#0f172a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.header-line span {
+  font-weight:700;
+  font-size:24px;
+  color:#fff;
+  line-height:1;
+}
+
+/* SEKCJE */
+section {
+  max-width:900px;
+  margin:60px auto;
+  background:#fff;
+  padding:40px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  text-align:center;
+}
+
+/* STATUS */
+.badge {
+  display:inline-block;
+  padding:6px 14px;
+  color:#fff;
+  border-radius:20px;
+  font-weight:600;
+  margin-bottom:20px;
+}
+
+.status-ok { background:#16a34a; }
+.status-wait { background:#f59e0b; }
+.status-no { background:#dc2626; }
+
+.hidden {
+  display:none;
+}
 </style>
 </head>
 
@@ -26,7 +173,32 @@
   <p id="heroDesc">Profil w Centralnym Rejestrze Elektryków</p>
 </header>
 
-<!-- ... reszta HTML bez zmian ... -->
+<div class="header-line">
+  <span id="gwiazdkiLine"></span>
+</div>
+
+<section id="profil" class="hidden">
+  <span id="status" class="badge"></span>
+
+  <div class="about-box">
+    <h3>⚡ Zakres usług / O mnie</h3>
+    <div id="opis"></div>
+  </div>
+
+  <p><strong>Email:</strong> <span id="email"></span></p>
+  <p><strong>Telefon:</strong> <span id="telefon"></span></p>
+
+  <p>
+    <button type="button" id="shareProfileBtn" class="share-btn">
+      🔗 Udostępnij profil
+    </button>
+  </p>
+</section>
+
+<section id="brak" class="hidden">
+  <h2>Brak wyników</h2>
+  <p>Nie znaleziono elektryka.</p>
+</section>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -108,14 +280,11 @@ if (id) {
       brak.classList.remove("hidden");
       gwiazdkiLine.textContent = "";
       
-      // Ustaw domyślne meta tagi dla braku profilu
+      // Ustaw domyślne meta tagi
       document.title = "Profil nie znaleziony - OREP.pl";
-      document.querySelector('meta[property="og:title"]').setAttribute('content', 
-        'Profil nie znaleziony - Ogólnopolski Rejestr Elektryków');
-      document.querySelector('meta[property="og:description"]').setAttribute('content',
-        'Nie znaleziono profilu elektryka w Ogólnopolskim Rejestrze Elektryków');
-      document.querySelector('meta[property="og:url"]').setAttribute('content', 
-        window.location.href);
+      document.querySelector('meta[property="og:title"]').setAttribute('content', 'Profil nie znaleziony');
+      document.querySelector('meta[property="og:description"]').setAttribute('content', 'Nie znaleziono profilu elektryka');
+      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
     } else {
       const fullName = `${data.imie} ${data.nazwisko}`;
       document.getElementById("heroName").textContent = fullName;
@@ -147,44 +316,15 @@ if (id) {
       profil.classList.remove("hidden");
       brak.classList.add("hidden");
       
-      // ========== WAŻNE: AKTUALIZUJEMY META TAGI W JAVASCRIPT ==========
-      // To pomaga aplikacjom społecznościowym pobrać właściwe dane
+      // Aktualizujemy meta tagi
       const cleanText = zajmujeSieHTML ? 
         cleanOpis(zajmujeSieHTML).replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 
-        'Usługi elektryczne - instalacje, naprawy, pomiary';
+        'Usługi elektryczne';
       
-      // 1. Aktualizuj tytuł strony
       document.title = `Profil elektryka: ${fullName} - OREP.pl`;
-      
-      // 2. Aktualizuj meta tagi Open Graph
-      document.querySelector('meta[property="og:title"]').setAttribute('content', 
-        `Profil elektryka: ${fullName}`);
-      document.querySelector('meta[property="og:description"]').setAttribute('content',
-        cleanText);
-      document.querySelector('meta[property="og:url"]').setAttribute('content', 
-        window.location.href);
-      
-      // 3. Dodaj dodatkowe meta tagi dla lepszego udostępniania
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (!metaDescription) {
-        const descMeta = document.createElement('meta');
-        descMeta.name = "description";
-        descMeta.content = cleanText;
-        document.head.appendChild(descMeta);
-      } else {
-        metaDescription.setAttribute('content', cleanText);
-      }
-      
-      // 4. Aktualizuj linki canonical
-      const canonicalLink = document.querySelector('link[rel="canonical"]');
-      if (!canonicalLink) {
-        const link = document.createElement('link');
-        link.rel = "canonical";
-        link.href = window.location.href;
-        document.head.appendChild(link);
-      } else {
-        canonicalLink.setAttribute('href', window.location.href);
-      }
+      document.querySelector('meta[property="og:title"]').setAttribute('content', `Profil elektryka: ${fullName}`);
+      document.querySelector('meta[property="og:description"]').setAttribute('content', cleanText);
+      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
     }
   };
 
@@ -192,10 +332,8 @@ if (id) {
 } else {
   // Jeśli brak ID w URL
   document.title = "Profil elektryka - OREP.pl";
-  document.querySelector('meta[property="og:title"]').setAttribute('content', 
-    'Ogólnopolski Rejestr Elektryków');
-  document.querySelector('meta[property="og:description"]').setAttribute('content',
-    'Sprawdź profil elektryka w Ogólnopolskim Rejestrze Elektryków');
+  document.querySelector('meta[property="og:title"]').setAttribute('content', 'Ogólnopolski Rejestr Elektryków');
+  document.querySelector('meta[property="og:description"]').setAttribute('content', 'Sprawdź profil elektryka w Ogólnopolskim Rejestrze Elektryków');
 }
 
 const shareBtn = document.getElementById("shareProfileBtn");
