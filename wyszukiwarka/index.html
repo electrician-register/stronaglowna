@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
@@ -152,7 +151,7 @@ sup a:hover {
   color:var(--muted);
 }
 
-/* STYLE STATUSÓW */
+/* STYLE STATUSÓW - TE SĄ UŻYWANE W KARTACH WYNIKÓW */
 .status-verified {
   color: #16a34a;
   font-weight: bold;
@@ -180,20 +179,20 @@ sup a:hover {
   margin: 4px 0;
 }
 
-/* KOLOROWE OPCJE W SELECT */
-#status option.verified {
+/* STYLE DLA STATUSÓW W SELEKCIE - INLINE STYLE W HTML */
+#status option[value="verified"] {
   color: #16a34a !important;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
-#status option.pending {
+#status option[value="pending"] {
   color: #f97316 !important;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
-#status option.unconfirmed {
+#status option[value="unconfirmed"] {
   color: #dc2626 !important;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 /* PAGINATION */
@@ -444,53 +443,41 @@ woj.addEventListener("change", async () => {
   try {
     console.log(`Pobieranie miast z tabeli 'miasta' dla województwa ID: ${selectedWojId}`)
     
-    // Próbuj różne nazwy kolumn dla województwa
-    const possibleColumns = ['wojewodztwo_id', 'woj_id', 'wojewodztwo', 'id_wojewodztwo', 'id_woj']
+    // Najpierw spróbujmy najbardziej prawdopodobną nazwę kolumny
+    let { data, error } = await supabase
+      .from("miasta")
+      .select("id,nazwa,wojewodztwo_id")
+      .eq("wojewodztwo_id", selectedWojId)
+      .order("nazwa")
     
-    let miastaData = null
-    let foundColumn = null
-    
-    for (const column of possibleColumns) {
-      console.log(`Próba pobrania z kolumną: ${column} = ${selectedWojId}`)
+    // Jeśli nie działa, spróbuj innych nazw
+    if (error || !data || data.length === 0) {
+      console.log("Próba z innymi nazwami kolumn...")
+      const possibleColumns = ['woj_id', 'wojewodztwo', 'id_wojewodztwo', 'id_woj']
       
-      const { data, error } = await supabase
-        .from("miasta")
-        .select("id,nazwa")
-        .eq(column, selectedWojId)
-        .order("nazwa")
-      
-      if (!error && data && data.length > 0) {
-        console.log(`SUKCES! Znaleziono kolumnę: ${column}, pobrano ${data.length} miast`)
-        miastaData = data
-        foundColumn = column
-        break
-      } else if (error) {
-        console.error(`Błąd dla kolumny ${column}:`, error)
-      } else {
-        console.log(`Brak danych dla kolumny ${column}`)
+      for (const column of possibleColumns) {
+        const response = await supabase
+          .from("miasta")
+          .select("id,nazwa")
+          .eq(column, selectedWojId)
+          .order("nazwa")
+        
+        if (!response.error && response.data && response.data.length > 0) {
+          data = response.data
+          error = null
+          console.log(`Znaleziono miasta z kolumną: ${column}`)
+          break
+        }
       }
     }
     
-    // Jeśli nie znaleziono, pobierz wszystkie miasta
-    if (!miastaData) {
-      console.log("Nie znaleziono odpowiedniej kolumny. Pobieranie wszystkich miast...")
-      const { data, error } = await supabase
-        .from("miasta")
-        .select("id,nazwa")
-        .order("nazwa")
-        .limit(100)
-      
-      if (error) throw error
-      
-      console.log("Pobrano wszystkie miasta:", data)
-      miastaData = data
-    }
+    if (error) throw error
     
     miasto.innerHTML = '<option value="">Wybierz miasto</option>'
     
-    if (miastaData && miastaData.length > 0) {
-      console.log(`Wyświetlam ${miastaData.length} miast`)
-      miastaData.forEach(m => {
+    if (data && data.length > 0) {
+      console.log(`Pobrano ${data.length} miast`)
+      data.forEach(m => {
         const o = document.createElement("option")
         o.value = String(m.id)
         o.textContent = m.nazwa
@@ -507,7 +494,7 @@ woj.addEventListener("change", async () => {
     console.error("Błąd ładowania miast:", err)
     miasto.innerHTML = '<option value="">Błąd ładowania miast</option>'
     miasto.disabled = true
-    showError(results, `Nie udało się załadować listy miast: ${err.message}`)
+    showError(results, `Nie udało się załadować listy miast`)
   }
 })
 
@@ -563,30 +550,31 @@ function renderPagination(hasMore) {
 
 // --- Formatowanie statusu ---
 function formatStatus(statusValue) {
-  switch(statusValue) {
-    case '✅':
-    case 'verified':
-      return { 
-        text: '✔️ Zweryfikowany', 
-        className: 'status-verified' 
-      }
-    case '⌛':
-    case 'pending':
-      return { 
-        text: '⌛ Elektryk w trakcie weryfikacji', 
-        className: 'status-pending' 
-      }
-    case '❌':
-    case 'unconfirmed':
-      return { 
-        text: '❌ Status nie potwierdzony', 
-        className: 'status-unconfirmed' 
-      }
-    default:
-      return { 
-        text: statusValue || 'Nie określono', 
-        className: '' 
-      }
+  // Jeśli status jest już w formacie emoji, użyj go bezpośrednio
+  if (statusValue === '✅' || statusValue === 'verified') {
+    return { 
+      text: '✔️ Zweryfikowany', 
+      className: 'status-verified',
+      style: 'color:#16a34a;font-weight:bold;'
+    }
+  } else if (statusValue === '⌛' || statusValue === 'pending') {
+    return { 
+      text: '⌛ Elektryk w trakcie weryfikacji', 
+      className: 'status-pending',
+      style: 'color:#f97316;font-weight:bold;'
+    }
+  } else if (statusValue === '❌' || statusValue === 'unconfirmed') {
+    return { 
+      text: '❌ Status nie potwierdzony', 
+      className: 'status-unconfirmed',
+      style: 'color:#dc2626;font-weight:bold;'
+    }
+  } else {
+    return { 
+      text: statusValue || 'Nie określono', 
+      className: '',
+      style: ''
+    }
   }
 }
 
@@ -677,7 +665,7 @@ async function search() {
         <div class="lp">${from + i + 1}</div>
         <div class="person">
           <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki || ''}</div>
-          <div class="small ${statusInfo.className}">${statusInfo.text}</div>
+          <div class="small ${statusInfo.className}" style="${statusInfo.style}">${statusInfo.text}</div>
           ${showContactInfo ? `
             <div class="contact-info">
               ${e.telefon ? `<div><strong>Telefon:</strong> ${e.telefon}</div>` : ''}
