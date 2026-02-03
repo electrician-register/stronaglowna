@@ -343,7 +343,7 @@ th { background:#222; color:#fff }
   <!-- KONTROLE WYSZUKIWANIA I PAGINACJI -->
   <div class="controls-container">
     <div class="search-box">
-      <input type="text" id="searchLp" placeholder="Szukaj po Lp...">
+      <input type="text" id="searchLp" placeholder="Szukaj po Lp (liczba)...">
       <input type="text" id="searchNazwisko" placeholder="Szukaj po nazwisku...">
       <button id="searchBtn">Szukaj</button>
       <button id="clearSearchBtn">Wyczyść</button>
@@ -627,21 +627,32 @@ function updatePagination() {
   }
 }
 
-/* ===== WCZYTANIE TABELI Z PAGINACJĄ I WYSZUKIWANIEM ===== */
+/* ===== POPRAWIONA FUNKCJA WCZYTANIA DANYCH ===== */
 async function loadData() {
   log("=== POBRANIE DANYCH Z TABELI ===");
 
-  // Buduj zapytanie z filtrami
+  // Buduj zapytanie z filtrami - DWA OSOBNE ZAPYTANIA
   let query = supabaseClient
     .from("tabela_elektrykow")
     .select("id, lp, imie, nazwisko, telefon, email, status, plik, show_contact", { count: 'exact' });
 
-  // Dodaj filtry wyszukiwania
-  if (currentSearch.lp) {
-    query = query.ilike('lp', `%${currentSearch.lp}%`);
-  }
+  // Dodaj filtry wyszukiwania - poprawione dla typu integer
   if (currentSearch.nazwisko) {
     query = query.ilike('nazwisko', `%${currentSearch.nazwisko}%`);
+  }
+  
+  // Dla pola Lp (integer) musimy użyć eq() zamiast ilike()
+  if (currentSearch.lp) {
+    // Sprawdź czy to liczba
+    const lpNumber = parseInt(currentSearch.lp);
+    if (!isNaN(lpNumber)) {
+      query = query.eq('lp', lpNumber);
+    } else {
+      // Jeśli nie jest liczbą, wyczyść wyszukiwanie po Lp
+      currentSearch.lp = '';
+      document.getElementById("searchLp").value = '';
+      log("⚠️ Wprowadź liczbę dla wyszukiwania po Lp");
+    }
   }
 
   // Dodaj sortowanie i paginację
