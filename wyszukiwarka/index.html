@@ -121,7 +121,7 @@ sup a:hover {
 
 .card{
   display:grid;
-  grid-template-columns: 70px 1fr 160px 120px;
+  grid-template-columns: 70px 1fr 160px;
   padding:14px;
   margin-bottom:12px;
   border-radius:10px;
@@ -151,16 +151,32 @@ sup a:hover {
   color:var(--muted);
 }
 
-.stars{
-  font-size:12px;
-  color:#f5b400;
-  text-align:center;
+/* STYLE STATUSÓW */
+.status-verified {
+  color: #16a34a;
+  font-weight: bold;
 }
 
-.status{
-  font-size:12px;
-  color:#16a34a;
-  text-align:center;
+.status-pending {
+  color: #f97316;
+  font-weight: bold;
+}
+
+.status-unconfirmed {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.contact-info {
+  background: #f0f9ff;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 8px;
+  border-left: 3px solid #0B5FA5;
+}
+
+.contact-info div {
+  margin: 4px 0;
 }
 
 /* PAGINATION */
@@ -206,8 +222,7 @@ sup a:hover {
   }
 
   .card > div {
-    display: flex;
-    justify-content: space-between;
+    display: block;
     padding: 8px 12px;
     margin-bottom: 4px;
   }
@@ -273,9 +288,9 @@ sup a:hover {
     Status
     <select id="status">
       <option value="">Wszystkie statusy</option>
-      <option value="✅">✅ Zweryfikowany</option>
-      <option value="⌛">⌛ Weryfikacja w toku</option>
-      <option value="❌">❌ Nieudostępnione</option>
+      <option value="verified">✔️ Zweryfikowany</option>
+      <option value="pending">⌛ Weryfikacja w toku</option>
+      <option value="unconfirmed">❌ Status nie potwierdzony</option>
     </select>
   </label>
 
@@ -349,42 +364,13 @@ woj.addEventListener("change", async () => {
   }
 
   try {
-    // Spróbuj różnych nazw kolumn - dostosuj do swojej struktury bazy
-    let query = supabase
+    let { data, error } = await supabase
       .from("miasta")
       .select("id,nazwa")
+      .or(`wojewodztwo_id.eq.${selectedWojId},woj_id.eq.${selectedWojId},wojewodztwo.eq.${selectedWojId}`)
       .order("nazwa")
-    
-    // Próba 1: wojewodztwo_id
-    query = query.eq("wojewodztwo_id", selectedWojId)
-    
-    let { data, error } = await query
-    
-    if (error || !data || data.length === 0) {
-      // Próba 2: woj_id
-      const response2 = await supabase
-        .from("miasta")
-        .select("id,nazwa")
-        .eq("woj_id", selectedWojId)
-        .order("nazwa")
-      
-      if (response2.error || !response2.data || response2.data.length === 0) {
-        // Próba 3: wojewodztwo
-        const response3 = await supabase
-          .from("miasta")
-          .select("id,nazwa")
-          .eq("wojewodztwo", selectedWojId)
-          .order("nazwa")
-        
-        if (response3.error) {
-          throw new Error("Nie znaleziono odpowiedniej kolumny w tabeli miasta")
-        }
-        
-        data = response3.data
-      } else {
-        data = response2.data
-      }
-    }
+
+    if (error) throw error;
 
     miasto.innerHTML = '<option value="">Wybierz miasto</option>'
     
@@ -458,6 +444,46 @@ function renderPagination(hasMore) {
   }
 }
 
+// --- Formatowanie statusu ---
+function formatStatus(statusValue) {
+  switch(statusValue) {
+    case '✅':
+    case 'verified':
+      return { 
+        text: '✔️ Zweryfikowany', 
+        className: 'status-verified' 
+      }
+    case '⌛':
+    case 'pending':
+      return { 
+        text: '⌛ Elektryk w trakcie weryfikacji', 
+        className: 'status-pending' 
+      }
+    case '❌':
+    case 'unconfirmed':
+      return { 
+        text: '❌ Status nie potwierdzony', 
+        className: 'status-unconfirmed' 
+      }
+    default:
+      return { 
+        text: statusValue || 'Nie określono', 
+        className: '' 
+      }
+  }
+}
+
+// --- Sprawdzenie czy pokazać dane kontaktowe ---
+function shouldShowContact(electrician) {
+  // Sprawdź czy elektryk ma status zweryfikowany
+  const isVerified = electrician.status === '✅' || electrician.status === 'verified'
+  
+  // Sprawdź czy ma ustawione show_contact
+  const hasContactPermission = electrician.show_contact === true
+  
+  return isVerified && hasContactPermission && (electrician.telefon || electrician.email)
+}
+
 // --- Szukanie ---
 async function search() {
   // Walidacja
@@ -476,7 +502,6 @@ async function search() {
   szukajBtn.textContent = "Szukam..."
 
   try {
-    // Pobierz wszystkie kolumny potrzebne do filtrowania
     let query = supabase
       .from("tabela_elektrykow")
       .select("id,imie,nazwisko,gwiazdki,status,telefon,email,wojewodztwo,miasto,show_contact", { 
@@ -487,10 +512,22 @@ async function search() {
     if (woj.value) query = query.eq("wojewodztwo", woj.value)
     if (miasto.value) query = query.eq("miasto", miasto.value)
     
-    // WAŻNE: Teraz gwiazdki są porównywane jako tekst
+    // Filtrowanie po gwiazdkach (jako tekst)
     if (gwiazdki.value) query = query.eq("gwiazdki", gwiazdki.value)
     
-    if (status.value) query = query.eq("status", status.value)
+    // Filtrowanie po statusie - obsługa różnych formatów
+    if (status.value) {
+      if (status.value === 'verified') {
+        query = query.eq("status", '✅')
+      } else if (status.value === 'pending') {
+        query = query.eq("status", '⌛')
+      } else if (status.value === 'unconfirmed') {
+        query = query.eq("status", '❌')
+      } else {
+        query = query.eq("status", status.value)
+      }
+    }
+    
     if (show_contact.checked) query = query.eq("show_contact", true)
 
     const from = (currentPage - 1) * pageSize
@@ -513,13 +550,23 @@ async function search() {
       const d = document.createElement("div")
       d.className = "card"
       
+      // Formatowanie statusu
+      const statusInfo = formatStatus(e.status)
+      
+      // Sprawdź czy pokazać dane kontaktowe
+      const showContactInfo = shouldShowContact(e)
+      
       d.innerHTML = `
         <div class="lp">${from + i + 1}</div>
         <div class="person">
           <div class="name">${e.imie} ${e.nazwisko} ${e.gwiazdki || ''}</div>
-          <div class="small">Status: ${e.status || 'Nie podano'}</div>
-          ${e.telefon ? `<div class="small">Tel: ${e.telefon}</div>` : ''}
-          ${e.email ? `<div class="small">Email: ${e.email}</div>` : ''}
+          <div class="small ${statusInfo.className}">${statusInfo.text}</div>
+          ${showContactInfo ? `
+            <div class="contact-info">
+              ${e.telefon ? `<div><strong>Telefon:</strong> ${e.telefon}</div>` : ''}
+              ${e.email ? `<div><strong>Email:</strong> ${e.email}</div>` : ''}
+            </div>
+          ` : ''}
         </div>
         <div>
           <button onclick="window.location.href='/profil/index.html?id=${e.id}'">
@@ -551,17 +598,8 @@ async function debugTableStructure() {
     
     if (!sampleError && sampleData && sampleData.length > 0) {
       console.log("Przykładowy rekord z tabeli elektryków:", sampleData[0])
-      console.log("Typ pola gwiazdki:", typeof sampleData[0].gwiazdki, "Wartość:", sampleData[0].gwiazdki)
-    }
-    
-    // Sprawdź strukturę tabeli miast
-    const { data: miastaSample, error: miastaError } = await supabase
-      .from("miasta")
-      .select("*")
-      .limit(1)
-    
-    if (!miastaError && miastaSample && miastaSample.length > 0) {
-      console.log("Przykładowy rekord z tabeli miast:", miastaSample[0])
+      console.log("Pole status:", sampleData[0].status)
+      console.log("Pole show_contact:", sampleData[0].show_contact)
     }
   } catch (err) {
     console.error("Błąd debugowania:", err)
@@ -621,18 +659,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   })
 })
-
-// --- Funkcja pomocnicza do czyszczenia tekstu z gwiazdek ---
-function cleanStarText(text) {
-  if (!text) return 0
-  // Liczy tylko gwiazdki emoji (⭐)
-  const starsCount = (text.match(/⭐/g) || []).length
-  return starsCount
-}
 </script>
 
 <p id="p1" class="przypis"><br>
-  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b><br><br>⭐ elektryk posiada uprawnienia Eksploatacja.<br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem wykonywania pomiarów ochronnych.<br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.<br><br> ✅ Elektryk udostępnił uprawnienia i został pozytywnie zweryfikowany.<br><br> ⌛ Elektryk udostępnił uprawnienia i oczekuje na weryfikację.<br><br>❌ Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydane przez komisję do tego uprawnioną zgodnie z URE.<br></p>
+  <sup>*</sup><b>Opis dotyczący gwiazdek oraz posiadanego statusu:</b><br><br>⭐ elektryk posiada uprawnienia Eksploatacja.<br><br> ⭐⭐ elektryk posiada uprawnienia Eksploatacja wraz z prawem wykonywania pomiarów ochronnych.<br><br>⭐⭐⭐ elektryk posiada wszystkie możliwe uprawnienia z prawem do prowadzenia Dozoru instalacji i sieci energetycznych.<br><br> <span class="status-verified">✔️ Zweryfikowany</span> - Elektryk udostępnił uprawnienia i został pozytywnie zweryfikowany. Dane kontaktowe są widoczne.<br><br> <span class="status-pending">⌛ Elektryk w trakcie weryfikacji</span> - Elektryk udostępnił uprawnienia i oczekuje na weryfikację.<br><br> <span class="status-unconfirmed">❌ Status nie potwierdzony</span> - Elektryk <b>NIE</b> udostępnił uprawnień do weryfikacji lub <b>NIE</b> zostały wydane przez komisję do tego uprawnioną zgodnie z URE.<br></p>
 
 </body>
 </html>
