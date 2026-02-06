@@ -13,8 +13,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: Arial, sans-serif;
-  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display:flex;
   justify-content:center;
   align-items:center;
@@ -27,25 +27,28 @@ body {
   display:flex;
   flex-direction:column;
   align-items:center;
-  background:#e2e6ea;
-  padding:40px 20px;
-  border-radius:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.1);
-  border:20px solid white;
-  max-width:500px;
+  background:#ffffff;
+  padding:40px 30px;
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  border:3px solid #4f46e5;
+  max-width:480px;
   width:100%;
   text-align:center;
+  overflow:hidden;
 }
 
 .close-x {
   position:absolute;
-  top:8px;
-  right:12px;
-  font-size:22px;
+  top:15px;
+  right:20px;
+  font-size:24px;
   font-weight:bold;
   cursor:pointer;
-  color:#ff0000;
+  color:#ef4444;
   user-select:none;
+  transition: color 0.3s;
+  z-index:10;
 }
 
 .close-x:hover {
@@ -55,59 +58,131 @@ body {
 .form-container{
   width:100%;
   background:#fff;
-  padding:25px 20px;
-  border-radius:8px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.05);
-  border:2px solid blue;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.08);
+  border:2px solid #e5e7eb;
 }
 
 h2 {
+  margin-bottom:25px;
+  color:#1f2937;
+  font-size:28px;
+  font-weight:700;
+}
+
+.input-group {
   margin-bottom:20px;
 }
 
 input[type="email"],
 input[type="password"] {
   width:100%;
-  padding:12px 15px;
+  padding:14px 16px;
   margin-bottom:15px;
-  border:1px solid #ccc;
-  border-radius:6px;
+  border:2px solid #e5e7eb;
+  border-radius:8px;
   font-size:16px;
+  transition: all 0.3s;
+  background:#f9fafb;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline:none;
+  border-color:#4f46e5;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.password-wrapper {
+  position:relative;
+}
+
+.toggle-password {
+  position:absolute;
+  right:15px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  color:#6b7280;
+  cursor:pointer;
+  font-size:14px;
+  padding:5px;
 }
 
 button {
   width:100%;
-  min-height:48px;
+  min-height:52px;
   border:none;
-  border-radius:6px;
+  border-radius:10px;
   font-size:16px;
+  font-weight:600;
   cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
+  transition: all 0.3s;
+  gap:10px;
+}
+
+button:hover {
+  transform:translateY(-2px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
 }
 
 .btn-submit {
-  background-color:#2b6cb0;
+  background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color:white;
-  font-weight:600;
+}
+
+.btn-submit:hover {
+  background:linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
 }
 
 .btn-secondary {
-  background:#008000;
+  background:#10b981;
   color:#fff;
 }
 
-.btn-logout {
-  background:#ff0000;
-  color:#fff;
+.btn-secondary:hover {
+  background:#0da271;
+}
+
+.btn-google {
+  background:#fff;
+  color:#3c4043;
+  border:2px solid #dadce0;
   margin-top:10px;
+}
+
+.btn-google:hover {
+  background:#f8f9fa;
+  border-color:#c0c0c0;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.google-icon {
+  width:20px;
+  height:20px;
+}
+
+.btn-logout {
+  background:#ef4444;
+  color:#fff;
+  margin-top:15px;
+}
+
+.btn-logout:hover {
+  background:#dc2626;
 }
 
 .actions {
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:12px;
+  margin-top:20px;
 }
 
 .hidden {
@@ -115,12 +190,74 @@ button {
 }
 
 .log {
-  margin-top:15px;
+  margin-top:20px;
+  padding:12px;
   font-size:14px;
-  color:#333;
+  color:#374151;
   word-break:break-word;
   min-height:20px;
+  border-radius:8px;
+  background:#f3f4f6;
 }
+
+.log.success {
+  background:#d1fae5;
+  color:#065f46;
+  border-left:4px solid #10b981;
+}
+
+.log.error {
+  background:#fee2e2;
+  color:#991b1b;
+  border-left:4px solid #ef4444;
+}
+
+.log.info {
+  background:#dbeafe;
+  color:#1e40af;
+  border-left:4px solid #3b82f6;
+}
+
+.divider {
+  display:flex;
+  align-items:center;
+  margin:25px 0;
+  color:#6b7280;
+  font-size:14px;
+}
+
+.divider::before,
+.divider::after {
+  content:"";
+  flex:1;
+  height:1px;
+  background:#e5e7eb;
+}
+
+.divider span {
+  padding:0 15px;
+}
+
+/* Loading spinner */
+.spinner {
+  width:20px;
+  height:20px;
+  border:3px solid rgba(255,255,255,0.3);
+  border-radius:50%;
+  border-top-color:#fff;
+  animation:spin 1s linear infinite;
+  display:inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Google branding colors */
+.google-blue { color: #4285f4; }
+.google-red { color: #ea4335; }
+.google-yellow { color: #fbbc05; }
+.google-green { color: #34a853; }
 </style>
 </head>
 
@@ -131,18 +268,44 @@ button {
   <div class="close-x" onclick="closeOnly()">✕</div>
 
   <div class="form-container">
-    <h2>Logowanie / Rejestracja</h2>
+    <h2>Zaloguj się do OREP</h2>
+    
+    <!-- Google Login Button -->
+    <button class="btn-google" id="googleLoginBtn">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Zaloguj przez Google
+    </button>
 
-    <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
-    <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
+    <div class="divider">
+      <span>lub przez e-mail</span>
+    </div>
+
+    <div class="input-group">
+      <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
+      <div class="password-wrapper">
+        <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
+        <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+      </div>
+    </div>
 
     <div class="actions" id="authActions">
-      <button class="btn-submit" id="signupBtn">Zarejestruj</button>
-      <button class="btn-secondary" id="loginBtn">Zaloguj</button>
+      <button class="btn-submit" id="signupBtn">
+        <span id="signupText">Zarejestruj się</span>
+        <span id="signupSpinner" class="spinner hidden"></span>
+      </button>
+      <button class="btn-secondary" id="loginBtn">
+        <span id="loginText">Zaloguj się</span>
+        <span id="loginSpinner" class="spinner hidden"></span>
+      </button>
     </div>
 
     <button id="logoutBtn" class="btn-logout hidden">
-      Wyloguj
+      Wyloguj się
     </button>
 
     <div class="log" id="log"></div>
@@ -153,7 +316,14 @@ button {
 const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inicjalizacja Supabase
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const emailInput = document.getElementById('emailInput');
@@ -161,76 +331,286 @@ document.addEventListener('DOMContentLoaded', () => {
   const signupBtn = document.getElementById('signupBtn');
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const togglePasswordBtn = document.getElementById('togglePassword');
   const log = document.getElementById('log');
 
-  // REJESTRACJA
+  // Sprawdź czy użytkownik jest już zalogowany
+  checkAuth();
+
+  // Toggle password visibility
+  togglePasswordBtn.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    togglePasswordBtn.textContent = type === 'password' ? '👁️' : '🙈';
+  });
+
+  // REJESTRACJA PRZEZ EMAIL
   signupBtn.onclick = async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
-    if (!email) {
-      log.innerText = "❌ Podaj poprawny adres e-mail";
+    if (!validateEmail(email)) {
+      showLog("❌ Podaj poprawny adres e-mail", "error");
       return;
     }
-    if (!password || password.length < 8) {
-      log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
+    if (!validatePassword(password)) {
+      showLog("❌ Hasło musi mieć minimum 8 znaków", "error");
       return;
     }
 
-    log.innerText = "⏳ Trwa rejestracja...";
-    const { data, error } = await sb.auth.signUp({ email, password });
+    setLoading(signupBtn, true);
+    showLog("⏳ Trwa rejestracja...", "info");
 
-    if (error) {
-      if (error.message.includes("User already registered")) {
-        log.innerText = "❌ Użytkownik o tym adresie e-mail już istnieje";
-      } else if (error.message.includes("rate limit")) {
-        log.innerText = "❌ Zbyt wiele prób. Spróbuj ponownie później";
-      } else {
-        log.innerText = "❌ " + error.message;
+    try {
+      const { data, error } = await sb.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/rejestracja_formularz`,
+          data: {
+            signup_method: 'email'
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes("User already registered")) {
+          showLog("❌ Użytkownik o tym adresie już istnieje", "error");
+        } else if (error.message.includes("rate limit")) {
+          showLog("❌ Zbyt wiele prób. Spróbuj za chwilę", "error");
+        } else {
+          showLog(`❌ ${error.message}`, "error");
+        }
+        return;
       }
-      return;
-    }
 
-    if (data?.user) {
-      window.location.href = "/rejestracja_formularz";
-    } else {
-      log.innerText = "✅ Sprawdź e-mail i potwierdź konto";
+      if (data?.user) {
+        if (data.user.identities?.length === 0) {
+          showLog("✅ Użytkownik już istnieje. Możesz się zalogować", "success");
+        } else if (!data.user.email_confirmed_at) {
+          showLog("✅ Sprawdź skrzynkę e-mail i potwierdź rejestrację", "success");
+          // Czekaj 3 sekundy i przekieruj
+          setTimeout(() => {
+            window.location.href = "/rejestracja_formularz";
+          }, 3000);
+        } else {
+          window.location.href = "/rejestracja_formularz";
+        }
+      }
+    } catch (error) {
+      showLog("❌ Wystąpił nieoczekiwany błąd", "error");
+    } finally {
+      setLoading(signupBtn, false);
     }
   };
 
-  // LOGOWANIE – TYLKO PO KLIKNIĘCIU
+  // LOGOWANIE PRZEZ EMAIL
   loginBtn.onclick = async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
     if (!email || !password) {
-      log.innerText = "❌ Podaj e-mail i hasło";
+      showLog("❌ Podaj e-mail i hasło", "error");
       return;
     }
 
-    log.innerText = "⏳ Trwa logowanie...";
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    setLoading(loginBtn, true);
+    showLog("⏳ Trwa logowanie...", "info");
 
-    if (error) {
-      log.innerText = "❌ Nieprawidłowy e-mail lub hasło";
-      return;
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          showLog("❌ Nieprawidłowy e-mail lub hasło", "error");
+        } else if (error.message.includes("Email not confirmed")) {
+          showLog("❌ Potwierdź swój adres e-mail", "error");
+        } else {
+          showLog(`❌ ${error.message}`, "error");
+        }
+        return;
+      }
+
+      if (data?.user) {
+        showLog("✅ Zalogowano pomyślnie!", "success");
+        setTimeout(() => {
+          window.location.href = "/rejestracja_formularz";
+        }, 1000);
+      }
+    } catch (error) {
+      showLog("❌ Wystąpił błąd podczas logowania", "error");
+    } finally {
+      setLoading(loginBtn, false);
     }
+  };
 
-    if (data?.user) {
-      window.location.href = "/rejestracja_formularz";
+  // LOGOWANIE PRZEZ GOOGLE
+  googleLoginBtn.onclick = async () => {
+    setLoading(googleLoginBtn, true);
+    showLog("⏳ Przekierowywanie do Google...", "info");
+
+    try {
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/rejestracja_formularz`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+
+      if (error) {
+        showLog(`❌ ${error.message}`, "error");
+        setLoading(googleLoginBtn, false);
+      }
+      // Po udanym logowaniu Supabase automatycznie przekieruje
+    } catch (error) {
+      showLog("❌ Wystąpił błąd podczas logowania przez Google", "error");
+      setLoading(googleLoginBtn, false);
     }
   };
 
   // WYLOGOWANIE
   logoutBtn.onclick = async () => {
     await sb.auth.signOut();
-    window.location.href = "/";
+    showLog("✅ Wylogowano pomyślnie", "success");
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
   };
 });
+
+// Funkcje pomocnicze
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+function validatePassword(password) {
+  return password.length >= 8;
+}
+
+function showLog(message, type = "info") {
+  const log = document.getElementById('log');
+  log.innerHTML = message;
+  log.className = `log ${type}`;
+  
+  // Auto-hide success messages after 5 seconds
+  if (type === 'success') {
+    setTimeout(() => {
+      if (log.innerHTML === message) {
+        log.innerHTML = '';
+        log.className = 'log';
+      }
+    }, 5000);
+  }
+}
+
+function setLoading(button, isLoading) {
+  const textSpan = button.querySelector('span:not(.spinner)');
+  const spinner = button.querySelector('.spinner');
+  
+  if (isLoading) {
+    textSpan.style.opacity = '0.5';
+    spinner.classList.remove('hidden');
+    button.disabled = true;
+  } else {
+    textSpan.style.opacity = '1';
+    spinner.classList.add('hidden');
+    button.disabled = false;
+  }
+}
+
+async function checkAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  
+  if (session) {
+    // Użytkownik jest zalogowany
+    document.getElementById('authActions').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
+    document.getElementById('emailInput').value = session.user.email || '';
+    
+    const method = session.user.app_metadata?.provider || 'email';
+    showLog(`✅ Zalogowano jako: ${session.user.email} (przez ${method})`, "success");
+  }
+}
 
 function closeOnly() {
   window.location.href = "/";
 }
+
+// Obsługa powrotu z OAuth
+async function handleOAuthCallback() {
+  const { data: { session }, error } = await sb.auth.getSession();
+  
+  if (error) {
+    showLog(`❌ Błąd autoryzacji: ${error.message}`, "error");
+    return;
+  }
+  
+  if (session?.provider_token) {
+    // Pobierz dodatkowe informacje z Google API
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: {
+          Authorization: `Bearer ${session.provider_token}`
+        }
+      });
+      
+      if (response.ok) {
+        const googleData = await response.json();
+        console.log('Google user info:', googleData);
+        
+        // Możesz zapisać te dane do swojej bazy
+        await updateUserProfile(session.user.id, {
+          full_name: googleData.name,
+          avatar_url: googleData.picture,
+          google_id: googleData.sub
+        });
+      }
+    } catch (error) {
+      console.log('Nie udało się pobrać danych z Google:', error);
+    }
+  }
+}
+
+async function updateUserProfile(userId, profileData) {
+  const { error } = await sb
+    .from('profiles')
+    .upsert({
+      id: userId,
+      ...profileData,
+      updated_at: new Date().toISOString()
+    });
+  
+  if (error) {
+    console.error('Błąd aktualizacji profilu:', error);
+  }
+}
+
+// Sprawdź czy jesteśmy w callbacku OAuth
+if (window.location.hash.includes('access_token') || window.location.hash.includes('error')) {
+  handleOAuthCallback();
+}
+
+// Nasłuchuj zmian stanu autoryzacji
+sb.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event);
+  
+  if (event === 'SIGNED_IN' && session) {
+    showLog(`✅ Witaj ${session.user.email}!`, "success");
+    setTimeout(() => {
+      window.location.href = "/rejestracja_formularz";
+    }, 1000);
+  } else if (event === 'SIGNED_OUT') {
+    document.getElementById('authActions').classList.remove('hidden');
+    document.getElementById('logoutBtn').classList.add('hidden');
+    showLog("👋 Do zobaczenia!", "info");
+  }
+});
 </script>
 
 </body>
