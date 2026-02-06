@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-
 <!-- Puste meta tagi - wypełni JavaScript -->
 <meta property="og:title" content="">
 <meta property="og:description" content="">
@@ -201,38 +200,14 @@ section {
 </section>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+// ===== KONFIGURACJA =====
+const API_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/get-elektryk-profile";
 
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const profil = document.getElementById("profil");
-const brak = document.getElementById("brak");
-const statusEl = document.getElementById("status");
-const gwiazdkiLine = document.getElementById("gwiazdkiLine");
-const opisEl = document.getElementById("opis");
-
-const statusMap = {
-  "✅": { text:"Status ELEKTRYKA - zweryfikowany 🙂", class:"status-ok" },
-  "⌛": { text:"Status ELEKTRYKA - w trakcie weryfikacji 😴", class:"status-wait" },
-  "❌": { text:"Status ELEKTRYKA - aktualnie brak weryfikacji 😕", class:"status-no" }
-};
-
-/* === BEZPIECZNE CZYSZCZENIE I RENDEROWANIE HTML === */
+// ===== FUNKCJE POMOCNICZE =====
 function cleanOpis(html) {
   if (!html) return "";
   
-  // Prostsza wersja - dozwolone tagi
-  const allowedSimple = ['<b>', '</b>', '<strong>', '</strong>', 
-                        '<i>', '</i>', '<em>', '</em>', 
-                        '<u>', '</u>', '<a>', '</a>',
-                        '<ul>', '</ul>', '<ol>', '</ol>', 
-                        '<li>', '</li>', '<br>', '<br/>', '<br />',
-                        '<p>', '</p>', '<div>', '</div>'];
-  
-  // Usuwamy potencjalnie niebezpieczne tagi, ale zachowujemy formatowanie
+  // Prosta sanitizacja HTML
   let cleaned = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
@@ -241,7 +216,7 @@ function cleanOpis(html) {
     .replace(/on\w+='[^']*'/gi, '')
     .replace(/javascript:/gi, '');
   
-  // Dodajemy target="_blank" do linków
+  // Dodaj target="_blank" do linków
   cleaned = cleaned.replace(/<a\s+(.*?)>/gi, (match, attrs) => {
     if (!attrs.includes('target=')) {
       return `<a ${attrs} target="_blank">`;
@@ -264,78 +239,117 @@ function maskPhone(phone) {
   return phone.slice(0,2) + "******" + phone.slice(-2);
 }
 
+const statusMap = {
+  "✅": { text:"Status ELEKTRYKA - zweryfikowany 🙂", class:"status-ok" },
+  "⌛": { text:"Status ELEKTRYKA - w trakcie weryfikacji 😴", class:"status-wait" },
+  "❌": { text:"Status ELEKTRYKA - aktualnie brak weryfikacji 😕", class:"status-no" }
+};
+
+// ===== GŁÓWNA FUNKCJA ŁADUJĄCA PROFIL =====
+async function loadProfile(id) {
+  try {
+    const response = await fetch(
+      `${API_URL}?id=${id}`,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    if (!response.ok) throw new Error('Błąd ładowania profilu');
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      const data = result.data;
+      renderProfile(data);
+    } else {
+      showNotFound();
+    }
+  } catch (error) {
+    console.error('Błąd:', error);
+    showNotFound();
+  }
+}
+
+// ===== FUNKCJA RENDERUJĄCA PROFIL =====
+function renderProfile(data) {
+  const profil = document.getElementById("profil");
+  const brak = document.getElementById("brak");
+  const statusEl = document.getElementById("status");
+  const gwiazdkiLine = document.getElementById("gwiazdkiLine");
+  const opisEl = document.getElementById("opis");
+  
+  const fullName = `${data.imie} ${data.nazwisko}`;
+  document.getElementById("heroName").textContent = fullName;
+  
+  // Wyświetlamy sformatowany HTML zamiast czystego tekstu
+  const zajmujeSieHTML = data.zajmujeSie || "";
+  opisEl.innerHTML = cleanOpis(zajmujeSieHTML) || 
+    "<p>Usługi elektryczne - instalacje, naprawy, pomiary, doradztwo techniczne.</p>";
+  
+  gwiazdkiLine.textContent = data.gwiazdki || "";
+
+  statusEl.className = "badge";
+  if (statusMap[data.status]) {
+    statusEl.textContent = statusMap[data.status].text;
+    statusEl.classList.add(statusMap[data.status].class);
+  }
+
+  const emailEl = document.getElementById("email");
+  const telEl = document.getElementById("telefon");
+
+  // Edge Function już zwraca zamaskowane dane jeśli show_contact=false
+  emailEl.textContent = data.email || "";
+  telEl.textContent = data.telefon || "";
+
+  profil.classList.remove("hidden");
+  brak.classList.add("hidden");
+  
+  // Aktualizujemy meta tagi
+  const cleanText = zajmujeSieHTML ? 
+    cleanOpis(zajmujeSieHTML).replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 
+    'Usługi elektryczne';
+  
+  document.title = `Profil elektryka: ${fullName} - OREP.pl`;
+  document.querySelector('meta[property="og:title"]').setAttribute('content', `Profil elektryka: ${fullName}`);
+  document.querySelector('meta[property="og:description"]').setAttribute('content', cleanText);
+  document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+}
+
+// ===== FUNKCJA POKAZUJĄCA BRAK PROFILU =====
+function showNotFound() {
+  const profil = document.getElementById("profil");
+  const brak = document.getElementById("brak");
+  const gwiazdkiLine = document.getElementById("gwiazdkiLine");
+  
+  profil.classList.add("hidden");
+  brak.classList.remove("hidden");
+  gwiazdkiLine.textContent = "";
+  
+  // Ustaw domyślne meta tagi
+  document.title = "Profil nie znaleziony - OREP.pl";
+  document.querySelector('meta[property="og:title"]').setAttribute('content', 'Profil nie znaleziony');
+  document.querySelector('meta[property="og:description"]').setAttribute('content', 'Nie znaleziono profilu elektryka');
+  document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+}
+
+// ===== INICJALIZACJA =====
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get("id");
 
 if (id) {
-  const loadProfile = async () => {
-    const { data, error } = await supabase
-      .from("tabela_elektrykow")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (error || !data) {
-      profil.classList.add("hidden");
-      brak.classList.remove("hidden");
-      gwiazdkiLine.textContent = "";
-      
-      // Ustaw domyślne meta tagi
-      document.title = "Profil nie znaleziony - OREP.pl";
-      document.querySelector('meta[property="og:title"]').setAttribute('content', 'Profil nie znaleziony');
-      document.querySelector('meta[property="og:description"]').setAttribute('content', 'Nie znaleziono profilu elektryka');
-      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
-    } else {
-      const fullName = `${data.imie} ${data.nazwisko}`;
-      document.getElementById("heroName").textContent = fullName;
-      
-      // Wyświetlamy sformatowany HTML zamiast czystego tekstu
-      const zajmujeSieHTML = data.zajmujeSie || "";
-      opisEl.innerHTML = cleanOpis(zajmujeSieHTML) || 
-        "<p>Usługi elektryczne - instalacje, naprawy, pomiary, doradztwo techniczne.</p>";
-      
-      gwiazdkiLine.textContent = data.gwiazdki || "";
-
-      statusEl.className = "badge";
-      if (statusMap[data.status]) {
-        statusEl.textContent = statusMap[data.status].text;
-        statusEl.classList.add(statusMap[data.status].class);
-      }
-
-      const emailEl = document.getElementById("email");
-      const telEl = document.getElementById("telefon");
-
-      if (data.show_contact === true) {
-        emailEl.textContent = data.email || "";
-        telEl.textContent = data.telefon || "";
-      } else {
-        emailEl.textContent = maskEmail(data.email);
-        telEl.textContent = maskPhone(data.telefon);
-      }
-
-      profil.classList.remove("hidden");
-      brak.classList.add("hidden");
-      
-      // Aktualizujemy meta tagi
-      const cleanText = zajmujeSieHTML ? 
-        cleanOpis(zajmujeSieHTML).replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 
-        'Usługi elektryczne';
-      
-      document.title = `Profil elektryka: ${fullName} - OREP.pl`;
-      document.querySelector('meta[property="og:title"]').setAttribute('content', `Profil elektryka: ${fullName}`);
-      document.querySelector('meta[property="og:description"]').setAttribute('content', cleanText);
-      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
-    }
-  };
-
-  loadProfile();
+  loadProfile(id);
 } else {
   // Jeśli brak ID w URL
   document.title = "Profil elektryka - OREP.pl";
   document.querySelector('meta[property="og:title"]').setAttribute('content', 'Ogólnopolski Rejestr Elektryków');
   document.querySelector('meta[property="og:description"]').setAttribute('content', 'Sprawdź profil elektryka w Ogólnopolskim Rejestrze Elektryków');
+  showNotFound();
 }
 
+// ===== OBSŁUGA PRZYCISKU UDOSTĘPNIANIA =====
 const shareBtn = document.getElementById("shareProfileBtn");
 
 shareBtn.addEventListener("click", async () => {
