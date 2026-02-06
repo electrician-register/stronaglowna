@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const togglePasswordBtn = document.getElementById('togglePassword');
   const log = document.getElementById('log');
 
-  // Sprawdź czy użytkownik jest już zalogowany
+  // Sprawdź czy użytkownik jest już zalogowany - TYLKO POKAŻ INFORMACJĘ, NIE PRZEKIEROWUJ
   checkAuth();
 
   // Toggle password visibility
@@ -330,12 +330,11 @@ document.addEventListener('DOMContentLoaded', () => {
           showLog("✅ Użytkownik już istnieje. Możesz się zalogować", "success");
         } else if (!data.user.email_confirmed_at) {
           showLog("✅ Sprawdź skrzynkę e-mail i potwierdź rejestrację", "success");
-          // Czekaj 3 sekundy i przekieruj
-          setTimeout(() => {
-            window.location.href = "/rejestracja_formularz";
-          }, 3000);
+          // NIE przekierowujemy automatycznie
         } else {
-          window.location.href = "/rejestracja_formularz";
+          showLog("✅ Rejestracja udana! Możesz się teraz zalogować", "success");
+          // Wyczyszczenie pól
+          passwordInput.value = '';
         }
       }
     } catch (error) {
@@ -345,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // LOGOWANIE PRZEZ EMAIL
+  // LOGOWANIE PRZEZ EMAIL - TYLKO PRZEZ PRZYCIŚNIĘCIE PRZYCISKU
   loginBtn.onclick = async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
@@ -374,9 +373,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data?.user) {
         showLog("✅ Zalogowano pomyślnie!", "success");
-        setTimeout(() => {
-          window.location.href = "/rejestracja_formularz";
-        }, 1000);
+        // Pokaż przycisk wyloguj i ukryj akcje
+        document.getElementById('authActions').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.remove('hidden');
+        showLog(`✅ Zalogowano jako: ${data.user.email}`, "success");
       }
     } catch (error) {
       showLog("❌ Wystąpił błąd podczas logowania", "error");
@@ -440,12 +440,12 @@ async function checkAuth() {
   const { data: { session } } = await sb.auth.getSession();
 
   if (session) {
-    // Użytkownik jest zalogowany
+    // Użytkownik jest już zalogowany - TYLKO POKAZUJEMY INFORMACJĘ
     document.getElementById('authActions').classList.add('hidden');
     document.getElementById('logoutBtn').classList.remove('hidden');
     document.getElementById('emailInput').value = session.user.email || '';
 
-    showLog(`✅ Zalogowano jako: ${session.user.email}`, "success");
+    showLog(`✅ Jesteś zalogowany jako: ${session.user.email}`, "success");
   }
 }
 
@@ -453,21 +453,8 @@ function closeOnly() {
   window.location.href = "/";
 }
 
-// Nasłuchuj zmian stanu autoryzacji
-sb.auth.onAuthStateChange((event, session) => {
-  console.log('Auth state changed:', event);
-
-  if (event === 'SIGNED_IN' && session) {
-    showLog(`✅ Witaj ${session.user.email}!`, "success");
-    setTimeout(() => {
-      window.location.href = "/rejestracja_formularz";
-    }, 1000);
-  } else if (event === 'SIGNED_OUT') {
-    document.getElementById('authActions').classList.remove('hidden');
-    document.getElementById('logoutBtn').classList.add('hidden');
-    showLog("👋 Do zobaczenia!", "info");
-  }
-});
+// USUNIĘTO: Automatyczne przekierowanie po zalogowaniu
+// Użytkownik musi sam przejść do formularza
 </script>
 
 </body>
