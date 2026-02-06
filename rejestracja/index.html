@@ -2,460 +2,270 @@
 <html lang="pl">
 <head>
 <meta name="robots" content="noindex, nofollow">
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Rejestracja – OREP</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rejestracja – OREP</title>
 
-<!-- Supabase JS CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  padding:20px;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      padding:20px;
+    }
 
-.wrapper{
-  position: relative;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  background:#ffffff;
-  padding:40px 30px;
-  border-radius:16px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.3);
-  border:3px solid #4f46e5;
-  max-width:480px;
-  width:100%;
-  text-align:center;
-  overflow:hidden;
-}
+    .wrapper{
+      position: relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      background:#e2e6ea;
+      padding:40px 20px;
+      border-radius:12px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.1);
+      border:20px solid white;
+      max-width:500px;
+      width:100%;
+      text-align:center;
+    }
 
-.close-x {
-  position:absolute;
-  top:15px;
-  right:20px;
-  font-size:24px;
-  font-weight:bold;
-  cursor:pointer;
-  color:#ef4444;
-  user-select:none;
-  transition: color 0.3s;
-  z-index:10;
-}
+    /* X w rogu */
+    .close-x {
+      position:absolute;
+      top:8px;
+      right:12px;
+      font-size:22px;
+      font-weight:bold;
+      cursor:pointer;
+      color: #ff0000;
+      user-select:none;
+    }
 
-.close-x:hover {
-  color:#000;
-}
+    .close-x:hover {
+      color:#000;
+    }
 
-.form-container{
-  width:100%;
-  background:#fff;
-  padding:30px;
-  border-radius:12px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.08);
-  border:2px solid #e5e7eb;
-}
+    .form-container{
+      width:100%;
+      background:#fff;
+      padding:25px 20px;
+      border-radius:8px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.05);
+      border:2px solid blue;
+    }
 
-h2 {
-  margin-bottom:25px;
-  color:#1f2937;
-  font-size:28px;
-  font-weight:700;
-}
+    h2 {
+      margin-bottom:20px;
+    }
 
-.input-group {
-  margin-bottom:20px;
-}
+    input[type="email"],
+    input[type="password"] {
+      width:100%;
+      padding:12px 15px;
+      margin-bottom:15px;
+      border:1px solid #ccc;
+      border-radius:6px;
+      font-size:16px;
+    }
 
-input[type="email"],
-input[type="password"] {
-  width:100%;
-  padding:14px 16px;
-  margin-bottom:15px;
-  border:2px solid #e5e7eb;
-  border-radius:8px;
-  font-size:16px;
-  transition: all 0.3s;
-  background:#f9fafb;
-}
+    button {
+      width:100%;
+      min-height:48px;
+      border:none;
+      border-radius:6px;
+      font-size:16px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      line-height:1;
+    }
 
-input[type="email"]:focus,
-input[type="password"]:focus {
-  outline:none;
-  border-color:#4f46e5;
-  background:#fff;
-  box-shadow:0 0 0 3px rgba(79, 70, 229, 0.1);
-}
+    .btn-submit {
+      background-color:#2b6cb0;
+      color:white;
+      font-weight:600;
+    }
 
-.password-wrapper {
-  position:relative;
-}
+    .btn-secondary {
+      background:#008000;
+      color:#fff;
+      border:1px solid #fff;
+    }
 
-.toggle-password {
-  position:absolute;
-  right:15px;
-  top:50%;
-  transform:translateY(-50%);
-  background:none;
-  border:none;
-  color:#6b7280;
-  cursor:pointer;
-  font-size:14px;
-  padding:5px;
-}
+    .btn-logout {
+      background:#ff0000;
+      color:#fff;
+      margin-top:10px;
+    }
 
-button {
-  width:100%;
-  min-height:52px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  font-weight:600;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition: all 0.3s;
-  gap:10px;
-}
+    .actions {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
 
-button:hover {
-  transform:translateY(-2px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
-}
+    .hidden {
+      display:none !important;
+    }
 
-.btn-submit {
-  background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color:white;
-}
-
-.btn-submit:hover {
-  background:linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
-}
-
-.btn-secondary {
-  background:#10b981;
-  color:#fff;
-}
-
-.btn-secondary:hover {
-  background:#0da271;
-}
-
-.btn-logout {
-  background:#ef4444;
-  color:#fff;
-  margin-top:15px;
-}
-
-.btn-logout:hover {
-  background:#dc2626;
-}
-
-.actions {
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin-top:20px;
-}
-
-.hidden {
-  display:none !important;
-}
-
-.log {
-  margin-top:20px;
-  padding:12px;
-  font-size:14px;
-  color:#374151;
-  word-break:break-word;
-  min-height:20px;
-  border-radius:8px;
-  background:#f3f4f6;
-}
-
-.log.success {
-  background:#d1fae5;
-  color:#065f46;
-  border-left:4px solid #10b981;
-}
-
-.log.error {
-  background:#fee2e2;
-  color:#991b1b;
-  border-left:4px solid #ef4444;
-}
-
-.log.info {
-  background:#dbeafe;
-  color:#1e40af;
-  border-left:4px solid #3b82f6;
-}
-
-/* Loading spinner */
-.spinner {
-  width:20px;
-  height:20px;
-  border:3px solid rgba(255,255,255,0.3);
-  border-radius:50%;
-  border-top-color:#fff;
-  animation:spin 1s linear infinite;
-  display:inline-block;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-</style>
+    .log {
+      margin-top:15px;
+      font-size:14px;
+      color:#333;
+      word-break:break-word;
+      min-height:20px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="wrapper">
+  <div class="wrapper">
 
-  <div class="close-x" onclick="closeOnly()">✕</div>
+    <!-- X – tylko zamyka, NIE wylogowuje -->
+    <div class="close-x" onclick="closeOnly()">✕</div>
 
-  <div class="form-container">
-    <h2>Zaloguj się do OREP</h2>
+    <div class="form-container">
+      <h2>Logowanie / Rejestracja</h2>
 
-    <div class="input-group">
       <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
-      <div class="password-wrapper">
-        <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
-        <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+      <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
+
+      <div class="actions" id="authActions">
+        <button class="btn-submit" id="signupBtn">Zarejestruj</button>
+        <button class="btn-secondary" id="loginBtn">Zaloguj</button>
       </div>
-    </div>
 
-    <div class="actions" id="authActions">
-      <button class="btn-submit" id="signupBtn">
-        <span id="signupText">Zarejestruj się</span>
-        <span id="signupSpinner" class="spinner hidden"></span>
+      <button id="logoutBtn" class="btn-logout hidden">
+        Wyloguj
       </button>
-      <button class="btn-secondary" id="loginBtn">
-        <span id="loginText">Zaloguj się</span>
-        <span id="loginSpinner" class="spinner hidden"></span>
-      </button>
+
+      <div class="log" id="log"></div>
     </div>
-
-    <button id="logoutBtn" class="btn-logout hidden">
-      Wyloguj się
-    </button>
-
-    <div class="log" id="log"></div>
   </div>
-</div>
 
-<script>
-const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+  <script>
+    const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Inicjalizacja Supabase
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-});
+    document.addEventListener('DOMContentLoaded', async () => {
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+      const signupBtn = document.getElementById('signupBtn');
+      const loginBtn = document.getElementById('loginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const authActions = document.getElementById('authActions');
+      const log = document.getElementById('log');
 
-document.addEventListener('DOMContentLoaded', () => {
-  const emailInput = document.getElementById('emailInput');
-  const passwordInput = document.getElementById('passwordInput');
-  const signupBtn = document.getElementById('signupBtn');
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const togglePasswordBtn = document.getElementById('togglePassword');
-  const log = document.getElementById('log');
+      // Sprawdzenie, czy użytkownik już jest zalogowany
+      try {
+        const { data } = await sb.auth.getUser();
+        if (data?.user) {
+          window.location.href = '/rejestracja_formularz';
+        }
+      } catch (err) {
+        console.error(err);
+      }
 
-  // Sprawdź czy użytkownik jest już zalogowany - TYLKO POKAŻ INFORMACJĘ, NIE PRZEKIEROWUJ
-  checkAuth();
+      // Rejestracja
+      signupBtn.onclick = async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-  // Toggle password visibility
-  togglePasswordBtn.addEventListener('click', () => {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    togglePasswordBtn.textContent = type === 'password' ? '👁️' : '🙈';
-  });
+        if (!email) {
+          log.innerText = "❌ Podaj poprawny adres e-mail";
+          return;
+        }
+        if (!password || password.length < 8) {
+          log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
+          return;
+        }
 
-  // REJESTRACJA PRZEZ EMAIL
-  signupBtn.onclick = async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    if (!validateEmail(email)) {
-      showLog("❌ Podaj poprawny adres e-mail", "error");
-      return;
-    }
-    if (!validatePassword(password)) {
-      showLog("❌ Hasło musi mieć minimum 8 znaków", "error");
-      return;
-    }
-
-    setLoading(signupBtn, true);
-    showLog("⏳ Trwa rejestracja...", "info");
-
-    try {
-      const { data, error } = await sb.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/rejestracja_formularz`,
-          data: {
-            signup_method: 'email'
+        log.innerText = "⏳ Trwa rejestracja...";
+        try {
+          const { data, error } = await sb.auth.signUp({ email, password });
+          if (error) {
+            if (error.message.includes("User already registered")) {
+              log.innerText = "❌ Użytkownik o tym adresie e-mail już istnieje";
+            } else if (error.message.includes("Invalid email")) {
+              log.innerText = "❌ Nieprawidłowy adres e-mail";
+            } else if (error.message.includes("Password should be at least")) {
+              log.innerText = "❌ Hasło musi mieć minimum 8 znaków";
+              
+            } else if (error.message.includes("rate limit")) {
+              log.innerText = "❌ Wysłano zbyt wiele prób logowania. Spróbuj ponownie za kilka minut...";
+            } else {
+              log.innerText = "❌ " + error.message;
+            }
+            return;
           }
+          if (data?.user) {
+            window.location.href = '/rejestracja_formularz';
+          } else {
+            log.innerText = "✅ Rejestracja zakończona. Sprawdź e-mail i potwierdź konto.";
+          }
+        } catch {
+          log.innerText = "❌ Wystąpił błąd podczas rejestracji";
         }
-      });
+      };
 
-      if (error) {
-        if (error.message.includes("User already registered")) {
-          showLog("❌ Użytkownik o tym adresie już istnieje", "error");
-        } else if (error.message.includes("rate limit")) {
-          showLog("❌ Zbyt wiele prób. Spróbuj za chwilę", "error");
-        } else {
-          showLog(`❌ ${error.message}`, "error");
+      // Logowanie
+      loginBtn.onclick = async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email) {
+          log.innerText = "❌ Podaj adres e-mail";
+          return;
         }
-        return;
-      }
-
-      if (data?.user) {
-        if (data.user.identities?.length === 0) {
-          showLog("✅ Użytkownik już istnieje. Możesz się zalogować", "success");
-        } else if (!data.user.email_confirmed_at) {
-          showLog("✅ Sprawdź skrzynkę e-mail i potwierdź rejestrację", "success");
-          // NIE przekierowujemy automatycznie
-        } else {
-          showLog("✅ Rejestracja udana! Możesz się teraz zalogować", "success");
-          // Wyczyszczenie pól
-          passwordInput.value = '';
+        if (!password) {
+          log.innerText = "❌ Podaj hasło";
+          return;
         }
-      }
-    } catch (error) {
-      showLog("❌ Wystąpił nieoczekiwany błąd", "error");
-    } finally {
-      setLoading(signupBtn, false);
-    }
-  };
 
-  // LOGOWANIE PRZEZ EMAIL - TYLKO PRZEZ PRZYCIŚNIĘCIE PRZYCISKU
-  loginBtn.onclick = async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    if (!email || !password) {
-      showLog("❌ Podaj e-mail i hasło", "error");
-      return;
-    }
-
-    setLoading(loginBtn, true);
-    showLog("⏳ Trwa logowanie...", "info");
-
-    try {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          showLog("❌ Nieprawidłowy e-mail lub hasło", "error");
-        } else if (error.message.includes("Email not confirmed")) {
-          showLog("❌ Potwierdź swój adres e-mail", "error");
-        } else {
-          showLog(`❌ ${error.message}`, "error");
+        log.innerText = "⏳ Trwa logowanie...";
+        try {
+          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) {
+            if (error.message.includes("Invalid login credentials")) {
+              log.innerText = "❌ Nieprawidłowy e-mail lub hasło";
+            } else if (error.message.includes("Email not confirmed")) {
+              log.innerText = "❌ Konto nie zostało jeszcze potwierdzone e-mailem";
+            } else {
+              log.innerText = "❌ " + error.message;
+            }
+            return;
+          }
+          if (data?.user) {
+            window.location.href = '/rejestracja_formularz';
+          }
+        } catch {
+          log.innerText = "❌ Wystąpił błąd podczas logowania";
         }
-        return;
-      }
+      };
 
-      if (data?.user) {
-        showLog("✅ Zalogowano pomyślnie!", "success");
-        // Pokaż przycisk wyloguj i ukryj akcje
-        document.getElementById('authActions').classList.add('hidden');
-        document.getElementById('logoutBtn').classList.remove('hidden');
-        showLog(`✅ Zalogowano jako: ${data.user.email}`, "success");
-      }
-    } catch (error) {
-      showLog("❌ Wystąpił błąd podczas logowania", "error");
-    } finally {
-      setLoading(loginBtn, false);
-    }
-  };
+      // Wylogowanie
+      logoutBtn.onclick = async () => {
+        await sb.auth.signOut();
+        window.location.href = '/';
+      };
+    });
 
-  // WYLOGOWANIE
-  logoutBtn.onclick = async () => {
-    await sb.auth.signOut();
-    showLog("✅ Wylogowano pomyślnie", "success");
-    setTimeout(() => {
+    // Tylko zamknięcie strony
+    function closeOnly() {
       window.location.href = "/";
-    }, 1500);
-  };
-});
-
-// Funkcje pomocnicze
-function validateEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
-}
-
-function validatePassword(password) {
-  return password.length >= 8;
-}
-
-function showLog(message, type = "info") {
-  const log = document.getElementById('log');
-  log.innerHTML = message;
-  log.className = `log ${type}`;
-
-  // Auto-hide success messages after 5 seconds
-  if (type === 'success') {
-    setTimeout(() => {
-      if (log.innerHTML === message) {
-        log.innerHTML = '';
-        log.className = 'log';
-      }
-    }, 5000);
-  }
-}
-
-function setLoading(button, isLoading) {
-  const textSpan = button.querySelector('span:not(.spinner)');
-  const spinner = button.querySelector('.spinner');
-
-  if (isLoading) {
-    textSpan.style.opacity = '0.5';
-    spinner.classList.remove('hidden');
-    button.disabled = true;
-  } else {
-    textSpan.style.opacity = '1';
-    spinner.classList.add('hidden');
-    button.disabled = false;
-  }
-}
-
-async function checkAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-
-  if (session) {
-    // Użytkownik jest już zalogowany - TYLKO POKAZUJEMY INFORMACJĘ
-    document.getElementById('authActions').classList.add('hidden');
-    document.getElementById('logoutBtn').classList.remove('hidden');
-    document.getElementById('emailInput').value = session.user.email || '';
-
-    showLog(`✅ Jesteś zalogowany jako: ${session.user.email}`, "success");
-  }
-}
-
-function closeOnly() {
-  window.location.href = "/";
-}
-
-// USUNIĘTO: Automatyczne przekierowanie po zalogowaniu
-// Użytkownik musi sam przejść do formularza
-</script>
-
+    }
+  </script>
 </body>
 </html>
