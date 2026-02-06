@@ -1,538 +1,474 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <link rel="icon" href="/favicon.png">
-  <meta name="robots" content="noindex, nofollow">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rejestracja – Ogólnopolski Rejestr Elektryków</title>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rejestracja – OREP</title>
 
-  <!-- Quill Editor CSS -->
-  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<!-- Supabase JS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      padding: 10px;
-      margin: 0;
-    }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px;
+}
 
-    .form-wrapper {
-      width: 100%;
-      max-width: 600px;
-      padding: 0 10px;
-      box-sizing: border-box;
-    }
+.wrapper{
+  position: relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  background:#ffffff;
+  padding:40px 30px;
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  border:3px solid #4f46e5;
+  max-width:480px;
+  width:100%;
+  text-align:center;
+  overflow:hidden;
+}
 
-    form {
-      position: relative;
-      background-color: #fff;
-      padding: 20px 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
+.close-x {
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-size:24px;
+  font-weight:bold;
+  cursor:pointer;
+  color:#ef4444;
+  user-select:none;
+  transition: color 0.3s;
+  z-index:10;
+}
 
-    h2 { text-align: center; margin-bottom: 20px; font-size: 22px; }
+.close-x:hover {
+  color:#000;
+}
 
-    label {
-      margin-top: 15px;
-      display: block;
-      font-weight: 600;
-      font-size: 14px;
-    }
+.form-container{
+  width:100%;
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.08);
+  border:2px solid #e5e7eb;
+}
 
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box;
-      background-color: #fff;
-      color: #000;
-    }
+h2 {
+  margin-bottom:25px;
+  color:#1f2937;
+  font-size:28px;
+  font-weight:700;
+}
 
-    input[readonly] { background-color: #f4f6f8; cursor: not-allowed; }
-    input[type="tel"] { ime-mode: disabled; }
+.input-group {
+  margin-bottom:20px;
+}
 
-    select:disabled { background-color: #f4f6f8; color: #555; cursor: not-allowed; }
-    select:not(:disabled) { background-color: #fff; color: #000; }
+input[type="email"],
+input[type="password"] {
+  width:100%;
+  padding:14px 16px;
+  margin-bottom:15px;
+  border:2px solid #e5e7eb;
+  border-radius:8px;
+  font-size:16px;
+  transition: all 0.3s;
+  background:#f9fafb;
+}
 
-    select { height: 42px; }
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline:none;
+  border-color:#4f46e5;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(79, 70, 229, 0.1);
+}
 
-    textarea { min-height: 80px; }
+.password-wrapper {
+  position:relative;
+}
 
-    button[type="submit"] {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background: #4CAF50;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button[type="submit"]:hover { background: #45a049; }
+.toggle-password {
+  position:absolute;
+  right:15px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  color:#6b7280;
+  cursor:pointer;
+  font-size:14px;
+  padding:5px;
+}
 
-    #close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #666;
-      line-height: 1;
-    }
-    #close-btn:hover { color: #000; }
+button {
+  width:100%;
+  min-height:52px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: all 0.3s;
+  gap:10px;
+}
 
-    #result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
-    .error { background: #f44336; color: #fff; }
-    #loading { display: none; text-align: center; margin-top: 10px; font-weight: bold; }
+button:hover {
+  transform:translateY(-2px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
 
-    .rodo-label {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      margin-top: 15px;
-      font-weight: normal;
-      font-size: 14px;
-      gap: 10px;
-    }
-    .rodo-label input[type="checkbox"] { margin-top: 2px; accent-color: orange; }
+.btn-submit {
+  background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color:white;
+}
 
-    /* Quill Editor styling */
-    #zajmujeSie-editor-container {
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .ql-toolbar {
-      border-top-left-radius: 6px;
-      border-top-right-radius: 6px;
-      background-color: #f9f9f9;
-      border-bottom: 1px solid #ccc;
-    }
-    .ql-container {
-      border-bottom-left-radius: 6px;
-      border-bottom-right-radius: 6px;
-      min-height: 150px;
-      font-size: 16px;
-    }
-    .ql-editor {
-      min-height: 150px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-  </style>
+.btn-submit:hover {
+  background:linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+}
+
+.btn-secondary {
+  background:#10b981;
+  color:#fff;
+}
+
+.btn-secondary:hover {
+  background:#0da271;
+}
+
+.btn-logout {
+  background:#ef4444;
+  color:#fff;
+  margin-top:15px;
+}
+
+.btn-logout:hover {
+  background:#dc2626;
+}
+
+.actions {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:20px;
+}
+
+.hidden {
+  display:none !important;
+}
+
+.log {
+  margin-top:20px;
+  padding:12px;
+  font-size:14px;
+  color:#374151;
+  word-break:break-word;
+  min-height:20px;
+  border-radius:8px;
+  background:#f3f4f6;
+}
+
+.log.success {
+  background:#d1fae5;
+  color:#065f46;
+  border-left:4px solid #10b981;
+}
+
+.log.error {
+  background:#fee2e2;
+  color:#991b1b;
+  border-left:4px solid #ef4444;
+}
+
+.log.info {
+  background:#dbeafe;
+  color:#1e40af;
+  border-left:4px solid #3b82f6;
+}
+
+/* Loading spinner */
+.spinner {
+  width:20px;
+  height:20px;
+  border:3px solid rgba(255,255,255,0.3);
+  border-radius:50%;
+  border-top-color:#fff;
+  animation:spin 1s linear infinite;
+  display:inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
 </head>
 
 <body>
-<div class="form-wrapper">
-<form id="register-form">
 
-  <button type="button" id="close-btn" aria-label="Zamknij formularz">❌</button>
+<div class="wrapper">
 
-  <h2 id="form-title">Rejestracja</h2>
+  <div class="close-x" onclick="closeOnly()">✕</div>
 
-  <label>Imię</label>
-  <input id="imie" required oninput="this.value=this.value.toUpperCase()">
+  <div class="form-container">
+    <h2>Zaloguj się do OREP</h2>
 
-  <label>Nazwisko</label>
-  <input id="nazwisko" required oninput="this.value=this.value.toUpperCase()">
+    <div class="input-group">
+      <input type="email" id="emailInput" placeholder="Twój adres e-mail" />
+      <div class="password-wrapper">
+        <input type="password" id="passwordInput" placeholder="Hasło (min. 8 znaków)" />
+        <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+      </div>
+    </div>
 
-  <label for="wojewodztwo">Województwo</label>
-  <select id="wojewodztwo" required>
-    <option value="">— wybierz województwo —</option>
-  </select>
+    <div class="actions" id="authActions">
+      <button class="btn-submit" id="signupBtn">
+        <span id="signupText">Zarejestruj się</span>
+        <span id="signupSpinner" class="spinner hidden"></span>
+      </button>
+      <button class="btn-secondary" id="loginBtn">
+        <span id="loginText">Zaloguj się</span>
+        <span id="loginSpinner" class="spinner hidden"></span>
+      </button>
+    </div>
 
-  <label for="miasto">Miasto</label>
-  <select id="miasto" required disabled>
-    <option value="">— wybierz miasto —</option>
-  </select>
+    <button id="logoutBtn" class="btn-logout hidden">
+      Wyloguj się
+    </button>
 
-<label>Nr upr. EKSPLOATACJA</label>
-<textarea id="nrE"></textarea>
-
-<label id="nrEValidLabel" style="display:none;">
-  Data ważności – EKSPLOATACJA
-</label>
-<input type="date" id="nrEValidTo" style="display:none;">
-
-
-<label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
-<textarea id="nrEPomiary"></textarea>
-
-<label id="nrEPomiaryValidLabel" style="display:none;">
-  Data ważności – EKSPLOATACJA Z POMIARAMI
-</label>
-<input type="date" id="nrEPomiaryValidTo" style="display:none;">
-
-
-<label>Nr upr. DOZÓR</label>
-<textarea id="nrD"></textarea>
-
-<label id="nrDValidLabel" style="display:none;">
-  Data ważności – DOZÓR
-</label>
-<input type="date" id="nrDValidTo" style="display:none;">
-
-
-  <label>Email</label>
-  <input id="email" readonly>
-
-  <label>Telefon</label>
-  <input id="telefon" type="tel">
-
-  <label>Zajmuje się</label>
-  <!-- Quill Editor container -->
-  <div id="zajmujeSie-editor-container">
-    <!-- Toolbar will be inserted here by Quill -->
+    <div class="log" id="log"></div>
   </div>
-  <!-- Hidden input to store HTML content -->
-  <input type="hidden" id="zajmujeSie">
-
-  <label>Załącz skan uprawnień</label>
-  <input type="file" id="plik" multiple>
-
-  <label class="rodo-label">
-    <input type="checkbox" id="rodo" required>
-    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu publikacji w Ogólnopolskim Rejestrze Elektryków zgodnie z Regulaminem Platformy. Oświadczam, że dane są prawdziwe i ponoszę za nie odpowiedzialność.
-  </label>
-
-  <button type="submit" id="submit-btn">Zarejestruj</button>
-
-  <div id="loading">Zapisywanie danych...</div>
-  <div id="result"></div>
-</form>
 </div>
 
-<!-- Quill Editor JS -->
-<script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+<script>
+const SUPABASE_URL = "https://tfbqqduxtsacvwfigsvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8";
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-const supabase = createClient(
-  'https://tfbqqduxtsacvwfigsvt.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-)
-
-let currentUser = null
-const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD','telefon','zajmujeSie']
-
-// ========== QUILL EDITOR INITIALIZATION ==========
-let quill = null;
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize Quill editor
-  quill = new Quill('#zajmujeSie-editor-container', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        ['bold', 'italic', 'underline'],
-        ['link'],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        ['clean']
-      ]
-    },
-    placeholder: 'Opisz czym się zajmujesz...',
-  });
-
-  // Update hidden input with HTML content on change
-  quill.on('text-change', () => {
-    const content = quill.root.innerHTML;
-    document.getElementById('zajmujeSie').value = content;
-  });
+// Inicjalizacja Supabase
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
 });
 
-function bindValidity(inputId, labelId, dateId) {
-  const input = document.getElementById(inputId)
-  const label = document.getElementById(labelId)
-  const date = document.getElementById(dateId)
+document.addEventListener('DOMContentLoaded', () => {
+  const emailInput = document.getElementById('emailInput');
+  const passwordInput = document.getElementById('passwordInput');
+  const signupBtn = document.getElementById('signupBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const togglePasswordBtn = document.getElementById('togglePassword');
+  const log = document.getElementById('log');
 
-  date.min = new Date().toISOString().split('T')[0]
+  // Sprawdź czy użytkownik jest już zalogowany
+  checkAuth();
 
-  input.addEventListener('input', () => {
-    if (input.value.trim() !== '') {
-      label.style.display = 'block'
-      date.style.display = 'block'
-      date.required = true
-    } else {
-      label.style.display = 'none'
-      date.style.display = 'none'
-      date.required = false
-      date.value = ''
-    }
-  })
-}
-bindValidity('nrE', 'nrEValidLabel', 'nrEValidTo')
-bindValidity('nrEPomiary', 'nrEPomiaryValidLabel', 'nrEPomiaryValidTo')
-bindValidity('nrD', 'nrDValidLabel', 'nrDValidTo')
-
-async function loadWojewodztwa(selectedWoj = null) {
-  const { data, error } = await supabase.from('wojewodztwa').select('id, nazwa').order('nazwa')
-  if (error) return
-  const wojSelect = document.getElementById('wojewodztwo')
-  wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
-  data.forEach(w => {
-    const o = document.createElement('option')
-    o.value = w.id
-    o.textContent = w.nazwa
-    wojSelect.appendChild(o)
-  })
-  if (selectedWoj) {
-    wojSelect.value = selectedWoj
-    wojSelect.dispatchEvent(new Event('change'))
-  }
-}
-
-document.getElementById('wojewodztwo').addEventListener('change', async function() {
-  const wojId = this.value
-  const miastoSelect = document.getElementById('miasto')
-  if (!wojId) {
-    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-    miastoSelect.disabled = true
-    return
-  }
-  const { data, error } = await supabase.from('miasta').select('id,nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
-  if (error) return
-  miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-  data.forEach(m => {
-    const o = document.createElement('option')
-    o.value = m.id
-    o.textContent = m.nazwa
-    miastoSelect.appendChild(o)
-  })
-  miastoSelect.disabled = false
-})
-
-document.getElementById('close-btn').addEventListener('click', () => {
-  window.location.href = 'https://orep.pl/'
-})
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return window.location.href = '/logowanie'
-
-  currentUser = user
-  email.value = user.email
-
-  const { data } = await supabase.from('tabela_elektrykow')
-    .select('*')
-    .eq('email', user.email)
-    .single()
-
-  if (data) {
-    document.getElementById('form-title').textContent = 'Aktualizacja danych'
-    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
-    fields.forEach(f => {
-      if (data[f] && document.getElementById(f)) {
-        document.getElementById(f).value = data[f]
-      }
-    })
-
-    // Load Quill editor content if exists
-    if (data.zajmujeSie && quill) {
-      quill.root.innerHTML = data.zajmujeSie;
-      document.getElementById('zajmujeSie').value = data.zajmujeSie;
-    }
-
-    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
-    if (data.miasto) document.getElementById('miasto').value = data.miasto
-
-    // daty ważności
-    if (data.nrE) {
-      nrEValidLabel.style.display = 'block'
-      nrEValidTo.style.display = 'block'
-      nrEValidTo.value = data.nrE_valid_to || ''
-    }
-    if (data.nrEPomiary) {
-      nrEPomiaryValidLabel.style.display = 'block'
-      nrEPomiaryValidTo.style.display = 'block'
-      nrEPomiaryValidTo.value = data.nrEPomiary_valid_to || ''
-    }
-    if (data.nrD) {
-      nrDValidLabel.style.display = 'block'
-      nrDValidTo.style.display = 'block'
-      nrDValidTo.value = data.nrD_valid_to || ''
-    }
-
-  } else {
-    loadWojewodztwa()
-  }
-})
-
-document.getElementById('register-form').addEventListener('submit', async e => {
-  e.preventDefault()
-  if (!currentUser) {
-    result.textContent = 'Musisz być zalogowany'
-    result.className = 'error'
-    return
-  }
-
-  loading.style.display = 'block'
-  result.textContent = ''
-  result.className = ''
-
-  if (nrE.value && nrEPomiary.value) {
-    loading.style.display='none'
-    result.textContent='Wybierz tylko jeden rodzaj eksploatacji'
-    result.className='error'
-    return
-  }
-
-  if (nrD.value && !nrEPomiary.value) {
-    loading.style.display='none'
-    result.textContent='Do DOZORU wymagane są pomiary'
-    result.className='error'
-    return
-  }
-
-  const allowedTypes = ['application/pdf','image/jpeg','image/png']
-  const maxSize = 5*1024*1024
-
-  let plikUrls=[]
-  for (let i=0;i<plik.files.length;i++) {
-    const file = plik.files[i]
-    if (!allowedTypes.includes(file.type) || file.size>maxSize) {
-      loading.style.display='none'
-      result.textContent='Plik nie może przekraczać 5MB. Obsługiwane pliki to: PDF, JPG/JPEG i PNG'
-      result.className='error'
-      return
-    }
-    const path = `${currentUser.id}/${Date.now()}_${file.name}`
-    const { error } = await supabase.storage.from('uprawnienia').upload(path,file,{upsert:true})
-    if (error) {
-      loading.style.display='none'
-      result.textContent=error.message
-      result.className='error'
-      return
-    }
-    const { data } = await supabase.storage.from('uprawnienia').createSignedUrl(path,3600)
-    plikUrls.push(data.signedUrl)
-  }
-
-  const payload = { email: currentUser.email }
-  payload.nre_valid_to = nrEValidTo.value || null
-  payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
-  payload.nrd_valid_to = nrDValidTo.value || null
-
-  // Get values from all fields including Quill editor
-  fields.forEach(f => {
-    const element = document.getElementById(f);
-    if (element) {
-      payload[f] = element.value.trim();
-    }
+  // Toggle password visibility
+  togglePasswordBtn.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    togglePasswordBtn.textContent = type === 'password' ? '👁️' : '🙈';
   });
 
-  if (plikUrls.length) payload.plik = plikUrls.join(',')
+  // REJESTRACJA PRZEZ EMAIL
+  signupBtn.onclick = async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-  const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
-  let error
-  if (existing) {
-    const { error: e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id)
-    error = e2
-  } else {
-    const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload)
-    error = e3
-  }
-
-  loading.style.display='none'
-  if (error) {
-    result.textContent = error.message
-    result.className = 'error'
-    return
-  }
-
-  try {
-    const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-      },
-      body: JSON.stringify({
-        email: currentUser.email,
-        name: document.getElementById('imie').value,
-        nazwisko: document.getElementById('nazwisko').value,
-        telefon: document.getElementById('telefon').value,
-        email: document.getElementById('email').value,
-        nrE: document.getElementById('nrE').value,
-        nrEPomiary: document.getElementById('nrEPomiary').value,
-        nrD: document.getElementById('nrD').value
-      })
-    })
-    if (!res.ok) {
-      const err = await res.text()
-      throw new Error(err || 'Błąd wysyłki emaila')
+    if (!validateEmail(email)) {
+      showLog("❌ Podaj poprawny adres e-mail", "error");
+      return;
     }
-  } catch(err) {
-    result.textContent = 'Nie udało się wysłać emaila powitalnego: ' + err.message
-    result.className = 'error'
-    return
-  }
+    if (!validatePassword(password)) {
+      showLog("❌ Hasło musi mieć minimum 8 znaków", "error");
+      return;
+    }
 
-  window.location.href = 'https://orep.pl/logowanie'
-})
+    setLoading(signupBtn, true);
+    showLog("⏳ Trwa rejestracja...", "info");
 
-/* === BLOKADA EMAILA I TELEFONU W QUILL EDITOR === */
-
-// Listen for input in Quill editor to block emails and phone numbers
-if (quill) {
-  quill.on('text-change', () => {
-    const text = quill.getText(); // Get plain text
-
-    // Count digits
-    const digitCount = (text.match(/\d/g) || []).length;
-    if (digitCount > 2) {
-      alert('W tym polu nie można wpisać więcej niż 2 cyfr.');
-
-      // Remove excess digits
-      let newText = text;
-      let digitsRemoved = 0;
-      newText = newText.replace(/\d/g, (match) => {
-        if (digitsRemoved < 2) {
-          digitsRemoved++;
-          return match;
+    try {
+      const { data, error } = await sb.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/rejestracja_formularz`,
+          data: {
+            signup_method: 'email'
+          }
         }
-        return '';
       });
 
-      // Update editor with cleaned text
-      const currentSelection = quill.getSelection();
-      quill.setText(newText);
-      if (currentSelection) {
-        quill.setSelection(currentSelection);
+      if (error) {
+        if (error.message.includes("User already registered")) {
+          showLog("❌ Użytkownik o tym adresie już istnieje", "error");
+        } else if (error.message.includes("rate limit")) {
+          showLog("❌ Zbyt wiele prób. Spróbuj za chwilę", "error");
+        } else {
+          showLog(`❌ ${error.message}`, "error");
+        }
+        return;
       }
+
+      if (data?.user) {
+        if (data.user.identities?.length === 0) {
+          showLog("✅ Użytkownik już istnieje. Możesz się zalogować", "success");
+        } else if (!data.user.email_confirmed_at) {
+          showLog("✅ Sprawdź skrzynkę e-mail i potwierdź rejestrację", "success");
+          // Czekaj 3 sekundy i przekieruj
+          setTimeout(() => {
+            window.location.href = "/rejestracja_formularz";
+          }, 3000);
+        } else {
+          window.location.href = "/rejestracja_formularz";
+        }
+      }
+    } catch (error) {
+      showLog("❌ Wystąpił nieoczekiwany błąd", "error");
+    } finally {
+      setLoading(signupBtn, false);
+    }
+  };
+
+  // LOGOWANIE PRZEZ EMAIL
+  loginBtn.onclick = async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      showLog("❌ Podaj e-mail i hasło", "error");
+      return;
     }
 
-    // Check for email patterns and remove them
-    const html = quill.root.innerHTML;
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
-    const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
+    setLoading(loginBtn, true);
+    showLog("⏳ Trwa logowanie...", "info");
 
-    let cleanedHtml = html.replace(emailRegex, '');
-    cleanedHtml = cleanedHtml.replace(phoneRegex, '');
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
-    if (cleanedHtml !== html) {
-      const selection = quill.getSelection();
-      quill.root.innerHTML = cleanedHtml;
-      if (selection) {
-        quill.setSelection(selection);
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          showLog("❌ Nieprawidłowy e-mail lub hasło", "error");
+        } else if (error.message.includes("Email not confirmed")) {
+          showLog("❌ Potwierdź swój adres e-mail", "error");
+        } else {
+          showLog(`❌ ${error.message}`, "error");
+        }
+        return;
       }
+
+      if (data?.user) {
+        showLog("✅ Zalogowano pomyślnie!", "success");
+        setTimeout(() => {
+          window.location.href = "/rejestracja_formularz";
+        }, 1000);
+      }
+    } catch (error) {
+      showLog("❌ Wystąpił błąd podczas logowania", "error");
+    } finally {
+      setLoading(loginBtn, false);
     }
-  });
+  };
+
+  // WYLOGOWANIE
+  logoutBtn.onclick = async () => {
+    await sb.auth.signOut();
+    showLog("✅ Wylogowano pomyślnie", "success");
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
+  };
+});
+
+// Funkcje pomocnicze
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
 }
+
+function validatePassword(password) {
+  return password.length >= 8;
+}
+
+function showLog(message, type = "info") {
+  const log = document.getElementById('log');
+  log.innerHTML = message;
+  log.className = `log ${type}`;
+
+  // Auto-hide success messages after 5 seconds
+  if (type === 'success') {
+    setTimeout(() => {
+      if (log.innerHTML === message) {
+        log.innerHTML = '';
+        log.className = 'log';
+      }
+    }, 5000);
+  }
+}
+
+function setLoading(button, isLoading) {
+  const textSpan = button.querySelector('span:not(.spinner)');
+  const spinner = button.querySelector('.spinner');
+
+  if (isLoading) {
+    textSpan.style.opacity = '0.5';
+    spinner.classList.remove('hidden');
+    button.disabled = true;
+  } else {
+    textSpan.style.opacity = '1';
+    spinner.classList.add('hidden');
+    button.disabled = false;
+  }
+}
+
+async function checkAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+
+  if (session) {
+    // Użytkownik jest zalogowany
+    document.getElementById('authActions').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
+    document.getElementById('emailInput').value = session.user.email || '';
+
+    showLog(`✅ Zalogowano jako: ${session.user.email}`, "success");
+  }
+}
+
+function closeOnly() {
+  window.location.href = "/";
+}
+
+// Nasłuchuj zmian stanu autoryzacji
+sb.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event);
+
+  if (event === 'SIGNED_IN' && session) {
+    showLog(`✅ Witaj ${session.user.email}!`, "success");
+    setTimeout(() => {
+      window.location.href = "/rejestracja_formularz";
+    }, 1000);
+  } else if (event === 'SIGNED_OUT') {
+    document.getElementById('authActions').classList.remove('hidden');
+    document.getElementById('logoutBtn').classList.add('hidden');
+    showLog("👋 Do zobaczenia!", "info");
+  }
+});
 </script>
+
 </body>
 </html>
