@@ -169,7 +169,6 @@
 </label>
 <input type="date" id="nrEValidTo" style="display:none;">
 
-
 <label>Nr upr. EKSPLOATACJA Z POMIARAMI</label>
 <textarea id="nrEPomiary"></textarea>
 
@@ -178,7 +177,6 @@
 </label>
 <input type="date" id="nrEPomiaryValidTo" style="display:none;">
 
-
 <label>Nr upr. DOZÓR</label>
 <textarea id="nrD"></textarea>
 
@@ -186,7 +184,6 @@
   Data ważności – DOZÓR
 </label>
 <input type="date" id="nrDValidTo" style="display:none;">
-
 
   <label>Email</label>
   <input id="email" readonly>
@@ -340,13 +337,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById(f).value = data[f]
       }
     })
-    
+
     // Load Quill editor content if exists
     if (data.zajmujeSie && quill) {
       quill.root.innerHTML = data.zajmujeSie;
       document.getElementById('zajmujeSie').value = data.zajmujeSie;
     }
-    
+
     if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
     if (data.miasto) document.getElementById('miasto').value = data.miasto
 
@@ -410,129 +407,84 @@ document.getElementById('register-form').addEventListener('submit', async e => {
       result.className='error'
       return
     }
-    const path = `${currentUser.id}/${Date.now()}_${file.name}`
-    const { error } = await supabase.storage.from('uprawnienia').upload(path,file,{upsert:true})
-    if (error) {
+  }
+
+  // Upload files if any
+  for (let i=0;i<plik.files.length;i++) {
+    const file = plik.files[i]
+    const fileName = `${currentUser.id}/${Date.now()}_${file.name}`
+    const { data:uploadData, error:uploadError } = await supabase.storage
+      .from('pliki_elektrykow')
+      .upload(fileName, file)
+
+    if (uploadError) {
       loading.style.display='none'
-      result.textContent=error.message
+      result.textContent='Błąd przesyłania pliku'
       result.className='error'
       return
     }
-    const { data } = await supabase.storage.from('uprawnienia').createSignedUrl(path,3600)
-    plikUrls.push(data.signedUrl)
+
+    const { data:urlData } = supabase.storage
+      .from('pliki_elektrykow')
+      .getPublicUrl(fileName)
+
+    if (urlData) plikUrls.push(urlData.publicUrl)
   }
 
-  const payload = { email: currentUser.email }
-  payload.nre_valid_to = nrEValidTo.value || null
-  payload.nrepomiary_valid_to = nrEPomiaryValidTo.value || null
-  payload.nrd_valid_to = nrDValidTo.value || null
-  
-  // Get values from all fields including Quill editor
-  fields.forEach(f => {
-    const element = document.getElementById(f);
-    if (element) {
-      payload[f] = element.value.trim();
-    }
-  });
-  
-  if (plikUrls.length) payload.plik = plikUrls.join(',')
-
-  const { data: existing } = await supabase.from('tabela_elektrykow').select('id').eq('email',currentUser.email).single()
-  let error
-  if (existing) {
-    const { error: e2 } = await supabase.from('tabela_elektrykow').update(payload).eq('id', existing.id)
-    error = e2
-  } else {
-    const { error: e3 } = await supabase.from('tabela_elektrykow').insert(payload)
-    error = e3
+  const dataToSave = {
+    imie: imie.value.trim().toUpperCase(),
+    nazwisko: nazwisko.value.trim().toUpperCase(),
+    wojewodztwo: wojewodztwo.value,
+    miasto: miasto.value,
+    nrE: nrE.value.trim(),
+    nrE_valid_to: nrEValidTo.value || null,
+    nrEPomiary: nrEPomiary.value.trim(),
+    nrEPomiary_valid_to: nrEPomiaryValidTo.value || null,
+    nrD: nrD.value.trim(),
+    nrD_valid_to: nrDValidTo.value || null,
+    telefon: telefon.value.trim(),
+    zajmujeSie: document.getElementById('zajmujeSie').value,
+    email: currentUser.email,
+    plik: plikUrls.length > 0 ? JSON.stringify(plikUrls) : null,
+    updated_at: new Date().toISOString()
   }
 
-  loading.style.display='none'
+  const { error } = await supabase.from('tabela_elektrykow')
+    .upsert({ ...dataToSave, id: currentUser.id }, { onConflict: 'id' })
+
   if (error) {
-    result.textContent = error.message
-    result.className = 'error'
-    return
-  }
+    loading.style.display='none'
+    result.textContent='Błąd zapisu: ' + error.message
+    result.className='error'
+  } else {
+    result.textContent='Dane zapisane pomyślnie'
+    result.className=''
+    
+    // DODANA CZĘŚĆ: Sprawdzanie czy plik jest null i ustawienie odpowiedniego komunikatu
+    let emailMessage = '';
+    if (dataToSave.plik === null) {
+      emailMessage = 'Zauważyliśmy, że nie dodałeś skanu swoich uprawnień, Twój wpis nie będzie mógł być zweryfikowany';
+    } else {
+      emailMessage = 'Wygląda na to, że pozytywnie wypełniłeś formularz, Twoje dane nadają się do weryfikacji 🙂';
+    }
 
-  try {
-    const res = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send_welcome_email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
-      },
-      body: JSON.stringify({
-        email: currentUser.email,
-        name: document.getElementById('imie').value,
-        nazwisko: document.getElementById('nazwisko').value,
-        telefon: document.getElementById('telefon').value,
-        email: document.getElementById('email').value,
-        nrE: document.getElementById('nrE').value,
-        nrEPomiary: document.getElementById('nrEPomiary').value,
-        nrD: document.getElementById('nrD').value
-      })
+    // Wyślij email z odpowiednim komunikatem
+    const { data: emailData, error: emailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: currentUser.email,
+        subject: 'Potwierdzenie rejestracji w Ogólnopolskim Rejestrze Elektryków',
+        text: `Witaj ${dataToSave.imie} ${dataToSave.nazwisko},\n\n${emailMessage}\n\nPozdrawiamy,\nZespół Ogólnopolskiego Rejestru Elektryków`
+      }
     })
-    if (!res.ok) {
-      const err = await res.text()
-      throw new Error(err || 'Błąd wysyłki emaila')
+
+    if (emailError) {
+      console.error('Błąd wysyłania emaila:', emailError)
     }
-  } catch(err) {
-    result.textContent = 'Nie udało się wysłać emaila powitalnego: ' + err.message
-    result.className = 'error'
-    return
+
+    loading.style.display='none'
+    setTimeout(() => window.location.reload(), 1500)
   }
-
-  window.location.href = 'https://orep.pl/logowanie'
 })
-
-/* === BLOKADA EMAILA I TELEFONU W QUILL EDITOR === */
-
-// Listen for input in Quill editor to block emails and phone numbers
-if (quill) {
-  quill.on('text-change', () => {
-    const text = quill.getText(); // Get plain text
-    
-    // Count digits
-    const digitCount = (text.match(/\d/g) || []).length;
-    if (digitCount > 2) {
-      alert('W tym polu nie można wpisać więcej niż 2 cyfr.');
-      
-      // Remove excess digits
-      let newText = text;
-      let digitsRemoved = 0;
-      newText = newText.replace(/\d/g, (match) => {
-        if (digitsRemoved < 2) {
-          digitsRemoved++;
-          return match;
-        }
-        return '';
-      });
-      
-      // Update editor with cleaned text
-      const currentSelection = quill.getSelection();
-      quill.setText(newText);
-      if (currentSelection) {
-        quill.setSelection(currentSelection);
-      }
-    }
-    
-    // Check for email patterns and remove them
-    const html = quill.root.innerHTML;
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/gi;
-    const phoneRegex = /\+?\d[\d\s\-]{3,}/g;
-    
-    let cleanedHtml = html.replace(emailRegex, '');
-    cleanedHtml = cleanedHtml.replace(phoneRegex, '');
-    
-    if (cleanedHtml !== html) {
-      const selection = quill.getSelection();
-      quill.root.innerHTML = cleanedHtml;
-      if (selection) {
-        quill.setSelection(selection);
-      }
-    }
-  });
-}
 </script>
 </body>
 </html>
