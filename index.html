@@ -5,20 +5,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Ogólnopolski Rejestr Elektryków - zarejestruj się lub znajdź certyfikowanego elektryka w Twojej okolicy.">
-      <meta property="og:image" content="https://i.postimg.cc/Z0cxFCZR/bezpieczenstwo.png">
-      <meta property="og:image" content="https://i.postimg.cc/rzJNCKcS/certyfikowani.png">
-      <meta property="og:image" content="https://i.postimg.cc/zVGSd8XS/favicon.png">
-      <meta property="og:image" content="https://i.postimg.cc/HVv0RRVq/icon-192.png">
-      <meta property="og:image" content="https://i.postimg.cc/qNtcTwKz/icon-512.png">
-      <meta property="og:image" content="https://i.postimg.cc/94ZG4fJm/logo.png">
-      <meta property="og:image" content="https://i.postimg.cc/BLCHgVWq/logo1.png">
-      <meta property="og:image" content="https://i.postimg.cc/8jcMR4ty/orzel-3.webp">
-      <meta property="og:image" content="https://i.postimg.cc/qtVKdT4f/rejestracja.png">
   <title>Ogólnopolski Rejestr Elektryków w Polsce</title>
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
+
   <!-- Inline critical CSS - ŁADUJE SIĘ NATYCHMIAST -->
   <style>
     * {
@@ -199,47 +190,47 @@
       margin-top: 20px;
       letter-spacing: 1px;
     }
-    
+
     /* Loading states */
     .box, .feature {
       opacity: 0;
       animation: fadeIn 0.5s ease forwards;
     }
-    
+
     .box:nth-child(1) { animation-delay: 0.1s; }
     .box:nth-child(2) { animation-delay: 0.2s; }
     .box:nth-child(3) { animation-delay: 0.3s; }
     .feature:nth-child(1) { animation-delay: 0.4s; }
     .feature:nth-child(2) { animation-delay: 0.5s; }
     .feature:nth-child(3) { animation-delay: 0.6s; }
-    
+
     @keyframes fadeIn {
       to { opacity: 1; }
     }
-    
+
     /* Responsive */
     @media (max-width: 768px) {
       .grid, .features {
         gap: 20px;
       }
-      
+
       .box, .feature {
         width: 100%;
         max-width: 400px;
       }
-      
+
       .container {
         flex-direction: column;
         text-align: center;
         padding: 15px;
       }
-      
+
       .header-text {
         margin-top: 10px;
       }
     }
   </style>
-  
+
   <!-- Lazy load non-critical CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
         media="print" onload="this.media='all'">
@@ -255,7 +246,7 @@
        class="logo"
        data-src="logo.png" 
        loading="lazy">
-  
+
   <div class="header-text">
     <div class="text">
       <span class="black">Ogólnopolski</span>
@@ -279,8 +270,10 @@
     </a>
 
     <a href="/wyszukiwarka" class="box">
-           <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Audytomat","url":"https://audytomat.com","description":"Audytomat ➤ Świadectwo energetyczne od 129zł! Wykonaliśmy ponad 30 tysięcy świadectw. Otrzymaj certyfikat energetyczny szybko i bezproblemowo! ⭐ Sprawdź!","publisher":{"@type":"Organization","name":"Audytomat","logo":{"@type":"ImageObject","url":"https://i.postimg.cc/1tCSMPvX/pionowe-3.png"}}}</script>
-
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
+           alt="Orzeł 2"
+           data-src="orzel_2.png"
+           loading="lazy">
       <p>SZUKAM ELEKTRYKA</p>
     </a>
 
@@ -311,7 +304,7 @@
       <h3>Rejestracja</h3>
       <p>Proces rejestracji jest szybki i prosty. Po utworzeniu konta elektryk może zarządzać swoim profilem, aktualizować dane i prezentować zakres wykonywanych usług.</p>
     </div>
-    
+
     <div class="feature">
       <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Certyfikowani fachowcy"
@@ -341,7 +334,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Lazy load images
   const images = document.querySelectorAll('img[data-src]');
-  
+
   if ('IntersectionObserver' in window) {
     const imageObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
@@ -356,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
       rootMargin: '50px 0px',
       threshold: 0.1
     });
-    
+
     images.forEach(img => imageObserver.observe(img));
   } else {
     // Fallback for older browsers
@@ -365,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
       img.removeAttribute('data-src');
     });
   }
-  
+
   // Preload critical pages
   const links = ['/rejestracja', '/wyszukiwarka', '/proelektryk'];
   links.forEach(link => {
