@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Ogólnopolski Rejestr Elektryków - zarejestruj się lub znajdź certyfikowanego elektryka w Twojej okolicy.">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ogólnopolski Rejestr Elektryków - zarejestruj się lub znajdź certyfikowanego elektryka w Twojej okolicy.">
       <meta property="og:image" content="https://i.postimg.cc/Z0cxFCZR/bezpieczenstwo.png">
       <meta property="og:image" content="https://i.postimg.cc/rzJNCKcS/certyfikowani.png">
       <meta property="og:image" content="https://i.postimg.cc/zVGSd8XS/favicon.png">
@@ -19,19 +21,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- TAILWIND CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- KONFIGURACJA Tailwind (BEZPOŚREDNIO PO CDN) -->
+  <!-- 2. KONFIGURACJA - WYŁĄCZENIE RESETU -->
   <script>
     tailwind.config = {
       corePlugins: {
-        preflight: false 
+        preflight: false  // ← KLUCZOWA LINIJKA
       }
     }
   </script>
 
-  <!-- TWÓJ ORYGINALNY CSS -->
+  <!-- 3. TWÓJ ORYGINALNY CSS (TERAZ BEZ KONFLIKTÓW) -->
   <style>
     * {
       margin: 0;
@@ -56,31 +57,199 @@
       background: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-    
-    /* ... RESZTA TWOICH STYLÓW BEZ ZMIAN ... */
-    
-    /* DODAJ KLASY DLA NAGŁÓWKA TAILWIND */
-    .tailwind-h1 {
-      margin-top: 2rem !important;
-      margin-bottom: 1.5rem !important;
-      font-size: 2rem !important;
-      line-height: 2.25rem !important;
-      text-align: center !important;
-      font-weight: 700 !important;
+    .logo {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
     }
-    
-    @media (min-width: 768px) {
-      .tailwind-h1 {
-        font-size: 4rem !important;
-        line-height: 5rem !important;
+
+    .header-text {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .text {
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .text span {
+      display: block;
+    }
+
+    .black { color: #000; }
+    .white { color: #ffffff; }
+    .blue { color: #003d7c; }
+    .red { color: #e63946; }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .box {
+      background: white;
+      padding: 30px 20px;
+      width: 280px;
+      min-height: 180px;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,61,124,0.08);
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,61,124,0.15);
+      border-color: #003d7c;
+    }
+
+    .box img {
+      width: 65px;
+      height: 65px;
+      margin-bottom: 15px;
+      object-fit: contain;
+    }
+
+    .box p {
+      font-size: 1.1em;
+      color: #003366;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    a.box {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+    }
+
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+      max-width: 1200px;
+    }
+
+    .feature {
+      flex: 1;
+      min-width: 280px;
+      max-width: 350px;
+      background: white;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .feature img {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+
+    .feature h3 {
+      margin-bottom: 15px;
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 700;
+    }
+
+    .feature p {
+      font-size: 1em;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    footer {
+      background: #1a1a1a;
+      color: #ccc;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 60px;
+    }
+
+    footer a {
+      color: #4dabf7;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: #74c0fc;
+      text-decoration: underline;
+    }
+
+    .adres_http_inline {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* Loading states */
+    .box, .feature {
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .box:nth-child(1) { animation-delay: 0.1s; }
+    .box:nth-child(2) { animation-delay: 0.2s; }
+    .box:nth-child(3) { animation-delay: 0.3s; }
+    .feature:nth-child(1) { animation-delay: 0.4s; }
+    .feature:nth-child(2) { animation-delay: 0.5s; }
+    .feature:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .grid, .features {
+        gap: 20px;
+      }
+
+      .box, .feature {
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .container {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+      }
+
+      .header-text {
+        margin-top: 10px;
       }
     }
-    
-    .tailwind-p {
-      text-align: center !important;
-      color: #6b7280 !important;
-    }
-    
   </style>
 
   <!-- Lazy load non-critical CSS -->
@@ -88,10 +257,11 @@
         media="print" onload="this.media='all'">
 </head>
 
-<body> <!-- TYLKO JEDEN <body> ! -->
+<body>
 
 <!-- GÓRA STRONY -->
 <div class="container">
+  <!-- Base64 encoded small placeholder -->
   <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%23003d7c'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='10' font-family='Arial'%3EOREP%3C/text%3E%3C/svg%3E" 
        alt="Logo OREP" 
        class="logo"
@@ -112,6 +282,7 @@
 <div class="content">
   <main class="grid">
     <a href="/rejestracja" class="box">
+      <!-- SVG placeholder -->
       <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Orzeł 1"
            data-src="orzel_1.png"
@@ -126,16 +297,22 @@
            loading="lazy">
       <p>SZUKAM ELEKTRYKA</p>
     </a>
-  </main>
 
-  <!-- NAGŁÓWEK Z TAILWIND (JAKO OSOBNA SEKCJA) -->
-  <div style="padding: 2rem;"> <!-- padding zamiast klasy p-8 -->
-    <h1 class="tailwind-h1">
-        Jak działa OREP?
-    </h1>
+
     
-    <p class="tailwind-p">Testowy paragraf poniżej nagłówka</p>
-  </div>
+    <!-- część przeznaczona dla Mireli 
+    <a href="/audyt" class="box">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
+           alt="Orzeł 3"
+           data-src="orzel_3.png"
+           loading="lazy">
+      <p>ŚWIADECTWA ENERGETYCZNE</p>
+          </a>
+       To jest część przeznaczona dla Mireli -->
+
+  
+  
+  </main>
 
   <section class="features">
     <div class="feature">
@@ -166,6 +343,13 @@
     </div>
   </section>
 </div>
+  <body class="p-8">
+    <!-- Twój kod -->
+    <h1 class="mt-8 mb-6 text-[2rem] leading-9 md:text-[4rem] md:leading-[5rem] text-center font-bold">
+        Jak działa OREP?
+    </h1>
+    
+    <p class="text-center text-gray-600">Testowy paragraf poniżej nagłówka</p>
 
 <!-- STOPKA -->
 <footer>
@@ -232,5 +416,5 @@ window.addEventListener('load', function() {
 });
 </script>
 
-</body> <!-- TYLKO JEDEN ZAMYKAJĄCY </body> -->
+</body>
 </html>
