@@ -16,25 +16,23 @@
       <meta property="og:image" content="https://i.postimg.cc/BLCHgVWq/logo1.png">
       <meta property="og:image" content="https://i.postimg.cc/8jcMR4ty/orzel-3.webp">
       <meta property="og:image" content="https://i.postimg.cc/qtVKdT4f/rejestracja.png">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-   <script>
-    tailwind.config = {
-      corePlugins: {
-        preflight: false 
-      }
-    }
-  </script>
-  
-
-
-  
-  <title>Ogólnopolski Rejestr Elektryków w Polsce</title>
+ <title>Ogólnopolski Rejestr Elektryków w Polsce</title>
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Inline critical CSS - ŁADUJE SIĘ NATYCHMIAST -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 2. KONFIGURACJA - WYŁĄCZENIE RESETU -->
+  <script>
+    tailwind.config = {
+      corePlugins: {
+        preflight: false  // ← KLUCZOWA LINIJKA
+      }
+    }
+  </script>
+
+  <!-- 3. TWÓJ ORYGINALNY CSS (TERAZ BEZ KONFLIKTÓW) -->
   <style>
     * {
       margin: 0;
@@ -59,7 +57,6 @@
       background: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-
     .logo {
       width: 55px;
       height: 55px;
