@@ -36,7 +36,6 @@
       flex-direction: column;
     }
 
-    /* NOWE TŁO DLA CONTAINERA - gradient ciepły, minimalistyczny */
     .container {
       display: flex;
       align-items: center;
@@ -44,14 +43,13 @@
       padding: 10px 20px;
       background: linear-gradient(135deg, #F6F1EB 0%, #EAD7C5 100%);
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      border-bottom: 1px solid rgba(242, 201, 165, 0.3);
+      border-bottom: 2px solid #F2C9A5;
     }
     
     .logo {
       width: 55px;
       height: 55px;
       object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
 
     .header-text {
@@ -64,18 +62,16 @@
       font-size: 18px;
       line-height: 1.2;
       font-weight: 700;
-      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
     }
 
     .text span {
       display: block;
     }
 
-    /* Nowa paleta kolorów - ciepła, minimalistyczna */
-    .black { color: #2D2D2D; } /* Ciemniejszy odcień zamiast czystego czarnego */
+    .black { color: #000; }
     .white { color: #ffffff; }
-    .blue { color: #D9772B; } /* Zmieniony na pomarańczowy akcent */
-    .red { color: #B34A24; } /* Ciemniejszy pomarańcz/brąz */
+    .blue { color: #D9772B; }
+    .red { color: #e63946; }
 
     .content {
       flex: 1;
@@ -101,7 +97,7 @@
       min-height: 180px;
       border-radius: 16px;
       transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(217, 119, 43, 0.08);
+      box-shadow: 0 5px 15px rgba(0,61,124,0.08);
       border: 2px solid transparent;
       display: flex;
       flex-direction: column;
@@ -111,8 +107,8 @@
 
     .box:hover {
       transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(217, 119, 43, 0.15);
-      border-color: #D9772B;
+      box-shadow: 0 15px 30px rgba(0,61,124,0.15);
+      border-color: #003d7c;
     }
 
     .box img {
@@ -124,7 +120,7 @@
 
     .box p {
       font-size: 1.1em;
-      color: #2D2D2D;
+      color: #003366;
       font-weight: 600;
       text-align: center;
       line-height: 1.4;
@@ -152,8 +148,7 @@
       background: white;
       padding: 30px 25px;
       border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(217, 119, 43, 0.08);
-      border: 1px solid #F6F1EB;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     }
 
     .feature img {
@@ -165,7 +160,7 @@
 
     .feature h3 {
       margin-bottom: 15px;
-      color: #D9772B;
+      color: #003366;
       font-size: 1.3em;
       font-weight: 700;
     }
@@ -178,16 +173,15 @@
     }
 
     footer {
-      background: #2D2D2D;
-      color: #EAD7C5;
+      background: #1a1a1a;
+      color: #ccc;
       text-align: center;
       padding: 30px 20px;
       margin-top: 60px;
-      border-top: 3px solid #D9772B;
     }
 
     footer a {
-      color: #F2C9A5;
+      color: #4dabf7;
       text-decoration: none;
       margin: 0 12px;
       font-weight: 500;
@@ -195,7 +189,7 @@
     }
 
     footer a:hover {
-      color: #D9772B;
+      color: #74c0fc;
       text-decoration: underline;
     }
 
@@ -237,7 +231,7 @@
       font-size: 2rem;
       line-height: 1.3;
       font-weight: 700;
-      color: #2D2D2D;
+      color: #1a1a1a;
       text-align: center;
     }
     
@@ -258,7 +252,7 @@
     }
     
     .seo-text strong {
-      color: #D9772B;
+      color: #003d7c;
       font-weight: 600;
     }
     
@@ -266,13 +260,13 @@
       background: white;
       padding: 25px 30px;
       border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(217, 119, 43, 0.08);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       margin: 30px 0;
-      border-left: 4px solid #D9772B;
+      border-left: 4px solid #003d7c;
     }
     
     .seo-list h3 {
-      color: #D9772B;
+      color: #003366;
       font-size: 1.3em;
       font-weight: 700;
       margin-bottom: 15px;
@@ -295,20 +289,20 @@
       content: "✓";
       position: absolute;
       left: 0;
-      color: #D9772B;
+      color: #003d7c;
       font-weight: bold;
     }
     
     .highlight-box {
-      background: linear-gradient(135deg, #F6F1EB 0%, #EAD7C5 100%);
+      background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
       padding: 25px 30px;
       border-radius: 12px;
       margin: 30px 0;
-      border: 1px solid #F2C9A5;
+      border: 1px solid #c2d9ff;
     }
     
     .highlight-box h3 {
-      color: #D9772B;
+      color: #003366;
       font-size: 1.3em;
       font-weight: 700;
       margin-bottom: 15px;
@@ -323,9 +317,8 @@
       padding: 40px;
       background: white;
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(217, 119, 43, 0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       gap: 60px;
-      border: 1px solid #F6F1EB;
     }
     
     .image-text-content {
@@ -334,7 +327,7 @@
     
     .image-text-content h2 {
       font-size: 2.2rem;
-      color: #D9772B;
+      color: #003366;
       margin-bottom: 20px;
       line-height: 1.3;
     }
@@ -355,14 +348,13 @@
       max-width: 100%;
       height: auto;
       border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(217, 119, 43, 0.1);
-      border: 1px solid #F2C9A5;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
     
-    /* Przyciski w nowej kolorystyce */
+    /* Przyciski w stylu Oferteo */
     .btn-oferteo {
       display: inline-block;
-      background: linear-gradient(135deg, #D9772B 0%, #B34A24 100%);
+      background: linear-gradient(135deg, #003d7c 0%, #002550 100%);
       color: white;
       padding: 14px 32px;
       font-size: 1.1rem;
@@ -370,15 +362,25 @@
       border-radius: 50px;
       text-decoration: none;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(217, 119, 43, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 61, 124, 0.3);
       border: none;
       cursor: pointer;
     }
     
     .btn-oferteo:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(217, 119, 43, 0.4);
-      background: linear-gradient(135deg, #E68A2E 0%, #C55B28 100%);
+      box-shadow: 0 6px 18px rgba(0, 61, 124, 0.4);
+      background: linear-gradient(135deg, #004a9a 0%, #003366 100%);
+    }
+    
+    .btn-oferteo.red {
+      background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+      box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+    }
+    
+    .btn-oferteo.red:hover {
+      box-shadow: 0 6px 18px rgba(230, 57, 70, 0.4);
+      background: linear-gradient(135deg, #f04a57 0%, #d12230 100%);
     }
     
     /* Opinie/recenzje */
@@ -392,10 +394,9 @@
       background: white;
       padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(217, 119, 43, 0.08);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       margin-bottom: 20px;
-      border: 1px solid #F6F1EB;
-      border-left: 4px solid #D9772B;
+      border-left: 4px solid #003d7c;
     }
     
     .review-header {
@@ -407,12 +408,12 @@
     
     .reviewer {
       font-weight: 600;
-      color: #D9772B;
+      color: #003366;
       font-size: 1.1rem;
     }
     
     .stars {
-      color: #FFB347;
+      color: #ffc107;
       font-size: 1.3rem;
     }
     
@@ -423,14 +424,11 @@
       border-radius: 12px;
       font-size: 0.85rem;
       font-weight: 500;
-      display: inline-block;
-      margin-top: 5px;
     }
     
     .review-text {
       color: #555;
       line-height: 1.6;
-      margin-top: 10px;
     }
 
     /* Responsive */
@@ -482,16 +480,6 @@
       .image-text-content h2 {
         font-size: 1.6rem;
       }
-      
-      .review-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-      
-      .review-card {
-        padding: 20px;
-      }
     }
   </style>
 
@@ -504,7 +492,7 @@
 
 <!-- GÓRA STRONY -->
 <div class="container">
-  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%23D9772B'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='10' font-family='Arial'%3EOREP%3C/text%3E%3C/svg%3E" 
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%23003d7c'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='10' font-family='Arial'%3EOREP%3C/text%3E%3C/svg%3E" 
        alt="Logo OREP" 
        class="logo"
        data-src="https://i.postimg.cc/94ZG4fJm/logo.png" 
@@ -524,7 +512,7 @@
 <div class="content">
   <main class="grid">
     <a href="/rejestracja" class="box">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23F6F1EB'/%3E%3C/svg%3E"
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Orzeł 1"
            data-src="orzel_1.png"
            loading="lazy">
@@ -532,7 +520,7 @@
     </a>
 
     <a href="/wyszukiwarka" class="box">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23F6F1EB'/%3E%3C/svg%3E"
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Orzeł 2"
            data-src="orzel_2.png"
            loading="lazy">
@@ -540,7 +528,7 @@
     </a>
   </main>
 
-  <!-- SEKCJA Z OBRAZEM OBOK TEKSTU -->
+  <!-- SEKCJA Z OBRAZEM OBOK TEKSTU (OFERTEO STYLE) -->
   <div class="image-text-section">
     <div class="image-text-content">
       <h2>Znajdź sprawdzonego elektryka szybko i wygodnie</h2>
@@ -554,6 +542,7 @@
     </div>
     
     <div class="image-text-image">
+      <!-- Tutaj wstaw swój obrazek -->
       <img src="/zadowolony_klient.png" 
            alt="Elektryk przy pracy" 
            loading="lazy">
@@ -614,7 +603,7 @@
 
   <!-- SEKCJA OPINII -->
   <div class="reviews-section">
-    <h2 style="text-align: center; color: #D9772B; margin-bottom: 30px;">Opinie naszych użytkowników</h2>
+    <h2 style="text-align: center; color: #003366; margin-bottom: 30px;">Opinie naszych użytkowników</h2>
     
     <div class="review-card">
       <div class="review-header">
@@ -637,7 +626,7 @@
 
   <section class="features">
     <div class="feature">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23F6F1EB'/%3E%3C/svg%3E"
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Bezpieczeństwo"
            data-src="https://i.postimg.cc/Z0cxFCZR/bezpieczenstwo.png"
            loading="lazy">
@@ -646,7 +635,7 @@
     </div>
 
     <div class="feature">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23F6F1EB'/%3E%3C/svg%3E"
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Rejestracja"
            data-src="https://i.postimg.cc/qtVKdT4f/rejestracja.png"
            loading="lazy">
@@ -655,7 +644,7 @@
     </div>
 
     <div class="feature">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23F6F1EB'/%3E%3C/svg%3E"
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='70' height='70' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Certyfikowani fachowcy"
            data-src="https://i.postimg.cc/rzJNCKcS/certyfikowani.png"
            loading="lazy">
