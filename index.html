@@ -14,13 +14,10 @@
       <meta property="og:image" content="https://i.postimg.cc/BLCHgVWq/logo1.png">
       <meta property="og:image" content="https://i.postimg.cc/8jcMR4ty/orzel-3.webp">
       <meta property="og:image" content="https://i.postimg.cc/qtVKdT4f/rejestracja.png">
- <title>Ogólnopolski Rejestr Elektryków w Polsce</title>
+ <title>Ogólnopolski Rejestr Elektryków w Polsce | OREP.pl</title>
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <!-- USUŃ Tailwind - nie potrzebujemy go -->
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 
   <style>
     /* RESET I TWOJE ORYGINALNE STYLE */
@@ -220,81 +217,95 @@
       to { opacity: 1; }
     }
     
-    /* NOWE: STYLE DLA ŁADNEGO NAGŁÓWKA (Tailwind-style) */
-    .hero-section {
+    /* NOWA SEKCJA TEKSTOWA DLA SEO */
+    .seo-content {
       width: 100%;
       max-width: 1200px;
       margin: 50px auto 40px;
       padding: 0 20px;
-      text-align: center;
     }
     
-    .hero-title {
+    .seo-title {
       margin-top: 2rem;
       margin-bottom: 1.5rem;
       font-size: 2rem;
-      line-height: 2.25rem;
+      line-height: 1.3;
       font-weight: 700;
       color: #1a1a1a;
       text-align: center;
     }
     
     @media (min-width: 768px) {
-      .hero-title {
-        font-size: 3.5rem;
-        line-height: 1.2;
+      .seo-title {
+        font-size: 2.5rem;
         margin-top: 3rem;
         margin-bottom: 2rem;
       }
     }
     
-    .hero-subtitle {
-      text-align: center;
-      color: #6b7280;
-      font-size: 1.125rem;
-      line-height: 1.75rem;
-      max-width: 600px;
-      margin: 0 auto 2rem;
+    .seo-text {
+      color: #333;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      text-align: left;
+      margin-bottom: 1.5rem;
     }
     
-    .hero-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    
-    .btn-primary {
-      background-color: #003d7c;
-      color: white;
-      padding: 0.75rem 2rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      border: 2px solid #003d7c;
-    }
-    
-    .btn-primary:hover {
-      background-color: #002a55;
-      transform: translateY(-2px);
-    }
-    
-    .btn-secondary {
-      background-color: white;
+    .seo-text strong {
       color: #003d7c;
-      padding: 0.75rem 2rem;
-      border-radius: 0.5rem;
       font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      border: 2px solid #003d7c;
     }
     
-    .btn-secondary:hover {
-      background-color: #f0f7ff;
-      transform: translateY(-2px);
+    .seo-list {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      margin: 30px 0;
+      border-left: 4px solid #003d7c;
+    }
+    
+    .seo-list h3 {
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    
+    .seo-list ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    .seo-list li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      color: #444;
+      line-height: 1.6;
+    }
+    
+    .seo-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #003d7c;
+      font-weight: bold;
+    }
+    
+    .highlight-box {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+      padding: 25px 30px;
+      border-radius: 12px;
+      margin: 30px 0;
+      border: 1px solid #c2d9ff;
+    }
+    
+    .highlight-box h3 {
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 15px;
     }
 
     /* Responsive */
@@ -318,20 +329,13 @@
         margin-top: 10px;
       }
       
-      .hero-title {
-        font-size: 2.5rem;
+      .seo-title {
+        font-size: 2rem;
         line-height: 1.2;
       }
       
-      .hero-buttons {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .btn-primary, .btn-secondary {
-        width: 100%;
-        max-width: 300px;
-        text-align: center;
+      .seo-list, .highlight-box {
+        padding: 20px;
       }
     }
   </style>
@@ -341,7 +345,7 @@
         media="print" onload="this.media='all'">
 </head>
 
-<body> <!-- TYLKO JEDEN <body> -->
+<body>
 
 <!-- GÓRA STRONY -->
 <div class="container">
@@ -381,25 +385,56 @@
     </a>
   </main>
 
-  <!-- NOWA SEKCJA HERO Z ŁADNYM NAGŁÓWKIEM -->
-  <div class="hero-section">
-    <h1 class="hero-title">
-      Jak działa <span style="color: #003d7c;">Ogólnopolski Rejestr Elektryków?</span>
-    </h1>
+  <!-- SEKCJA TEKSTOWA DLA SEO -->
+  <div class="seo-content">
+    <h1 class="seo-title">Jak działa Ogólnopolski Rejestr Elektryków (OREP)?</h1>
     
-    <p class="hero-subtitle">
-      OREP to platforma łącząca certyfikowanych elektryków z klientami w całej Polsce. 
-      Bezpiecznie, przejrzyście i profesjonalnie.
+    <p class="seo-text">
+      <strong>Ogólnopolski Rejestr Elektryków (OREP)</strong> to profesjonalna platforma internetowa, 
+      która łączy certyfikowanych elektryków z klientami poszukującymi fachowych usług elektrycznych 
+      na terenie całej Polski. Nasza platforma powstała z myślą o bezpieczeństwie i wygodzie zarówno 
+      wykonawców, jak i osób potrzebujących pomocy elektryka.
     </p>
     
-    <div class="hero-buttons">
-      <a href="/rejestracja" class="btn-primary">
-        <i class="fas fa-user-plus"></i> Zarejestruj się jako elektryk
-      </a>
-      <a href="/wyszukiwarka" class="btn-secondary">
-        <i class="fas fa-search"></i> Znajdź elektryka w Twojej okolicy
-      </a>
+    <div class="seo-list">
+      <h3>Korzyści dla elektryków:</h3>
+      <ul>
+        <li>Bezpłatna rejestracja i tworzenie profilu zawodowego</li>
+        <li>Prezentacja kwalifikacji, certyfikatów i uprawnień</li>
+        <li>Możliwość dotarcia do nowych klientów w całej Polsce</li>
+        <li>Zarządzanie opiniami i rekomendacjami od zadowolonych klientów</li>
+        <li>System weryfikacji potwierdzający autentyczność kwalifikacji</li>
+      </ul>
     </div>
+    
+    <p class="seo-text">
+      Dla <strong>klientów poszukujących elektryka</strong> OREP.pl oferuje przejrzysty system wyszukiwania 
+      fachowców według lokalizacji, specjalizacji, dostępności i ocen. Każdy profil elektryka zawiera 
+      szczegółowe informacje o uprawnieniach, doświadczeniu oraz zakresie świadczonych usług.
+    </p>
+    
+    <div class="highlight-box">
+      <h3>Dlaczego warto korzystać z OREP?</h3>
+      <p class="seo-text">
+        W przeciwieństwie do ogłoszeń drobnych, nasz rejestr gwarantuje weryfikację kwalifikacji 
+        każdego zarejestrowanego elektryka. Działamy na rzecz podnoszenia standardów w branży 
+        elektrycznej i zapewnienia klientom dostępu do sprawdzonych, kompetentnych specjalistów.
+      </p>
+    </div>
+    
+    <p class="seo-text">
+      <strong>Rejestr jest całkowicie bezpłatny dla użytkowników</strong> - zarówno dla elektryków 
+      tworzących swoje profile, jak i dla osób poszukujących fachowca. Naszym celem jest stworzenie 
+      największej i najbardziej wiarygodnej bazy elektryków w Polsce, opartej na przejrzystych 
+      zasadach i weryfikacji kompetencji.
+    </p>
+    
+    <p class="seo-text">
+      Niezależnie od tego, czy potrzebujesz pomocy przy instalacji elektrycznej w domu, 
+      modernizacji instalacji, przeglądu okresowego, czy bardziej specjalistycznych usług 
+      przemysłowych - <strong>Ogólnopolski Rejestr Elektryków pomoże Ci znaleźć odpowiedniego 
+      specjalistę w Twojej okolicy</strong>.
+    </p>
   </div>
 
   <section class="features">
@@ -473,22 +508,6 @@ document.addEventListener('DOMContentLoaded', function() {
       img.src = img.getAttribute('data-src');
       img.removeAttribute('data-src');
     });
-  }
-
-  // Preload critical pages
-  const links = ['/rejestracja', '/wyszukiwarka', '/proelektryk'];
-  links.forEach(link => {
-    const prefetchLink = document.createElement('link');
-    prefetchLink.rel = 'prefetch';
-    prefetchLink.href = link;
-    document.head.appendChild(prefetchLink);
-  });
-  
-  // Dodaj animacje dla nowej sekcji
-  const heroSection = document.querySelector('.hero-section');
-  if (heroSection) {
-    heroSection.style.opacity = '0';
-    heroSection.style.animation = 'fadeIn 0.8s ease 0.7s forwards';
   }
 });
 </script>
