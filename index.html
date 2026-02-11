@@ -5,8 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Ogólnopolski Rejestr Elektryków - zarejestruj się lub znajdź certyfikowanego elektryka w Twojej okolicy.">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ogólnopolski Rejestr Elektryków - zarejestruj się lub znajdź certyfikowanego elektryka w Twojej okolicy.">
       <meta property="og:image" content="https://i.postimg.cc/Z0cxFCZR/bezpieczenstwo.png">
       <meta property="og:image" content="https://i.postimg.cc/rzJNCKcS/certyfikowani.png">
       <meta property="og:image" content="https://i.postimg.cc/zVGSd8XS/favicon.png">
@@ -21,19 +19,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- 2. KONFIGURACJA - WYŁĄCZENIE RESETU -->
-  <script>
-    tailwind.config = {
-      corePlugins: {
-        preflight: false  // ← KLUCZOWA LINIJKA
-      }
-    }
-  </script>
+  <!-- USUŃ Tailwind - nie potrzebujemy go -->
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 
-  <!-- 3. TWÓJ ORYGINALNY CSS (TERAZ BEZ KONFLIKTÓW) -->
   <style>
+    /* RESET I TWOJE ORYGINALNE STYLE */
     * {
       margin: 0;
       padding: 0;
@@ -57,6 +47,7 @@
       background: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
+    
     .logo {
       width: 55px;
       height: 55px;
@@ -228,6 +219,83 @@
     @keyframes fadeIn {
       to { opacity: 1; }
     }
+    
+    /* NOWE: STYLE DLA ŁADNEGO NAGŁÓWKA (Tailwind-style) */
+    .hero-section {
+      width: 100%;
+      max-width: 1200px;
+      margin: 50px auto 40px;
+      padding: 0 20px;
+      text-align: center;
+    }
+    
+    .hero-title {
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      line-height: 2.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+    }
+    
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 3.5rem;
+        line-height: 1.2;
+        margin-top: 3rem;
+        margin-bottom: 2rem;
+      }
+    }
+    
+    .hero-subtitle {
+      text-align: center;
+      color: #6b7280;
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+      background-color: #003d7c;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 2px solid #003d7c;
+    }
+    
+    .btn-primary:hover {
+      background-color: #002a55;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: white;
+      color: #003d7c;
+      padding: 0.75rem 2rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 2px solid #003d7c;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #f0f7ff;
+      transform: translateY(-2px);
+    }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -249,6 +317,22 @@
       .header-text {
         margin-top: 10px;
       }
+      
+      .hero-title {
+        font-size: 2.5rem;
+        line-height: 1.2;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+      }
     }
   </style>
 
@@ -257,11 +341,10 @@
         media="print" onload="this.media='all'">
 </head>
 
-<body>
+<body> <!-- TYLKO JEDEN <body> -->
 
 <!-- GÓRA STRONY -->
 <div class="container">
-  <!-- Base64 encoded small placeholder -->
   <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 55 55'%3E%3Crect width='55' height='55' fill='%23003d7c'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='10' font-family='Arial'%3EOREP%3C/text%3E%3C/svg%3E" 
        alt="Logo OREP" 
        class="logo"
@@ -282,7 +365,6 @@
 <div class="content">
   <main class="grid">
     <a href="/rejestracja" class="box">
-      <!-- SVG placeholder -->
       <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Orzeł 1"
            data-src="orzel_1.png"
@@ -297,22 +379,28 @@
            loading="lazy">
       <p>SZUKAM ELEKTRYKA</p>
     </a>
-
-
-    
-    <!-- część przeznaczona dla Mireli 
-    <a href="/audyt" class="box">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
-           alt="Orzeł 3"
-           data-src="orzel_3.png"
-           loading="lazy">
-      <p>ŚWIADECTWA ENERGETYCZNE</p>
-          </a>
-       To jest część przeznaczona dla Mireli -->
-
-  
-  
   </main>
+
+  <!-- NOWA SEKCJA HERO Z ŁADNYM NAGŁÓWKIEM -->
+  <div class="hero-section">
+    <h1 class="hero-title">
+      Jak działa <span style="color: #003d7c;">Ogólnopolski Rejestr Elektryków?</span>
+    </h1>
+    
+    <p class="hero-subtitle">
+      OREP to platforma łącząca certyfikowanych elektryków z klientami w całej Polsce. 
+      Bezpiecznie, przejrzyście i profesjonalnie.
+    </p>
+    
+    <div class="hero-buttons">
+      <a href="/rejestracja" class="btn-primary">
+        <i class="fas fa-user-plus"></i> Zarejestruj się jako elektryk
+      </a>
+      <a href="/wyszukiwarka" class="btn-secondary">
+        <i class="fas fa-search"></i> Znajdź elektryka w Twojej okolicy
+      </a>
+    </div>
+  </div>
 
   <section class="features">
     <div class="feature">
@@ -343,13 +431,6 @@
     </div>
   </section>
 </div>
-  <body class="p-8">
-    <!-- Twój kod -->
-    <h1 class="mt-8 mb-6 text-[2rem] leading-9 md:text-[4rem] md:leading-[5rem] text-center font-bold">
-        Jak działa OREP?
-    </h1>
-    
-    <p class="text-center text-gray-600">Testowy paragraf poniżej nagłówka</p>
 
 <!-- STOPKA -->
 <footer>
@@ -402,6 +483,13 @@ document.addEventListener('DOMContentLoaded', function() {
     prefetchLink.href = link;
     document.head.appendChild(prefetchLink);
   });
+  
+  // Dodaj animacje dla nowej sekcji
+  const heroSection = document.querySelector('.hero-section');
+  if (heroSection) {
+    heroSection.style.opacity = '0';
+    heroSection.style.animation = 'fadeIn 0.8s ease 0.7s forwards';
+  }
 });
 </script>
 
