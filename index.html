@@ -45,7 +45,7 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       border-bottom: 2px solid #F2C9A5;
     }
-    
+
     .logo {
       width: 55px;
       height: 55px;
@@ -90,8 +90,9 @@
       margin: 0 auto;
     }
 
+    /* 🔹 ZMIENIONE TŁO BOKSÓW – teraz identyczne jak w header (kolorystyka beżowa) */
     .box {
-      background: white;
+      background: linear-gradient(135deg, #F6F1EB 0%, #EAD7C5 100%);
       padding: 30px 20px;
       width: 280px;
       min-height: 180px;
@@ -216,7 +217,7 @@
     @keyframes fadeIn {
       to { opacity: 1; }
     }
-    
+
     /* NOWA SEKCJA TEKSTOWA DLA SEO */
     .seo-content {
       width: 100%;
@@ -224,7 +225,7 @@
       margin: 50px auto 40px;
       padding: 0 20px;
     }
-    
+
     .seo-title {
       margin-top: 2rem;
       margin-bottom: 1.5rem;
@@ -234,7 +235,7 @@
       color: #1a1a1a;
       text-align: center;
     }
-    
+
     @media (min-width: 768px) {
       .seo-title {
         font-size: 2.5rem;
@@ -242,7 +243,7 @@
         margin-bottom: 2rem;
       }
     }
-    
+
     .seo-text {
       color: #333;
       font-size: 1.1rem;
@@ -250,12 +251,12 @@
       text-align: left;
       margin-bottom: 1.5rem;
     }
-    
+
     .seo-text strong {
       color: #003d7c;
       font-weight: 600;
     }
-    
+
     .seo-list {
       background: white;
       padding: 25px 30px;
@@ -264,19 +265,19 @@
       margin: 30px 0;
       border-left: 4px solid #003d7c;
     }
-    
+
     .seo-list h3 {
       color: #003366;
       font-size: 1.3em;
       font-weight: 700;
       margin-bottom: 15px;
     }
-    
+
     .seo-list ul {
       list-style-type: none;
       padding-left: 0;
     }
-    
+
     .seo-list li {
       padding: 8px 0;
       padding-left: 25px;
@@ -284,7 +285,7 @@
       color: #444;
       line-height: 1.6;
     }
-    
+
     .seo-list li:before {
       content: "✓";
       position: absolute;
@@ -292,7 +293,7 @@
       color: #003d7c;
       font-weight: bold;
     }
-    
+
     .highlight-box {
       background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
       padding: 25px 30px;
@@ -300,14 +301,14 @@
       margin: 30px 0;
       border: 1px solid #c2d9ff;
     }
-    
+
     .highlight-box h3 {
       color: #003366;
       font-size: 1.3em;
       font-weight: 700;
       margin-bottom: 15px;
     }
-    
+
     /* NOWA SEKCJA: OBRAZ OBOK TEKSTU (OFERTEO STYLE) */
     .image-text-section {
       display: flex;
@@ -320,37 +321,37 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       gap: 60px;
     }
-    
+
     .image-text-content {
       flex: 1;
     }
-    
+
     .image-text-content h2 {
       font-size: 2.2rem;
       color: #003366;
       margin-bottom: 20px;
       line-height: 1.3;
     }
-    
+
     .image-text-content p {
       font-size: 1.15rem;
       line-height: 1.7;
       color: #444;
       margin-bottom: 25px;
     }
-    
+
     .image-text-image {
       flex: 1;
       text-align: center;
     }
-    
+
     .image-text-image img {
       max-width: 100%;
       height: auto;
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    
+
     /* Przyciski w stylu Oferteo */
     .btn-oferteo {
       display: inline-block;
@@ -366,30 +367,30 @@
       border: none;
       cursor: pointer;
     }
-    
+
     .btn-oferteo:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 18px rgba(0, 61, 124, 0.4);
       background: linear-gradient(135deg, #004a9a 0%, #003366 100%);
     }
-    
+
     .btn-oferteo.red {
       background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
       box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
     }
-    
+
     .btn-oferteo.red:hover {
       box-shadow: 0 6px 18px rgba(230, 57, 70, 0.4);
       background: linear-gradient(135deg, #f04a57 0%, #d12230 100%);
     }
-    
+
     /* Opinie/recenzje */
     .reviews-section {
       max-width: 1200px;
       margin: 40px auto;
       padding: 0 20px;
     }
-    
+
     .review-card {
       background: white;
       padding: 25px;
@@ -398,25 +399,25 @@
       margin-bottom: 20px;
       border-left: 4px solid #003d7c;
     }
-    
+
     .review-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
     }
-    
+
     .reviewer {
       font-weight: 600;
       color: #003366;
       font-size: 1.1rem;
     }
-    
+
     .stars {
       color: #ffc107;
       font-size: 1.3rem;
     }
-    
+
     .verified-badge {
       background: #28a745;
       color: white;
@@ -425,7 +426,7 @@
       font-size: 0.85rem;
       font-weight: 500;
     }
-    
+
     .review-text {
       color: #555;
       line-height: 1.6;
@@ -438,7 +439,7 @@
         gap: 30px;
         padding: 30px;
       }
-      
+
       .image-text-content h2 {
         font-size: 1.8rem;
       }
@@ -463,20 +464,20 @@
   .header-text {
     margin-top: 0;
   }
-  
+
   .seo-title {
     font-size: 2rem;
     line-height: 1.2;
   }
-  
+
   .seo-list, .highlight-box {
     padding: 20px;
   }
-  
+
   .image-text-section {
     padding: 25px;
   }
-  
+
   .image-text-content h2 {
     font-size: 1.6rem;
   }
@@ -511,6 +512,7 @@
 <!-- ŚRODEK -->
 <div class="content">
   <main class="grid">
+    <!-- 🔹 BOKS ZE ZMIENIONYM TŁEM (BEŻOWY GRADIENT) -->
     <a href="/rejestracja" class="box">
       <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Orzeł 1"
@@ -518,7 +520,7 @@
            loading="lazy">
       <p>JESTEM ELEKTRYKIEM REJESTRACJA</p>
     </a>
-
+    <!-- 🔹 BOKS ZE ZMIENIONYM TŁEM (BEŻOWY GRADIENT) -->
     <a href="/wyszukiwarka" class="box">
       <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='65' height='65' viewBox='0 0 65 65'%3E%3Crect width='65' height='65' fill='%23f0f0f0'/%3E%3C/svg%3E"
            alt="Orzeł 2"
@@ -552,14 +554,14 @@
   <!-- SEKCJA TEKSTOWA DLA SEO -->
   <div class="seo-content">
     <h1 class="seo-title">Jak działa Ogólnopolski Rejestr Elektryków (OREP)?</h1>
-    
+
     <p class="seo-text">
       <strong>Ogólnopolski Rejestr Elektryków (OREP)</strong> to profesjonalna platforma internetowa, 
       która łączy certyfikowanych elektryków z klientami poszukującymi fachowych usług elektrycznych 
       na terenie całej Polski. Nasza platforma powstała z myślą o bezpieczeństwie i wygodzie zarówno 
       wykonawców, jak i osób potrzebujących pomocy elektryka.
     </p>
-    
+
     <div class="seo-list">
       <h3>Korzyści dla elektryków:</h3>
       <ul>
@@ -570,13 +572,13 @@
         <li>System weryfikacji potwierdzający autentyczność kwalifikacji</li>
       </ul>
     </div>
-    
+
     <p class="seo-text">
       Dla <strong>klientów poszukujących elektryka</strong> OREP.pl oferuje przejrzysty system wyszukiwania 
       fachowców według lokalizacji, specjalizacji, dostępności i ocen. Każdy profil elektryka zawiera 
       szczegółowe informacje o uprawnieniach, doświadczeniu oraz zakresie świadczonych usług.
     </p>
-    
+
     <div class="highlight-box">
       <h3>Dlaczego warto korzystać z OREP?</h3>
       <p class="seo-text">
@@ -585,14 +587,14 @@
         elektrycznej i zapewnienia klientom dostępu do sprawdzonych, kompetentnych specjalistów.
       </p>
     </div>
-    
+
     <p class="seo-text">
       <strong>Rejestr jest całkowicie bezpłatny dla użytkowników</strong> - zarówno dla elektryków 
       tworzących swoje profile, jak i dla osób poszukujących fachowca. Naszym celem jest stworzenie 
       największej i najbardziej wiarygodnej bazy elektryków w Polsce, opartej na przejrzystych 
       zasadach i weryfikacji kompetencji.
     </p>
-    
+
     <p class="seo-text">
       Niezależnie od tego, czy potrzebujesz pomocy przy instalacji elektrycznej w domu, 
       modernizacji instalacji, przeglądu okresowego, czy bardziej specjalistycznych usług 
@@ -604,7 +606,7 @@
   <!-- SEKCJA OPINII -->
   <div class="reviews-section">
     <h2 style="text-align: center; color: #003366; margin-bottom: 30px;">Opinie naszych użytkowników</h2>
-    
+
     <div class="review-card">
       <div class="review-header">
         <div class="reviewer">Edyta J</div>
@@ -613,7 +615,7 @@
       <div class="verified-badge">opinia potwierdzona</div>
       <p class="review-text">Znakomita platforma! W ciągu godziny od złożenia zapytania dostałam 3 oferty od sprawdzonych elektryków. Jeden z nich naprawił usterkę tego samego dnia. Polecam!</p>
     </div>
-    
+
     <div class="review-card">
       <div class="review-header">
         <div class="reviewer">Michał K.</div>
