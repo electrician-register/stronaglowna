@@ -1,1 +1,464 @@
-qwerty
+
+    /* RESET I TWOJE ORYGINALNE STYLE */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f5f5;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #EAD7C5 100%);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-bottom: 2px solid #F2C9A5;
+    }
+
+    .logo {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+    }
+
+    .header-text {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .text {
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .text span {
+      display: block;
+    }
+
+    .black { color: #000; }
+    .white { color: #ffffff; }
+    .blue { color: #D9772B; }
+    .red { color: #e63946; }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* 🔹 ZMIENIONE TŁO BOKSÓW – teraz identyczne jak w header (kolorystyka beżowa) */
+    .box {
+      background: linear-gradient(135deg, #F6F1EB 0%, #EAD7C5 100%);
+      padding: 30px 20px;
+      width: 280px;
+      min-height: 180px;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,61,124,0.08);
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,61,124,0.15);
+      border-color: #003d7c;
+    }
+
+    .box img {
+      width: 65px;
+      height: 65px;
+      margin-bottom: 15px;
+      object-fit: contain;
+    }
+
+    .box p {
+      font-size: 1.1em;
+      color: #003366;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    a.box {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+    }
+
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+      max-width: 1200px;
+    }
+
+    .feature {
+      flex: 1;
+      min-width: 280px;
+      max-width: 350px;
+      background: white;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .feature img {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+
+    .feature h3 {
+      margin-bottom: 15px;
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 700;
+    }
+
+    .feature p {
+      font-size: 1em;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    footer {
+      background: #1a1a1a;
+      color: #ccc;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 60px;
+    }
+
+    footer a {
+      color: #4dabf7;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: #74c0fc;
+      text-decoration: underline;
+    }
+
+    .adres_http_inline {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* Loading states */
+    .box, .feature {
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .box:nth-child(1) { animation-delay: 0.1s; }
+    .box:nth-child(2) { animation-delay: 0.2s; }
+    .box:nth-child(3) { animation-delay: 0.3s; }
+    .feature:nth-child(1) { animation-delay: 0.4s; }
+    .feature:nth-child(2) { animation-delay: 0.5s; }
+    .feature:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* NOWA SEKCJA TEKSTOWA DLA SEO */
+    .seo-content {
+      width: 100%;
+      max-width: 1200px;
+      margin: 50px auto 40px;
+      padding: 0 20px;
+    }
+
+    .seo-title {
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      .seo-title {
+        font-size: 2.5rem;
+        margin-top: 3rem;
+        margin-bottom: 2rem;
+      }
+    }
+
+    .seo-text {
+      color: #333;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .seo-text strong {
+      color: #003d7c;
+      font-weight: 600;
+    }
+
+    .seo-list {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      margin: 30px 0;
+      border-left: 4px solid #003d7c;
+    }
+
+    .seo-list h3 {
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .seo-list ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .seo-list li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .seo-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #003d7c;
+      font-weight: bold;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+      padding: 25px 30px;
+      border-radius: 12px;
+      margin: 30px 0;
+      border: 1px solid #c2d9ff;
+    }
+
+    .highlight-box h3 {
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    /* NOWA SEKCJA: OBRAZ OBOK TEKSTU (OFERTEO STYLE) */
+    .image-text-section {
+      display: flex;
+      align-items: center;
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 40px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      gap: 60px;
+    }
+
+    .image-text-content {
+      flex: 1;
+    }
+
+    .image-text-content h2 {
+      font-size: 2.2rem;
+      color: #003366;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+
+    .image-text-content p {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #444;
+      margin-bottom: 25px;
+    }
+
+    .image-text-image {
+      flex: 1;
+      text-align: center;
+    }
+
+    .image-text-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Przyciski w stylu Oferteo */
+    .btn-oferteo {
+      display: inline-block;
+      background: linear-gradient(135deg, #003d7c 0%, #002550 100%);
+      color: white;
+      padding: 14px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 61, 124, 0.3);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-oferteo:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0, 61, 124, 0.4);
+      background: linear-gradient(135deg, #004a9a 0%, #003366 100%);
+    }
+
+    .btn-oferteo.red {
+      background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+      box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+    }
+
+    .btn-oferteo.red:hover {
+      box-shadow: 0 6px 18px rgba(230, 57, 70, 0.4);
+      background: linear-gradient(135deg, #f04a57 0%, #d12230 100%);
+    }
+
+    /* Opinie/recenzje */
+    .reviews-section {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .review-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      border-left: 4px solid #003d7c;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .reviewer {
+      font-weight: 600;
+      color: #003366;
+      font-size: 1.1rem;
+    }
+
+    .stars {
+      color: #ffc107;
+      font-size: 1.3rem;
+    }
+
+    .verified-badge {
+      background: #28a745;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .review-text {
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .image-text-section {
+        flex-direction: column;
+        gap: 30px;
+        padding: 30px;
+      }
+
+      .image-text-content h2 {
+        font-size: 1.8rem;
+      }
+    }
+    @media (max-width: 768px) {
+  .grid, .features {
+    gap: 20px;
+  }
+
+  .box, .feature {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .container {
+    flex-direction: row;
+    text-align: left;
+    padding: 10px 15px;
+    flex-wrap: wrap;
+  }
+
+  .header-text {
+    margin-top: 0;
+  }
+
+  .seo-title {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .seo-list, .highlight-box {
+    padding: 20px;
+  }
+
+  .image-text-section {
+    padding: 25px;
+  }
+
+  .image-text-content h2 {
+    font-size: 1.6rem;
+  }
+}
+  
