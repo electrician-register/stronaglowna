@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel wysyłki - Administrator</title>
+    <title>Panel Administratora</title>
     <style>
         * {
             margin: 0;
@@ -40,21 +40,6 @@
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .admin-badge {
-            background: #f1c40f;
-            color: #1e3c72;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 10px;
         }
         
         .content {
@@ -64,17 +49,8 @@
         .login-section {
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 25px;
+            padding: 30px;
             border: 2px solid #e9ecef;
-        }
-        
-        .login-section h3 {
-            color: #1e3c72;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         .form-group {
@@ -86,49 +62,26 @@
             margin-bottom: 6px;
             font-weight: 600;
             color: #2c3e50;
-            font-size: 14px;
         }
         
-        .form-group input,
-        .form-group textarea {
+        .form-group input {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 15px;
             transition: all 0.3s;
-            background: #f9f9f9;
         }
         
-        .form-group input:focus,
-        .form-group textarea:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #2a5298;
-            background: white;
             box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
-        }
-        
-        .form-group input.error {
-            border-color: #e74c3c;
-            background: #fef5f5;
-        }
-        
-        .password-input {
-            position: relative;
-        }
-        
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
         }
         
         .btn-login {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: #2a5298;
             color: white;
             border: none;
@@ -137,10 +90,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
         
         .btn-login:hover {
@@ -154,12 +103,6 @@
         
         .admin-panel {
             display: none;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .admin-header {
@@ -172,25 +115,6 @@
             align-items: center;
         }
         
-        .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .admin-avatar {
-            background: #2a5298;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
         .btn-logout {
             background: #e74c3c;
             color: white;
@@ -198,20 +122,6 @@
             padding: 8px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .btn-logout:hover {
-            background: #c0392b;
-        }
-        
-        .template-box {
-            background: #f5f9ff;
-            border: 2px solid #d4e6f1;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
         }
         
         .btn-send {
@@ -224,22 +134,7 @@
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             margin: 20px 0;
-        }
-        
-        .btn-send:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(42, 82, 152, 0.4);
-        }
-        
-        .btn-send:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
         }
         
         .logs-container {
@@ -249,41 +144,17 @@
             margin-top: 20px;
         }
         
-        .logs-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: #bdc3c7;
-            font-size: 13px;
-        }
-        
-        .clear-logs {
-            background: none;
-            border: 1px solid #7f8c8d;
-            color: #bdc3c7;
-            padding: 4px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .clear-logs:hover {
-            background: #7f8c8d;
-            color: white;
-        }
-        
         .logs-content {
             max-height: 200px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 12px;
+            color: #ecf0f1;
         }
         
         .log-entry {
             padding: 5px 8px;
             border-bottom: 1px solid #2a5298;
-            color: #ecf0f1;
         }
         
         .log-success { color: #98fb98; }
@@ -309,223 +180,147 @@
             text-align: center;
             display: none;
         }
-        
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #7f8c8d;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>
-                <span>👑</span>
-                Panel Administratora
-            </h1>
-            <p>System wysyłki odpowiedzi do klientów</p>
-            <div class="admin-badge">Tylko dla administratora</div>
+            <h1>👑 Panel Administratora</h1>
+            <p>Bezpieczne logowanie przez Supabase Auth</p>
         </div>
         
         <div class="content">
             <!-- Sekcja logowania -->
             <div id="loginSection" class="login-section">
-                <h3>
-                    <span>🔐</span>
-                    Logowanie administratora
-                </h3>
+                <h3 style="margin-bottom: 20px; color: #1e3c72;">🔐 Logowanie</h3>
                 
                 <div class="form-group">
-                    <label>📧 Email administratora</label>
-                    <input type="email" id="adminEmail" value="piotr8040@gmail.com" readonly style="background: #e9ecef;">
+                    <label>📧 Email</label>
+                    <input type="email" id="email" value="piotr8040@gmail.com">
                 </div>
                 
                 <div class="form-group">
                     <label>🔑 Hasło</label>
-                    <div class="password-input">
-                        <input type="password" id="adminPassword" placeholder="Wpisz hasło administratora">
-                        <span class="toggle-password" onclick="togglePassword()">👁️</span>
-                    </div>
+                    <input type="password" id="password" placeholder="Twoje hasło">
                 </div>
                 
                 <button class="btn-login" id="loginBtn" onclick="login()">
-                    <span>🔓</span>
                     Zaloguj się
                 </button>
                 
                 <div id="loginError" class="login-error">
-                    ❌ Nieprawidłowe hasło!
+                    ❌ Błędny email lub hasło
                 </div>
             </div>
             
-            <!-- Panel administratora (widoczny po zalogowaniu) -->
+            <!-- Panel administratora -->
             <div id="adminPanel" class="admin-panel">
                 <div class="admin-header">
-                    <div class="admin-info">
-                        <div class="admin-avatar">P</div>
-                        <div>
-                            <strong>Zalogowany jako:</strong><br>
-                            piotr8040@gmail.com (Administrator)
-                        </div>
+                    <div>
+                        <strong>Zalogowany jako:</strong> <span id="adminEmail"></span>
                     </div>
-                    <button class="btn-logout" onclick="logout()">
-                        <span>🚪</span> Wyloguj
-                    </button>
-                </div>
-                
-                <div class="template-box">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong style="color: #1e3c72;">📋 Szablon odpowiedzi dla klienta</strong>
-                        <span style="background: #27ae60; color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px;">GOTOWY</span>
-                    </div>
-                    <p style="color: #555; font-size: 13px;">Edytuj treść przed wysłaniem</p>
+                    <button class="btn-logout" onclick="logout()">Wyloguj</button>
                 </div>
                 
                 <form id="emailForm">
                     <div class="form-group">
                         <label>📧 Email klienta</label>
-                        <input type="email" id="to" placeholder="klient@firma.pl" value="piotr8040@gmail.com" required>
+                        <input type="email" id="to" value="piotr8040@gmail.com" required>
                     </div>
                     
                     <div class="form-group">
                         <label>📝 Temat</label>
-                        <input type="text" id="subject" value="Odpowiedź na Twoje zapytanie - Zespół Wsparcia" required>
+                        <input type="text" id="subject" value="Odpowiedź na zapytanie" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>✍️ Treść odpowiedzi</label>
-                        <textarea id="html" rows="12" required>
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;/head&gt;
-&lt;body style=&quot;font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;&quot;&gt;
-    &lt;div style=&quot;background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;&quot;&gt;
-        &lt;h1 style=&quot;color: white; margin: 0;&quot;&gt;📨 Odpowiedź od Administratora&lt;/h1&gt;
-    &lt;/div&gt;
-    
-    &lt;div style=&quot;background: white; padding: 30px; border-radius: 0 0 10px 10px;&quot;&gt;
-        &lt;p&gt;Szanowny Kliencie,&lt;/p&gt;
-        
-        &lt;p&gt;Dziękujemy za kontakt. Jako administrator odpowiadam na Twoje zapytanie:&lt;/p&gt;
-        
-        &lt;div style=&quot;background: #f5f9ff; border-left: 4px solid #2a5298; padding: 15px; margin: 20px 0;&quot;&gt;
-            &lt;p style=&quot;margin: 0;&quot;&gt;&lt;strong&gt;Twoja wiadomość:&lt;/strong&gt;&lt;br&gt;
-            [wklej tutaj treść pytania klienta]&lt;/p&gt;
-        &lt;/div&gt;
-        
-        &lt;p&gt;W odpowiedzi informuję, że:&lt;/p&gt;
-        
-        &lt;ul&gt;
-            &lt;li&gt;✅ Sprawa została przeanalizowana osobiście przez administratora&lt;/li&gt;
-            &lt;li&gt;✅ Przygotowaliśmy rozwiązanie zgodne z Twoimi potrzebami&lt;/li&gt;
-            &lt;li&gt;✅ W razie pytań odpowiem natychmiast&lt;/li&gt;
-        &lt;/ul&gt;
-        
-        &lt;div style=&quot;background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;&quot;&gt;
-            &lt;strong&gt;Szczegółowa odpowiedź:&lt;/strong&gt;&lt;br&gt;
-            &lt;span style=&quot;color: #1e3c72;&quot;&gt;[tutaj wpisz odpowiedź]&lt;/span&gt;
-        &lt;/div&gt;
-        
-        &lt;div style=&quot;margin: 30px 0; text-align: center;&quot;&gt;
-            &lt;a href=&quot;mailto:piotr8040@gmail.com&quot; style=&quot;background: #2a5298; color: white; padding: 12px 25px; border-radius: 5px; text-decoration: none; margin: 5px;&quot;&gt;📧 piotr8040@gmail.com&lt;/a&gt;
-        &lt;/div&gt;
-        
-        &lt;hr style=&quot;border: none; border-top: 1px solid #eee;&quot;&gt;
-        
-        &lt;p style=&quot;text-align: center;&quot;&gt;
-            Z poważaniem,<br&gt;
-            &lt;strong&gt;Administrator Systemu&lt;/strong&gt;<br>
-            &lt;span style=&quot;color: #666;&quot;&gt;piotr8040@gmail.com&lt;/span&gt;
-        &lt;/p&gt;
-    &lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
+                        <label>✍️ Treść</label>
+                        <textarea id="html" rows="10" required>
+&lt;h1&gt;Odpowiedź&lt;/h1&gt;
+&lt;p&gt;Treść wiadomości...&lt;/p&gt;
                         </textarea>
                     </div>
                     
                     <button type="submit" class="btn-send" id="sendBtn">
-                        <span>📤</span>
-                        <span id="btnText">Wyślij odpowiedź do klienta</span>
+                        <span id="btnText">📤 Wyślij</span>
                     </button>
                 </form>
                 
                 <div class="logs-container">
-                    <div class="logs-header">
-                        <span>📋 Logi wysyłki</span>
-                        <button class="clear-logs" id="clearLogs">Wyczyść</button>
-                    </div>
                     <div class="logs-content" id="logs">
-                        <div class="log-entry log-info">🟢 Zalogowano jako administrator</div>
+                        <div class="log-entry log-info">🟢 System gotowy</div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="footer">
-                Panel administratora | Tylko dla upoważnionych osób
             </div>
         </div>
     </div>
 
     <script>
-        // ADMINISTRATOR - ustaw hasło (zmień na swoje!)
-        const ADMIN_EMAIL = 'piotr8040@gmail.com'
-        const ADMIN_PASSWORD = 'admin123'  // ← ZMIEŃ TO HASŁO!
+        // Konfiguracja Supabase
+        const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3ZmlndnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDAwMDAsImV4cCI6MjA1NTM2NjQwMH0.Qw4l3s_6tXpY9nJqkLz8Qw4l3s_6tXpY9nJqkLz8Qw4'
         
-        let isLoggedIn = false
+        let session = null
         
-        // Pokaż/ukryj hasło
-        function togglePassword() {
-            const input = document.getElementById('adminPassword')
-            input.type = input.type === 'password' ? 'text' : 'password'
-        }
-        
-        // Logowanie
-        function login() {
-            const password = document.getElementById('adminPassword').value
+        // Funkcja logowania
+        async function login() {
+            const email = document.getElementById('email').value
+            const password = document.getElementById('password').value
+            const loginBtn = document.getElementById('loginBtn')
             const loginError = document.getElementById('loginError')
             
-            if (password === ADMIN_PASSWORD) {
-                isLoggedIn = true
-                document.getElementById('loginSection').style.display = 'none'
-                document.getElementById('adminPanel').style.display = 'block'
-                loginError.style.display = 'none'
-                dodajLog('success', '✅ Zalogowano jako administrator')
-            } else {
+            loginBtn.disabled = true
+            loginBtn.innerHTML = 'Logowanie... <span class="loading"></span>'
+            loginError.style.display = 'none'
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                })
+                
+                const data = await response.json()
+                
+                if (response.ok && data.access_token) {
+                    session = data
+                    
+                    // Sprawdź czy to admin (opcjonalnie)
+                    document.getElementById('loginSection').style.display = 'none'
+                    document.getElementById('adminPanel').style.display = 'block'
+                    document.getElementById('adminEmail').textContent = email
+                    dodajLog('success', '✅ Zalogowano pomyślnie')
+                } else {
+                    loginError.style.display = 'block'
+                    dodajLog('error', '❌ Błąd logowania')
+                }
+            } catch (error) {
                 loginError.style.display = 'block'
-                document.getElementById('adminPassword').value = ''
-                dodajLog('error', '❌ Nieprawidłowe hasło')
+                dodajLog('error', '❌ Błąd: ' + error.message)
+            } finally {
+                loginBtn.disabled = false
+                loginBtn.innerHTML = 'Zaloguj się'
             }
         }
         
         // Wylogowanie
         function logout() {
-            isLoggedIn = false
+            session = null
             document.getElementById('loginSection').style.display = 'block'
             document.getElementById('adminPanel').style.display = 'none'
-            document.getElementById('adminPassword').value = ''
-            document.getElementById('loginError').style.display = 'none'
+            document.getElementById('password').value = ''
+            dodajLog('info', '🟢 Wylogowano')
         }
         
-        // Elementy
-        const toInput = document.getElementById('to')
-        const subjectInput = document.getElementById('subject')
-        const htmlTextarea = document.getElementById('html')
-        const sendBtn = document.getElementById('sendBtn')
-        const btnText = document.getElementById('btnText')
-        const logsDiv = document.getElementById('logs')
-        const clearLogsBtn = document.getElementById('clearLogs')
-        
-        // Czyszczenie logów
-        clearLogsBtn.addEventListener('click', () => {
-            logsDiv.innerHTML = '<div class="log-entry log-info">🟢 Logi wyczyszczone</div>'
-        })
-        
-        // Dodawanie logów
+        // Logi
         function dodajLog(typ, msg) {
+            const logs = document.getElementById('logs')
             const czas = new Date().toLocaleTimeString()
             const klasa = typ === 'success' ? 'log-success' : typ === 'error' ? 'log-error' : 'log-info'
             const emoji = typ === 'success' ? '✅' : typ === 'error' ? '❌' : '🟢'
@@ -533,95 +328,67 @@
             const log = document.createElement('div')
             log.className = `log-entry ${klasa}`
             log.innerHTML = `${emoji} [${czas}] ${msg}`
-            logsDiv.appendChild(log)
-            logsDiv.scrollTop = logsDiv.scrollHeight
+            logs.appendChild(log)
+            logs.scrollTop = logs.scrollHeight
         }
         
-        // Walidacja
-        function sprawdzFormularz() {
-            if (!toInput.value.trim() || !toInput.validity.valid) {
-                dodajLog('error', '❌ Nieprawidłowy email klienta')
-                toInput.style.borderColor = '#e74c3c'
-                return false
-            }
-            if (!subjectInput.value.trim()) {
-                dodajLog('error', '❌ Brak tematu')
-                subjectInput.style.borderColor = '#e74c3c'
-                return false
-            }
-            if (!htmlTextarea.value.trim()) {
-                dodajLog('error', '❌ Brak treści')
-                htmlTextarea.style.borderColor = '#e74c3c'
-                return false
-            }
-            return true
-        }
-        
-        // Wysyłka
+        // Wysyłka maila
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault()
             
-            if (!isLoggedIn) {
-                dodajLog('error', '❌ Musisz być zalogowany!')
+            if (!session) {
+                dodajLog('error', '❌ Nie jesteś zalogowany')
                 return
             }
             
-            if (!sprawdzFormularz()) return
-            
             const dane = {
-                to: toInput.value.trim(),
-                subject: subjectInput.value.trim(),
-                html: htmlTextarea.value.trim()
+                to: document.getElementById('to').value,
+                subject: document.getElementById('subject').value,
+                html: document.getElementById('html').value
             }
             
-            dodajLog('info', `📧 Wysyłanie do: ${dane.to}`)
-            dodajLog('info', `📦 Rozmiar: ${JSON.stringify(dane).length} bajtów`)
+            dodajLog('info', '📧 Wysyłanie...')
             
-            // Blokada przycisku
-            sendBtn.disabled = true
-            btnText.innerHTML = 'Wysyłanie... <span class="loading"></span>'
+            document.getElementById('sendBtn').disabled = true
+            document.getElementById('btnText').innerHTML = 'Wysyłanie... <span class="loading"></span>'
             
             try {
-                const start = Date.now()
-                
-                const response = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-email', {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
                     body: JSON.stringify(dane)
                 })
                 
-                const czas = Date.now() - start
                 const text = await response.text()
                 
-                dodajLog('info', `📊 Status: ${response.status} (${czas}ms)`)
-                
                 if (response.ok) {
-                    const data = JSON.parse(text)
-                    dodajLog('success', `✅ Wysłano! ID: ${data.data?.id || 'OK'}`)
-                    // Czyścimy pola po sukcesie? (opcjonalnie)
-                    // toInput.value = ''
-                    // subjectInput.value = ''
+                    dodajLog('success', '✅ Wysłano!')
                 } else {
-                    dodajLog('error', `❌ Błąd ${response.status}: ${text}`)
+                    dodajLog('error', `❌ Błąd ${response.status}`)
                 }
-                
             } catch (error) {
-                dodajLog('error', `❌ Błąd sieci: ${error.message}`)
+                dodajLog('error', '❌ Błąd: ' + error.message)
             } finally {
-                sendBtn.disabled = false
-                btnText.innerHTML = '📤 Wyślij odpowiedź do klienta'
+                document.getElementById('sendBtn').disabled = false
+                document.getElementById('btnText').innerHTML = '📤 Wyślij'
             }
         })
         
-        // Usuwanie błędów przy pisaniu
-        toInput.addEventListener('input', () => toInput.style.borderColor = '')
-        subjectInput.addEventListener('input', () => subjectInput.style.borderColor = '')
-        htmlTextarea.addEventListener('input', () => htmlTextarea.style.borderColor = '')
-        
-        // Obsługa Enter w polu hasła
-        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+        // Obsługa Enter
+        document.getElementById('password').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') login()
         })
+        
+        // Sprawdź czy był już zalogowany (opcjonalnie)
+        // if (localStorage.getItem('sb-session')) {
+        //     session = JSON.parse(localStorage.getItem('sb-session'))
+        //     document.getElementById('loginSection').style.display = 'none'
+        //     document.getElementById('adminPanel').style.display = 'block'
+        // }
     </script>
 </body>
 </html>
