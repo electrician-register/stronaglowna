@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,20 +20,32 @@
         .log-info { color: #0066cc; }
         .log-success { color: #00aa00; }
         .log-error { color: #cc0000; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; }
     </style>
 </head>
 <body>
     <h2>📧 Test wysyłki maili</h2>
+    
+    <div class="warning">
+        <strong>⚠️ WAŻNE:</strong> Wpisz swój klucz anonimowy z Supabase poniżej!
+        <br>
+        <small>Znajdziesz go w: Supabase Dashboard → Project Settings → API → anon public key</small>
+    </div>
+    
+    <div style="margin: 20px 0;">
+        <label>Klucz anonimowy Supabase:</label>
+        <input type="text" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8" style="width: 100%; font-family: monospace;">
+    </div>
     
     <form id="emailForm">
         <label>Adres email:</label>
         <input type="email" id="to" value="piotr8040@gmail.com" required>
         
         <label>Temat:</label>
-        <input type="text" id="subject" value="Test z formularza" required>
+        <input type="text" id="subject" value="Test z autoryzacją" required>
         
         <label>Treść (HTML):</label>
-        <textarea id="html" rows="5"><h1>Witaj!</h1><p>To jest testowa wiadomość z formularza.</p></textarea>
+        <textarea id="html" rows="5"><h1>Witaj!</h1><p>To jest testowa wiadomość z autoryzacją.</p></textarea>
         
         <button type="submit">📨 Wyślij email</button>
     </form>
@@ -83,6 +94,12 @@
             // Wyczyść stare logi
             logi.innerHTML = ''
             
+            const supabaseKey = document.getElementById('supabaseKey').value.trim()
+            if (!supabaseKey) {
+                dodajLog('error', '❌ Brak klucza anonimowego! Wpisz go w polu powyżej.')
+                return
+            }
+            
             const to = document.getElementById('to').value
             const subject = document.getElementById('subject').value
             const html = document.getElementById('html').value
@@ -91,6 +108,7 @@
             
             dodajLog('info', 'Przygotowywanie danych...', dane)
             dodajLog('info', `Rozmiar danych: ${JSON.stringify(dane).length} bajtów`)
+            dodajLog('info', `Używam klucza: ${supabaseKey.substring(0, 10)}...`)
             
             try {
                 dodajLog('info', 'Wysyłanie żądania do Supabase...')
@@ -100,7 +118,9 @@
                 const response = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-email', {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
                     },
                     body: JSON.stringify(dane)
                 })
