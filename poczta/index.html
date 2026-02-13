@@ -177,26 +177,19 @@
             margin-top: 10px;
             text-align: center;
         }
-        
-        .success-message {
-            color: #27ae60;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>👑 Panel Administratora</h1>
-            <p>Logowanie przez Supabase Auth</p>
+            <p>Bezpieczne logowanie - hasło w bazie danych</p>
         </div>
         
         <div class="content">
             <!-- Sekcja logowania -->
             <div id="loginSection" class="login-section">
-                <h3 style="margin-bottom: 20px; color: #1e3c72;">🔐 Zaloguj się</h3>
+                <h3 style="margin-bottom: 20px; color: #1e3c72;">🔐 Logowanie administratora</h3>
                 
                 <div class="form-group">
                     <label>📧 Email</label>
@@ -204,8 +197,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>🔑 Hasło</label>
-                    <input type="password" id="password" placeholder="Wpisz hasło z Supabase Auth">
+                    <label>🔑 Hasło (z bazy danych)</label>
+                    <input type="password" id="password" placeholder="Wpisz hasło administratora">
                 </div>
                 
                 <button class="btn-login" id="loginBtn" onclick="login()">
@@ -219,7 +212,7 @@
             <div id="adminPanel" class="admin-panel">
                 <div class="admin-header">
                     <div>
-                        <strong>Zalogowany jako:</strong> <span id="adminEmail"></span>
+                        <strong>Zalogowany jako:</strong> <span id="adminName"></span>
                     </div>
                     <button class="btn-logout" onclick="logout()">Wyloguj</button>
                 </div>
@@ -258,11 +251,11 @@
     </div>
 
     <script>
-        // Konfiguracja
+        // Te dane są bezpieczne - to tylko URL i klucz anonimowy (publiczny)
         const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3ZmlndnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDAwMDAsImV4cCI6MjA1NTM2NjQwMH0.Qw4l3s_6tXpY9nJqkLz8Qw4l3s_6tXpY9nJqkLz8Qw4'
         
-        let session = null
+        let adminData = null
         
         async function login() {
             const email = document.getElementById('email').value
@@ -272,7 +265,6 @@
             
             if (!password) {
                 statusDiv.innerHTML = '❌ Wpisz hasło'
-                statusDiv.className = 'error-message'
                 return
             }
             
@@ -281,38 +273,32 @@
             statusDiv.innerHTML = ''
             
             try {
-                // Logowanie przez Supabase Auth
-                const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                // Wywołaj naszą bezpieczną funkcję Supabase
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-admin`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY
                     },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
+                    body: JSON.stringify({ email, password })
                 })
                 
                 const data = await response.json()
                 
-                if (response.ok && data.access_token) {
-                    // Sukces!
-                    session = data
+                if (data.success) {
+                    // Sukces - hasło poprawne
+                    adminData = data.admin
                     document.getElementById('loginSection').style.display = 'none'
                     document.getElementById('adminPanel').style.display = 'block'
-                    document.getElementById('adminEmail').textContent = email
-                    dodajLog('success', '✅ Zalogowano jako ' + email)
+                    document.getElementById('adminName').textContent = `${adminData.imie} ${adminData.nazwisko}`
+                    dodajLog('success', `✅ Zalogowano jako ${adminData.imie} ${adminData.nazwisko}`)
                 } else {
                     // Błąd logowania
-                    let errorMsg = data.msg || data.error_description || data.message || 'Błąd logowania'
-                    statusDiv.innerHTML = '❌ ' + errorMsg
-                    statusDiv.className = 'error-message'
-                    dodajLog('error', '❌ Błąd: ' + errorMsg)
+                    statusDiv.innerHTML = '❌ ' + (data.error || 'Błąd logowania')
+                    dodajLog('error', '❌ Błąd logowania')
                 }
             } catch (error) {
                 statusDiv.innerHTML = '❌ Błąd połączenia: ' + error.message
-                statusDiv.className = 'error-message'
                 dodajLog('error', '❌ Błąd: ' + error.message)
             } finally {
                 loginBtn.disabled = false
@@ -321,7 +307,7 @@
         }
         
         function logout() {
-            session = null
+            adminData = null
             document.getElementById('loginSection').style.display = 'block'
             document.getElementById('adminPanel').style.display = 'none'
             document.getElementById('password').value = ''
@@ -346,7 +332,7 @@
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault()
             
-            if (!session) {
+            if (!adminData) {
                 dodajLog('error', '❌ Nie jesteś zalogowany')
                 return
             }
@@ -367,8 +353,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${session.access_token}`
+                        'apikey': SUPABASE_ANON_KEY
                     },
                     body: JSON.stringify(dane)
                 })
@@ -388,12 +373,9 @@
             }
         })
         
-        // Enter w polu hasła
         document.getElementById('password').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') login()
         })
-        
-        dodajLog('info', '🟢 Panel gotowy - wpisz hasło z Supabase Auth')
     </script>
 </body>
 </html>
