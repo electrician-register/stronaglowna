@@ -1,38 +1,143 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wysyłarka maili</title>
+    <title>Test wysyłki maili</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        input, textarea { width: 100%; padding: 8px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        #logi { 
+            background: #f5f5f5; 
+            padding: 15px; 
+            margin-top: 20px; 
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow: auto;
+        }
+        .log-info { color: #0066cc; }
+        .log-success { color: #00aa00; }
+        .log-error { color: #cc0000; }
+    </style>
 </head>
 <body>
+    <h2>📧 Test wysyłki maili</h2>
+    
     <form id="emailForm">
-        <input type="email" id="to" placeholder="Adres email" required><br>
-        <input type="text" id="subject" placeholder="Temat" required><br>
-        <textarea id="message" placeholder="Treść wiadomości" rows="5" required></textarea><br>
-        <button type="submit">Wyślij</button>
+        <label>Adres email:</label>
+        <input type="email" id="to" value="piotr8040@gmail.com" required>
+        
+        <label>Temat:</label>
+        <input type="text" id="subject" value="Test z formularza" required>
+        
+        <label>Treść (HTML):</label>
+        <textarea id="html" rows="5"><h1>Witaj!</h1><p>To jest testowa wiadomość z formularza.</p></textarea>
+        
+        <button type="submit">📨 Wyślij email</button>
     </form>
-
+    
+    <div id="logi">
+        <span class="log-info">🟢 Logi pojawią się tutaj...</span>
+    </div>
+    
     <script>
+        const logi = document.getElementById('logi')
+        
+        function dodajLog(typ, wiadomosc, dane = null) {
+            const czas = new Date().toLocaleTimeString()
+            let kolor = '#0066cc'
+            let emoji = 'ℹ️'
+            
+            if (typ === 'success') {
+                kolor = '#00aa00'
+                emoji = '✅'
+            } else if (typ === 'error') {
+                kolor = '#cc0000'
+                emoji = '❌'
+            } else if (typ === 'warning') {
+                kolor = '#ff9900'
+                emoji = '⚠️'
+            }
+            
+            const logLine = document.createElement('div')
+            logLine.style.margin = '5px 0'
+            logLine.style.borderBottom = '1px solid #ddd'
+            logLine.style.padding = '5px'
+            
+            logLine.innerHTML = `
+                <span style="color: #666">[${czas}]</span> 
+                <span style="color: ${kolor}">${emoji} ${wiadomosc}</span>
+                ${dane ? `<pre style="margin:5px 0 0 20px; font-size:12px; color:#666">${JSON.stringify(dane, null, 2)}</pre>` : ''}
+            `
+            
+            logi.appendChild(logLine)
+            logi.scrollTop = logi.scrollHeight
+        }
+        
         document.getElementById('emailForm').onsubmit = async (e) => {
             e.preventDefault()
             
-            const response = await fetch('https://twojprojekt.supabase.co/functions/v1/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    to: document.getElementById('to').value,
-                    subject: document.getElementById('subject').value,
-                    html: document.getElementById('message').value.replace(/\n/g, '<br>'),
-                    text: document.getElementById('message').value
+            // Wyczyść stare logi
+            logi.innerHTML = ''
+            
+            const to = document.getElementById('to').value
+            const subject = document.getElementById('subject').value
+            const html = document.getElementById('html').value
+            
+            const dane = { to, subject, html }
+            
+            dodajLog('info', 'Przygotowywanie danych...', dane)
+            dodajLog('info', `Rozmiar danych: ${JSON.stringify(dane).length} bajtów`)
+            
+            try {
+                dodajLog('info', 'Wysyłanie żądania do Supabase...')
+                
+                const startTime = Date.now()
+                
+                const response = await fetch('https://tfbqqduxtsacvwfigsvt.supabase.co/functions/v1/send-email', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dane)
                 })
-            })
-            
-            const result = await response.json()
-            console.log(result)
-            
-            if (result.success) {
-                alert('Email wysłany!')
-            } else {
-                alert('Błąd: ' + result.error)
+                
+                const czasWykonania = Date.now() - startTime
+                dodajLog('info', `Odpowiedź otrzymana (${czasWykonania}ms)`)
+                dodajLog('info', `Status HTTP: ${response.status} ${response.statusText}`)
+                
+                // Pokaż nagłówki odpowiedzi
+                const headers = {}
+                response.headers.forEach((value, key) => {
+                    headers[key] = value
+                })
+                dodajLog('info', 'Nagłówki odpowiedzi:', headers)
+                
+                // Parsuj odpowiedź
+                const text = await response.text()
+                dodajLog('info', `Surowa odpowiedź (${text.length} bajtów):`, text)
+                
+                let data
+                try {
+                    data = JSON.parse(text)
+                } catch {
+                    data = { raw: text }
+                }
+                
+                if (response.ok) {
+                    dodajLog('success', '✅ SUKCES! Email wysłany', data)
+                } else {
+                    dodajLog('error', `❌ BŁĄD ${response.status}`, data)
+                }
+                
+            } catch (error) {
+                dodajLog('error', '❌ BŁĄD SIECI:', {
+                    message: error.message,
+                    stack: error.stack
+                })
             }
         }
     </script>
