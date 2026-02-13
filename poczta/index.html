@@ -1,117 +1,559 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-    <title>Test wysyłki maili</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odpowiedź na maila klienta | System obsługi</title>
     <style>
-        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
-        input, textarea { width: 100%; padding: 8px; margin: 10px 0; }
-        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
-        button:hover { background: #45a049; }
-        #logi { 
-            background: #f5f5f5; 
-            padding: 15px; 
-            margin-top: 20px; 
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            max-height: 400px;
-            overflow: auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .log-info { color: #0066cc; }
-        .log-success { color: #00aa00; }
-        .log-error { color: #cc0000; }
-        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; }
+        
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .info-icon {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .info-text {
+            flex: 1;
+        }
+        
+        .info-text strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .info-text small {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.5;
+            display: block;
+        }
+        
+        .info-text code {
+            background: #d1e9ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-group input.error,
+        .form-group textarea.error {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+        
+        .key-input {
+            font-family: monospace;
+            background: #f0f0f0;
+            font-size: 14px;
+        }
+        
+        .btn-send {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 25px 0 15px;
+        }
+        
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .logs-container {
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+        }
+        
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #bdc3c7;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .clear-logs {
+            background: none;
+            border: 1px solid #7f8c8d;
+            color: #bdc3c7;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .clear-logs:hover {
+            background: #7f8c8d;
+            color: white;
+        }
+        
+        .logs-content {
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            padding: 6px 10px;
+            border-bottom: 1px solid #34495e;
+            color: #ecf0f1;
+            word-break: break-word;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-info {
+            color: #87cefa;
+        }
+        
+        .log-success {
+            color: #98fb98;
+        }
+        
+        .log-error {
+            color: #ffa07a;
+        }
+        
+        .log-time {
+            color: #7f8c8d;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .template-preview {
+            background: #f5f9ff;
+            border: 2px solid #e1f0fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .template-preview h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .preview-badge {
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 15px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
-    <h2>📧 Test wysyłki maili</h2>
-    
-    <div class="warning">
-        <strong>⚠️ WAŻNE:</strong> Wpisz swój klucz anonimowy z Supabase poniżej!
-        <br>
-        <small>Znajdziesz go w: Supabase Dashboard → Project Settings → API → anon public key</small>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>📨</span>
+                System odpowiedzi na maile
+            </h1>
+            <p>Szybka odpowiedź na zapytania klientów</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-box">
+                <div class="info-icon">🔑</div>
+                <div class="info-text">
+                    <strong>Klucz autoryzacyjny Supabase</strong>
+                    <small>
+                        Wpisz swój klucz anonimowy z 
+                        <code>Supabase Dashboard → Project Settings → API → anon public key</code>
+                    </small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>🔑 Klucz anonimowy Supabase</label>
+                <input type="text" id="supabaseKey" class="key-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3ZmlndnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDAwMDAsImV4cCI6MjA1NTM2NjQwMH0.Qw4l3s_6tXpY9nJqkLz8Qw4l3s_6tXpY9nJqkLz8Qw4">
+            </div>
+            
+            <div class="template-preview">
+                <h3>
+                    <span>📋 SZABLON ODPOWIEDZI</span>
+                    <span class="preview-badge">gotowy do użycia</span>
+                </h3>
+                <p style="color: #555; font-size: 14px; margin-bottom: 10px;">
+                    Szablon profesjonalnej odpowiedzi na zapytanie klienta. Możesz go edytować poniżej.
+                </p>
+            </div>
+            
+            <form id="emailForm">
+                <div class="form-group">
+                    <label>📧 Email klienta</label>
+                    <input type="email" id="to" placeholder="klient@firma.pl" value="piotr8040@gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Temat wiadomości (możesz zmienić)</label>
+                    <input type="text" id="subject" value="Odpowiedź na Twoje zapytanie - Zespół Wsparcia" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>✍️ Treść odpowiedzi (edytuj przed wysłaniem)</label>
+                    <textarea id="html" rows="12" required>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
+    <div style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">📨 Odpowiedź na Twoje zapytanie</h1>
     </div>
     
-    <div style="margin: 20px 0;">
-        <label>Klucz anonimowy Supabase:</label>
-        <input type="text" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8" style="width: 100%; font-family: monospace;">
+    <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <p style="font-size: 16px;">Szanowny Kliencie,</p>
+        
+        <p style="font-size: 16px;">Dziękujemy za kontakt z naszym zespołem. Odpowiadając na Twoje zapytanie:</p>
+        
+        <div style="background: #f5f9ff; border-left: 4px solid #3498db; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0 0 10px;"><strong>✉️ Treść Twojej wiadomości:</strong></p>
+            <p style="margin: 0; font-style: italic; color: #555;">"Tutaj pojawi się cytat z wiadomości klienta"</p>
+        </div>
+        
+        <p style="font-size: 16px;">W odpowiedzi na Twoje pytanie informujemy, że:</p>
+        
+        <ul style="font-size: 16px; margin: 20px 0; padding-left: 20px;">
+            <li>✅ Twoje zapytanie zostało przeanalizowane</li>
+            <li>✅ Przygotowaliśmy rozwiązanie zgodnie z Twoimi potrzebami</li>
+            <li>✅ W razie pytań jesteśmy do dyspozycji</li>
+        </ul>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0 0 10px;"><strong>📋 Szczegóły odpowiedzi:</strong></p>
+            <p style="margin: 0;">Tutaj wpisz szczegółową odpowiedź na pytanie klienta. Im więcej szczegółów, tym lepiej.</p>
+        </div>
+        
+        <p style="font-size: 16px;">W razie dodatkowych pytań prosimy o kontakt:</p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; margin: 25px 0;">
+            <a href="mailto: support@twojafirma.pl" style="background: #3498db; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px;">📧 support@twojafirma.pl</a>
+            <a href="tel:+48123456789" style="background: #2c3e50; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px;">📞 +48 123 456 789</a>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+        
+        <p style="font-size: 14px; color: #666; text-align: center;">
+            Z poważaniem,<br>
+            <strong style="color: #2c3e50; font-size: 16px;">Zespół Wsparcia Klienta</strong><br>
+            <span style="color: #999;">Twoja Firma</span>
+        </p>
+        
+        <p style="font-size: 12px; color: #999; text-align: center; margin-top: 20px;">
+            © 2026 Twoja Firma. Wszystkie prawa zastrzeżone.<br>
+            <a href="#" style="color: #3498db; text-decoration: none;">Polityka prywatności</a> | 
+            <a href="#" style="color: #3498db; text-decoration: none;">Regulamin</a>
+        </p>
     </div>
-    
-    <form id="emailForm">
-        <label>Adres email:</label>
-        <input type="email" id="to" value="piotr8040@gmail.com" required>
-        
-        <label>Temat:</label>
-        <input type="text" id="subject" value="Test z autoryzacją" required>
-        
-        <label>Treść (HTML):</label>
-        <textarea id="html" rows="5"><h1>Witaj!</h1><p>To jest testowa wiadomość z autoryzacją.</p></textarea>
-        
-        <button type="submit">📨 Wyślij email</button>
-    </form>
-    
-    <div id="logi">
-        <span class="log-info">🟢 Logi pojawią się tutaj...</span>
+</body>
+</html>
+                    </textarea>
+                </div>
+                
+                <button type="submit" class="btn-send" id="sendBtn">
+                    <span>📤</span>
+                    <span id="btnText">Wyślij odpowiedź do klienta</span>
+                </button>
+            </form>
+            
+            <div class="logs-container">
+                <div class="logs-header">
+                    <span>📋 Logi wysyłki</span>
+                    <button class="clear-logs" id="clearLogs">Wyczyść</button>
+                </div>
+                <div class="logs-content" id="logs">
+                    <div class="log-entry log-info">
+                        <span class="log-time">🟢</span>
+                        System gotowy do wysyłki odpowiedzi
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                System odpowiedzi na maile klientów | Supabase + Resend
+            </div>
+        </div>
     </div>
-    
+
     <script>
-        const logi = document.getElementById('logi')
+        // Elementy DOM
+        const supabaseKeyInput = document.getElementById('supabaseKey')
+        const toInput = document.getElementById('to')
+        const subjectInput = document.getElementById('subject')
+        const htmlTextarea = document.getElementById('html')
+        const sendBtn = document.getElementById('sendBtn')
+        const btnText = document.getElementById('btnText')
+        const logsDiv = document.getElementById('logs')
+        const clearLogsBtn = document.getElementById('clearLogs')
         
+        // Czyszczenie logów
+        clearLogsBtn.addEventListener('click', () => {
+            logsDiv.innerHTML = '<div class="log-entry log-info"><span class="log-time">🟢</span> Logi wyczyszczone</div>'
+        })
+        
+        // Funkcja dodawania logów
         function dodajLog(typ, wiadomosc, dane = null) {
-            const czas = new Date().toLocaleTimeString()
-            let kolor = '#0066cc'
+            const czas = new Date().toLocaleTimeString('pl-PL')
+            let klasa = 'log-info'
             let emoji = 'ℹ️'
             
             if (typ === 'success') {
-                kolor = '#00aa00'
+                klasa = 'log-success'
                 emoji = '✅'
             } else if (typ === 'error') {
-                kolor = '#cc0000'
+                klasa = 'log-error'
                 emoji = '❌'
             } else if (typ === 'warning') {
-                kolor = '#ff9900'
+                klasa = 'log-warning'
                 emoji = '⚠️'
             }
             
-            const logLine = document.createElement('div')
-            logLine.style.margin = '5px 0'
-            logLine.style.borderBottom = '1px solid #ddd'
-            logLine.style.padding = '5px'
+            const logEntry = document.createElement('div')
+            logEntry.className = `log-entry ${klasa}`
             
-            logLine.innerHTML = `
-                <span style="color: #666">[${czas}]</span> 
-                <span style="color: ${kolor}">${emoji} ${wiadomosc}</span>
-                ${dane ? `<pre style="margin:5px 0 0 20px; font-size:12px; color:#666">${JSON.stringify(dane, null, 2)}</pre>` : ''}
+            let daneHtml = ''
+            if (dane) {
+                daneHtml = `<pre style="margin:5px 0 0 20px; font-size:11px; color: #aaa; overflow-x: auto;">${JSON.stringify(dane, null, 2)}</pre>`
+            }
+            
+            logEntry.innerHTML = `
+                <span class="log-time">${emoji}</span>
+                [${czas}] ${wiadomosc}
+                ${daneHtml}
             `
             
-            logi.appendChild(logLine)
-            logi.scrollTop = logi.scrollHeight
+            logsDiv.appendChild(logEntry)
+            logsDiv.scrollTop = logsDiv.scrollHeight
         }
         
-        document.getElementById('emailForm').onsubmit = async (e) => {
+        // Walidacja formularza
+        function validateForm() {
+            let isValid = true
+            
+            if (!supabaseKeyInput.value.trim()) {
+                supabaseKeyInput.classList.add('error')
+                isValid = false
+                dodajLog('error', 'Brak klucza autoryzacyjnego')
+            } else {
+                supabaseKeyInput.classList.remove('error')
+            }
+            
+            if (!toInput.value.trim() || !toInput.validity.valid) {
+                toInput.classList.add('error')
+                isValid = false
+                dodajLog('error', 'Nieprawidłowy adres email klienta')
+            } else {
+                toInput.classList.remove('error')
+            }
+            
+            if (!subjectInput.value.trim()) {
+                subjectInput.classList.add('error')
+                isValid = false
+                dodajLog('error', 'Brak tematu wiadomości')
+            } else {
+                subjectInput.classList.remove('error')
+            }
+            
+            if (!htmlTextarea.value.trim()) {
+                htmlTextarea.classList.add('error')
+                isValid = false
+                dodajLog('error', 'Brak treści wiadomości')
+            } else {
+                htmlTextarea.classList.remove('error')
+            }
+            
+            return isValid
+        }
+        
+        // Obsługa wysyłki formularza
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault()
             
-            // Wyczyść stare logi
-            logi.innerHTML = ''
-            
-            const supabaseKey = document.getElementById('supabaseKey').value.trim()
-            if (!supabaseKey) {
-                dodajLog('error', '❌ Brak klucza anonimowego! Wpisz go w polu powyżej.')
+            if (!validateForm()) {
+                dodajLog('error', '❌ Formularz zawiera błędy. Popraw dane.')
                 return
             }
             
-            const to = document.getElementById('to').value
-            const subject = document.getElementById('subject').value
-            const html = document.getElementById('html').value
+            const supabaseKey = supabaseKeyInput.value.trim()
+            const to = toInput.value.trim()
+            const subject = subjectInput.value.trim()
+            const html = htmlTextarea.value.trim()
             
             const dane = { to, subject, html }
             
-            dodajLog('info', 'Przygotowywanie danych...', dane)
-            dodajLog('info', `Rozmiar danych: ${JSON.stringify(dane).length} bajtów`)
-            dodajLog('info', `Używam klucza: ${supabaseKey.substring(0, 10)}...`)
+            dodajLog('info', 'Przygotowywanie odpowiedzi dla: ' + to)
+            dodajLog('info', `Rozmiar wiadomości: ${JSON.stringify(dane).length} bajtów`)
+            
+            // Blokuj przycisk
+            sendBtn.disabled = true
+            btnText.innerHTML = 'Wysyłanie... <span class="loading"></span>'
             
             try {
-                dodajLog('info', 'Wysyłanie żądania do Supabase...')
+                dodajLog('info', 'Wysyłanie odpowiedzi do Supabase...')
                 
                 const startTime = Date.now()
                 
@@ -127,18 +569,9 @@
                 
                 const czasWykonania = Date.now() - startTime
                 dodajLog('info', `Odpowiedź otrzymana (${czasWykonania}ms)`)
-                dodajLog('info', `Status HTTP: ${response.status} ${response.statusText}`)
+                dodajLog('info', `Status: ${response.status}`)
                 
-                // Pokaż nagłówki odpowiedzi
-                const headers = {}
-                response.headers.forEach((value, key) => {
-                    headers[key] = value
-                })
-                dodajLog('info', 'Nagłówki odpowiedzi:', headers)
-                
-                // Parsuj odpowiedź
                 const text = await response.text()
-                dodajLog('info', `Surowa odpowiedź (${text.length} bajtów):`, text)
                 
                 let data
                 try {
@@ -148,18 +581,28 @@
                 }
                 
                 if (response.ok) {
-                    dodajLog('success', '✅ SUKCES! Email wysłany', data)
+                    dodajLog('success', '✅ Odpowiedź wysłana! ID: ' + (data.data?.id || 'ok'))
                 } else {
-                    dodajLog('error', `❌ BŁĄD ${response.status}`, data)
+                    dodajLog('error', `❌ Błąd ${response.status}: ${data.error || 'Nieznany błąd'}`)
                 }
                 
             } catch (error) {
-                dodajLog('error', '❌ BŁĄD SIECI:', {
-                    message: error.message,
-                    stack: error.stack
-                })
+                dodajLog('error', '❌ Błąd sieci: ' + error.message)
+            } finally {
+                // Odblokuj przycisk
+                sendBtn.disabled = false
+                btnText.innerHTML = '📤 Wyślij odpowiedź do klienta'
             }
-        }
+        })
+        
+        // Usuwanie klasy error przy pisaniu
+        supabaseKeyInput.addEventListener('input', () => supabaseKeyInput.classList.remove('error'))
+        toInput.addEventListener('input', () => toInput.classList.remove('error'))
+        subjectInput.addEventListener('input', () => subjectInput.classList.remove('error'))
+        htmlTextarea.addEventListener('input', () => htmlTextarea.classList.remove('error'))
+        
+        // Powitalny log
+        dodajLog('success', '✅ Gotowy do wysyłki odpowiedzi na maile klientów')
     </script>
 </body>
 </html>
