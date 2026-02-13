@@ -70,13 +70,11 @@
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 15px;
-            transition: all 0.3s;
         }
         
         .form-group input:focus {
             outline: none;
             border-color: #2a5298;
-            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
         }
         
         .btn-login {
@@ -89,7 +87,7 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            margin-top: 10px;
         }
         
         .btn-login:hover {
@@ -173,12 +171,18 @@
         
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        .login-error {
+        .error-message {
             color: #e74c3c;
             font-size: 14px;
             margin-top: 10px;
             text-align: center;
-            display: none;
+        }
+        
+        .success-message {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </head>
@@ -186,13 +190,13 @@
     <div class="container">
         <div class="header">
             <h1>👑 Panel Administratora</h1>
-            <p>Bezpieczne logowanie przez Supabase Auth</p>
+            <p>Logowanie przez Supabase Auth</p>
         </div>
         
         <div class="content">
             <!-- Sekcja logowania -->
             <div id="loginSection" class="login-section">
-                <h3 style="margin-bottom: 20px; color: #1e3c72;">🔐 Logowanie</h3>
+                <h3 style="margin-bottom: 20px; color: #1e3c72;">🔐 Zaloguj się</h3>
                 
                 <div class="form-group">
                     <label>📧 Email</label>
@@ -201,16 +205,14 @@
                 
                 <div class="form-group">
                     <label>🔑 Hasło</label>
-                    <input type="password" id="password" placeholder="Twoje hasło">
+                    <input type="password" id="password" placeholder="Wpisz hasło z Supabase Auth">
                 </div>
                 
                 <button class="btn-login" id="loginBtn" onclick="login()">
                     Zaloguj się
                 </button>
                 
-                <div id="loginError" class="login-error">
-                    ❌ Błędny email lub hasło
-                </div>
+                <div id="loginStatus" class="error-message"></div>
             </div>
             
             <!-- Panel administratora -->
@@ -236,13 +238,13 @@
                     <div class="form-group">
                         <label>✍️ Treść</label>
                         <textarea id="html" rows="10" required>
-&lt;h1&gt;Odpowiedź&lt;/h1&gt;
-&lt;p&gt;Treść wiadomości...&lt;/p&gt;
+&lt;h1&gt;Odpowiedź od administratora&lt;/h1&gt;
+&lt;p&gt;Dziękujemy za kontakt...&lt;/p&gt;
                         </textarea>
                     </div>
                     
                     <button type="submit" class="btn-send" id="sendBtn">
-                        <span id="btnText">📤 Wyślij</span>
+                        <span id="btnText">📤 Wyślij wiadomość</span>
                     </button>
                 </form>
                 
@@ -256,24 +258,30 @@
     </div>
 
     <script>
-        // Konfiguracja Supabase
+        // Konfiguracja
         const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3ZmlndnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDAwMDAsImV4cCI6MjA1NTM2NjQwMH0.Qw4l3s_6tXpY9nJqkLz8Qw4l3s_6tXpY9nJqkLz8Qw4'
         
         let session = null
         
-        // Funkcja logowania
         async function login() {
             const email = document.getElementById('email').value
             const password = document.getElementById('password').value
             const loginBtn = document.getElementById('loginBtn')
-            const loginError = document.getElementById('loginError')
+            const statusDiv = document.getElementById('loginStatus')
+            
+            if (!password) {
+                statusDiv.innerHTML = '❌ Wpisz hasło'
+                statusDiv.className = 'error-message'
+                return
+            }
             
             loginBtn.disabled = true
             loginBtn.innerHTML = 'Logowanie... <span class="loading"></span>'
-            loginError.style.display = 'none'
+            statusDiv.innerHTML = ''
             
             try {
+                // Logowanie przez Supabase Auth
                 const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                     method: 'POST',
                     headers: {
@@ -289,19 +297,22 @@
                 const data = await response.json()
                 
                 if (response.ok && data.access_token) {
+                    // Sukces!
                     session = data
-                    
-                    // Sprawdź czy to admin (opcjonalnie)
                     document.getElementById('loginSection').style.display = 'none'
                     document.getElementById('adminPanel').style.display = 'block'
                     document.getElementById('adminEmail').textContent = email
-                    dodajLog('success', '✅ Zalogowano pomyślnie')
+                    dodajLog('success', '✅ Zalogowano jako ' + email)
                 } else {
-                    loginError.style.display = 'block'
-                    dodajLog('error', '❌ Błąd logowania')
+                    // Błąd logowania
+                    let errorMsg = data.msg || data.error_description || data.message || 'Błąd logowania'
+                    statusDiv.innerHTML = '❌ ' + errorMsg
+                    statusDiv.className = 'error-message'
+                    dodajLog('error', '❌ Błąd: ' + errorMsg)
                 }
             } catch (error) {
-                loginError.style.display = 'block'
+                statusDiv.innerHTML = '❌ Błąd połączenia: ' + error.message
+                statusDiv.className = 'error-message'
                 dodajLog('error', '❌ Błąd: ' + error.message)
             } finally {
                 loginBtn.disabled = false
@@ -309,16 +320,15 @@
             }
         }
         
-        // Wylogowanie
         function logout() {
             session = null
             document.getElementById('loginSection').style.display = 'block'
             document.getElementById('adminPanel').style.display = 'none'
             document.getElementById('password').value = ''
+            document.getElementById('loginStatus').innerHTML = ''
             dodajLog('info', '🟢 Wylogowano')
         }
         
-        // Logi
         function dodajLog(typ, msg) {
             const logs = document.getElementById('logs')
             const czas = new Date().toLocaleTimeString()
@@ -347,7 +357,7 @@
                 html: document.getElementById('html').value
             }
             
-            dodajLog('info', '📧 Wysyłanie...')
+            dodajLog('info', '📧 Wysyłanie do: ' + dane.to)
             
             document.getElementById('sendBtn').disabled = true
             document.getElementById('btnText').innerHTML = 'Wysyłanie... <span class="loading"></span>'
@@ -368,27 +378,22 @@
                 if (response.ok) {
                     dodajLog('success', '✅ Wysłano!')
                 } else {
-                    dodajLog('error', `❌ Błąd ${response.status}`)
+                    dodajLog('error', '❌ Błąd ' + response.status + ': ' + text)
                 }
             } catch (error) {
                 dodajLog('error', '❌ Błąd: ' + error.message)
             } finally {
                 document.getElementById('sendBtn').disabled = false
-                document.getElementById('btnText').innerHTML = '📤 Wyślij'
+                document.getElementById('btnText').innerHTML = '📤 Wyślij wiadomość'
             }
         })
         
-        // Obsługa Enter
+        // Enter w polu hasła
         document.getElementById('password').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') login()
         })
         
-        // Sprawdź czy był już zalogowany (opcjonalnie)
-        // if (localStorage.getItem('sb-session')) {
-        //     session = JSON.parse(localStorage.getItem('sb-session'))
-        //     document.getElementById('loginSection').style.display = 'none'
-        //     document.getElementById('adminPanel').style.display = 'block'
-        // }
+        dodajLog('info', '🟢 Panel gotowy - wpisz hasło z Supabase Auth')
     </script>
 </body>
 </html>
