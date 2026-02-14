@@ -1,1 +1,552 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Bash Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            background: linear-gradient(135deg, #1a1e2f 0%, #2d1f3a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .terminal-wrapper {
+            width: 100%;
+            max-width: 900px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Nagłówek terminala */
+        .terminal-header {
+            background: #2d2f3b;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid #1e1f28;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-btn {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .window-btn.close { background: #ff5f56; }
+        .window-btn.minimize { background: #ffbd2e; }
+        .window-btn.maximize { background: #27c93f; }
+
+        .window-btn.close:hover { background: #ff7b72; }
+        .window-btn.minimize:hover { background: #ffd966; }
+        .window-btn.maximize:hover { background: #4ade68; }
+
+        .terminal-title {
+            color: #e0e0e0;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .terminal-title i {
+            margin-right: 8px;
+            color: #4ade68;
+        }
+
+        /* Obszar terminala */
+        .terminal-body {
+            background: #1e1e2e;
+            padding: 25px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            min-height: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* Stylizacja scrollbara */
+        .terminal-body::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: #2d2f3b;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: #4a4e6b;
+            border-radius: 5px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: #5f6485;
+        }
+
+        /* Linie terminala */
+        .output-line {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .output-line.success { color: #4ade68; }
+        .output-line.error { color: #ff5f56; }
+        .output-line.warning { color: #ffbd2e; }
+        .output-line.info { color: #64b5f6; }
+
+        /* Wiersz poleceń */
+        .command-line {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .prompt {
+            color: #4ade68;
+            font-weight: bold;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        .prompt span {
+            color: #64b5f6;
+            margin: 0 5px;
+        }
+
+        .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 15px;
+            min-width: 200px;
+        }
+
+        .command-input::placeholder {
+            color: #4a4e6b;
+            font-style: italic;
+        }
+
+        /* Pasek statusu */
+        .terminal-footer {
+            background: #2d2f3b;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            color: #a0a4c0;
+            font-size: 13px;
+            border-top: 1px solid #3f4257;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade68;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Przyciski szybkich poleceń */
+        .quick-commands {
+            padding: 15px 20px;
+            background: #252736;
+            border-top: 1px solid #3f4257;
+        }
+
+        .quick-commands-title {
+            color: #a0a4c0;
+            font-size: 13px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            background: #2d2f3b;
+            border: 1px solid #4a4e6b;
+            color: #e0e0e0;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: #4a4e6b;
+            border-color: #64b5f6;
+        }
+
+        .quick-btn.primary {
+            background: #4ade68;
+            border-color: #4ade68;
+            color: #1e1e2e;
+            font-weight: bold;
+        }
+
+        .quick-btn.primary:hover {
+            background: #6bef8a;
+        }
+
+        /* Powitanie */
+        .welcome-message {
+            margin-bottom: 20px;
+            color: #64b5f6;
+            border-left: 3px solid #4ade68;
+            padding-left: 15px;
+        }
+
+        .welcome-message pre {
+            color: #a0a4c0;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-wrapper">
+        <!-- Nagłówek -->
+        <div class="terminal-header">
+            <div class="window-controls">
+                <div class="window-btn close"></div>
+                <div class="window-btn minimize"></div>
+                <div class="window-btn maximize"></div>
+            </div>
+            <div class="terminal-title">
+                <i>📟</i> użytkownik@supabase-terminal:~/projekt
+            </div>
+        </div>
+
+        <!-- Główny terminal -->
+        <div class="terminal-body" id="terminalBody">
+            <div class="welcome-message">
+                Witaj w terminalu Supabase! 👋
+                <pre>
+  ╔═══════════════════════════════════════╗
+  ║  Dostępne komendy:                    ║
+  ║  • supabase functions list            ║
+  ║  • supabase functions download nazwa  ║
+  ║  • supabase link --project-ref ID     ║
+  ║  • clear - czyści ekran               ║
+  ║  • help - pokazuje pomoc              ║
+  ╚═══════════════════════════════════════╝
+                </pre>
+            </div>
+            <div id="outputArea"></div>
+            
+            <!-- Wiersz poleceń -->
+            <div class="command-line">
+                <span class="prompt">❯<span>~</span>$</span>
+                <input type="text" class="command-input" id="commandInput" placeholder="Wpisz polecenie..." autofocus>
+            </div>
+        </div>
+
+        <!-- Szybkie polecenia -->
+        <div class="quick-commands">
+            <div class="quick-commands-title">⚡ SZYBKIE POLECENIA DLA SUPABASE</div>
+            <div class="quick-buttons">
+                <button class="quick-btn" onclick="runQuickCommand('supabase functions list')">
+                    📋 Lista funkcji
+                </button>
+                <button class="quick-btn" onclick="runQuickCommand('supabase functions download verify-admin')">
+                    ⬇️ Pobierz verify-admin
+                </button>
+                <button class="quick-btn" onclick="runQuickCommand('supabase link --project-ref tfbqqduxtsacvwfigsvt')">
+                    🔗 Linkuj projekt
+                </button>
+                <button class="quick-btn" onclick="runQuickCommand('supabase --help')">
+                    📚 Pomoc
+                </button>
+                <button class="quick-btn primary" onclick="runQuickCommand('clear')">
+                    🧹 Wyczyść
+                </button>
+            </div>
+        </div>
+
+        <!-- Pasek statusu -->
+        <div class="terminal-footer">
+            <div class="status-item">
+                <span class="status-dot"></span>
+                <span>Połączono z Supabase</span>
+            </div>
+            <div class="status-item">
+                <span>Projekt: tfbqqduxtsacvwfigsvt</span>
+            </div>
+            <div class="status-item">
+                <span>📱 Android Terminal</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terminalBody = document.getElementById('terminalBody');
+        const outputArea = document.getElementById('outputArea');
+        const commandInput = document.getElementById('commandInput');
+
+        // Historia poleceń
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        // Katalog bieżący (symulacja)
+        let currentDir = '~/projekt';
+
+        // Powitanie
+        addOutput('System ready. Type "help" for available commands.', 'info');
+
+        // Obsługa klawiszy
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value.trim();
+                if (command) {
+                    processCommand(command);
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                    this.value = '';
+                }
+            }
+            
+            // Historia poleceń (strzałki góra/dół)
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    this.value = commandHistory[historyIndex];
+                }
+            }
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    this.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    this.value = '';
+                }
+            }
+        });
+
+        // Funkcja przetwarzająca polecenia
+        function processCommand(command) {
+            // Pokaż wpisane polecenie
+            addOutput(`❯ ${command}`, 'command');
+            
+            const parts = command.toLowerCase().split(' ');
+            const mainCommand = parts[0];
+            
+            // Symulacja odpowiedzi terminala
+            setTimeout(() => {
+                if (mainCommand === 'help') {
+                    showHelp();
+                }
+                else if (mainCommand === 'clear') {
+                    clearTerminal();
+                }
+                else if (mainCommand === 'supabase') {
+                    handleSupabaseCommand(parts);
+                }
+                else if (mainCommand === 'pwd') {
+                    addOutput(currentDir, 'output');
+                }
+                else if (mainCommand === 'ls') {
+                    addOutput('supabase/\n├── functions/\n│   └── verify-admin/\n│       └── index.ts\n├── migrations/\n└── config.toml', 'output');
+                }
+                else if (mainCommand === 'echo') {
+                    addOutput(parts.slice(1).join(' '), 'output');
+                }
+                else if (mainCommand === 'date') {
+                    addOutput(new Date().toString(), 'output');
+                }
+                else if (mainCommand === 'whoami') {
+                    addOutput('użytkownik@supabase', 'output');
+                }
+                else {
+                    addOutput(`komenda nie znaleziona: ${mainCommand}. Wpisz 'help' aby zobaczyć dostępne komendy.`, 'error');
+                }
+                
+                // Przewiń na dół
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            }, 100);
+        }
+
+        // Obsługa komend supabase
+        function handleSupabaseCommand(parts) {
+            const subCommand = parts[1];
+            
+            if (subCommand === 'functions' && parts[2] === 'list') {
+                addOutput(`📦 Funkcje w projekcie tfbqqduxtsacvwfigsvt:`, 'success');
+                addOutput('└── verify-admin (Node.js 18)', 'output');
+            }
+            else if (subCommand === 'functions' && parts[2] === 'download') {
+                const functionName = parts[3];
+                if (functionName === 'verify-admin') {
+                    addOutput(`✅ Pobieranie funkcji ${functionName}...`, 'info');
+                    addOutput(`⚙️  Utworzono katalog: supabase/functions/${functionName}/`, 'success');
+                    addOutput(`📄 Zapisano: index.ts (3.2 KB)`, 'success');
+                    addOutput(`
+📋 ZAWARTOŚĆ FUNKCJI verify-admin:
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+
+serve(async (req) => {
+  try {
+    // Sprawdź czy użytkownik jest zalogowany
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Brak autoryzacji' }),
+        { status: 401 }
+      )
+    }
+
+    // Tutaj logika weryfikacji admina
+    const isAdmin = true // Symulacja
+    
+    return new Response(
+      JSON.stringify({ 
+        isAdmin: isAdmin,
+        message: isAdmin ? 'Jesteś administratorem' : 'Brak uprawnień'
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500 }
+    )
+  }
+})`, 'output');
+                } else {
+                    addOutput(`❌ Funkcja ${functionName} nie istnieje`, 'error');
+                }
+            }
+            else if (subCommand === 'link') {
+                addOutput('✅ Połączono z projektem: tfbqqduxtsacvwfigsvt', 'success');
+                addOutput('📁 Link do dashboardu: https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt', 'info');
+            }
+            else if (subCommand === '--help' || subCommand === '-h') {
+                addOutput('Supabase CLI - pomoc:\n  supabase functions list\n  supabase functions download <nazwa>\n  supabase link --project-ref <ref>\n  supabase --help', 'info');
+            }
+            else {
+                addOutput(`supabase: '${subCommand}' nie jest poleceniem supabase. Zobacz 'supabase --help'.`, 'warning');
+            }
+        }
+
+        // Pomoc
+        function showHelp() {
+            addOutput(`
+📚 DOSTĘPNE KOMENDY:
+
+  🚀 KOMENDY SYSTEMOWE:
+    help            - pokazuje tę pomoc
+    clear           - czyści ekran
+    pwd             - pokazuje bieżący katalog
+    ls              - listuje pliki
+    echo [tekst]    - wyświetla tekst
+    date            - pokazuje datę
+    whoami          - pokazuje użytkownika
+
+  🔥 KOMENDY SUPABASE:
+    supabase functions list
+    supabase functions download verify-admin
+    supabase link --project-ref ID
+    supabase --help
+
+  💡 WSKAZÓWKA:
+    Używaj strzałek góra/dół do nawigacji w historii poleceń.
+            `, 'info');
+        }
+
+        // Dodawanie outputu
+        function addOutput(text, type = 'output') {
+            const line = document.createElement('div');
+            line.className = `output-line ${type}`;
+            
+            // Zachowaj formatowanie dla kodu
+            if (type === 'output' && text.includes('ZAWARTOŚĆ FUNKCJI')) {
+                const pre = document.createElement('pre');
+                pre.style.color = '#4ade68';
+                pre.style.background = '#252736';
+                pre.style.padding = '15px';
+                pre.style.borderRadius = '8px';
+                pre.style.margin = '10px 0';
+                pre.style.overflowX = 'auto';
+                pre.textContent = text;
+                line.appendChild(pre);
+            } else {
+                line.textContent = text;
+            }
+            
+            outputArea.appendChild(line);
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        // Czyszczenie terminala
+        function clearTerminal() {
+            outputArea.innerHTML = '';
+            addOutput('Terminal wyczyszczony. Wpisz "help" aby zobaczyć komendy.', 'info');
+        }
+
+        // Szybkie polecenia z przycisków
+        function runQuickCommand(command) {
+            commandInput.value = command;
+            processCommand(command);
+        }
+
+        // Automatyczne focus na input
+        terminalBody.addEventListener('click', function() {
+            commandInput.focus();
+        });
+
+        // Obsługa dotyku na Androidzie
+        commandInput.addEventListener('touchstart', function() {
+            this.focus();
+        });
+
+        // Blokada zoomu na input (dla lepszego UX na Androidzie)
+        commandInput.style.fontSize = '16px';
+    </script>
+</body>
+</html>
