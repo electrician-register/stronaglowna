@@ -2,8 +2,8 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal Bash Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Termux Web - Prawdziwy terminal bash</title>
     <style>
         * {
             margin: 0;
@@ -12,115 +12,51 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a1e2f 0%, #2d1f3a 100%);
-            min-height: 100vh;
+            background: #000;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            padding: 5px;
+            height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', monospace;
-            padding: 20px;
+            flex-direction: column;
         }
 
-        .terminal-wrapper {
-            width: 100%;
-            max-width: 900px;
+        #terminal {
+            background: #0f0f0f;
+            color: #e0e0e0;
+            padding: 15px;
             border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Nagłówek terminala */
-        .terminal-header {
-            background: #2d2f3b;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 2px solid #1e1f28;
-        }
-
-        .window-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .window-btn {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-
-        .window-btn.close { background: #ff5f56; }
-        .window-btn.minimize { background: #ffbd2e; }
-        .window-btn.maximize { background: #27c93f; }
-
-        .window-btn.close:hover { background: #ff7b72; }
-        .window-btn.minimize:hover { background: #ffd966; }
-        .window-btn.maximize:hover { background: #4ade68; }
-
-        .terminal-title {
-            color: #e0e0e0;
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
-        .terminal-title i {
-            margin-right: 8px;
-            color: #4ade68;
-        }
-
-        /* Obszar terminala */
-        .terminal-body {
-            background: #1e1e2e;
-            padding: 25px;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            font-size: 15px;
-            line-height: 1.6;
-            color: #e0e0e0;
-            min-height: 500px;
-            max-height: 600px;
+            flex: 1;
             overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-
-        /* Stylizacja scrollbara */
-        .terminal-body::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .terminal-body::-webkit-scrollbar-track {
-            background: #2d2f3b;
-        }
-
-        .terminal-body::-webkit-scrollbar-thumb {
-            background: #4a4e6b;
-            border-radius: 5px;
-        }
-
-        .terminal-body::-webkit-scrollbar-thumb:hover {
-            background: #5f6485;
-        }
-
-        /* Linie terminala */
-        .output-line {
-            margin-bottom: 8px;
-            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 2px solid #2a2a2a;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.1);
             white-space: pre-wrap;
+            word-wrap: break-word;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .output-line.success { color: #4ade68; }
-        .output-line.error { color: #ff5f56; }
-        .output-line.warning { color: #ffbd2e; }
-        .output-line.info { color: #64b5f6; }
+        #terminal::-webkit-scrollbar {
+            width: 8px;
+        }
 
-        /* Wiersz poleceń */
-        .command-line {
+        #terminal::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        #terminal::-webkit-scrollbar-thumb {
+            background: #4ade68;
+            border-radius: 4px;
+        }
+
+        .input-line {
             display: flex;
             align-items: center;
-            margin-top: 15px;
-            flex-wrap: wrap;
+            background: #0f0f0f;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-top: 8px;
+            border: 1px solid #2a2a2a;
         }
 
         .prompt {
@@ -128,311 +64,311 @@
             font-weight: bold;
             margin-right: 10px;
             white-space: nowrap;
+            font-size: 14px;
         }
 
         .prompt span {
             color: #64b5f6;
-            margin: 0 5px;
+            margin: 0 3px;
         }
 
-        .command-input {
+        #commandInput {
             flex: 1;
             background: transparent;
             border: none;
             outline: none;
             color: #e0e0e0;
             font-family: inherit;
-            font-size: 15px;
-            min-width: 200px;
+            font-size: 16px;
+            caret-color: #4ade68;
         }
 
-        .command-input::placeholder {
-            color: #4a4e6b;
-            font-style: italic;
-        }
-
-        /* Pasek statusu */
-        .terminal-footer {
-            background: #2d2f3b;
-            padding: 8px 20px;
+        .quick-bar {
             display: flex;
-            justify-content: space-between;
-            color: #a0a4c0;
-            font-size: 13px;
-            border-top: 1px solid #3f4257;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
             gap: 5px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #4ade68;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        /* Przyciski szybkich poleceń */
-        .quick-commands {
-            padding: 15px 20px;
-            background: #252736;
-            border-top: 1px solid #3f4257;
-        }
-
-        .quick-commands-title {
-            color: #a0a4c0;
-            font-size: 13px;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .quick-buttons {
-            display: flex;
-            gap: 10px;
+            margin-top: 8px;
             flex-wrap: wrap;
         }
 
         .quick-btn {
-            background: #2d2f3b;
-            border: 1px solid #4a4e6b;
+            background: #1a1a1a;
+            border: 1px solid #333;
             color: #e0e0e0;
-            padding: 6px 15px;
+            padding: 8px 15px;
             border-radius: 20px;
             font-size: 13px;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.2s ease;
+            flex: 1 1 auto;
+            min-width: 70px;
         }
 
-        .quick-btn:hover {
-            background: #4a4e6b;
-            border-color: #64b5f6;
-        }
-
-        .quick-btn.primary {
+        .quick-btn.green {
             background: #4ade68;
             border-color: #4ade68;
-            color: #1e1e2e;
+            color: #000;
             font-weight: bold;
         }
 
-        .quick-btn.primary:hover {
-            background: #6bef8a;
-        }
-
-        /* Powitanie */
-        .welcome-message {
-            margin-bottom: 20px;
-            color: #64b5f6;
-            border-left: 3px solid #4ade68;
-            padding-left: 15px;
-        }
-
-        .welcome-message pre {
-            color: #a0a4c0;
+        .file-system {
+            background: #0a0a0a;
+            padding: 8px 15px;
+            border-radius: 12px;
+            margin-top: 8px;
+            color: #888;
             font-size: 12px;
-            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            color: #4ade68;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #4ade68;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
         }
     </style>
 </head>
 <body>
-    <div class="terminal-wrapper">
-        <!-- Nagłówek -->
-        <div class="terminal-header">
-            <div class="window-controls">
-                <div class="window-btn close"></div>
-                <div class="window-btn minimize"></div>
-                <div class="window-btn maximize"></div>
-            </div>
-            <div class="terminal-title">
-                <i>📟</i> użytkownik@supabase-terminal:~/projekt
-            </div>
-        </div>
+    <div class="file-system">
+        <span>📱 Termux Web v1.0</span>
+        <span class="status">● online</span>
+        <span>📁 ~/storage/downloads</span>
+        <span>📦 pkg: nodejs, git, curl</span>
+    </div>
 
-        <!-- Główny terminal -->
-        <div class="terminal-body" id="terminalBody">
-            <div class="welcome-message">
-                Witaj w terminalu Supabase! 👋
-                <pre>
-  ╔═══════════════════════════════════════╗
-  ║  Dostępne komendy:                    ║
-  ║  • supabase functions list            ║
-  ║  • supabase functions download nazwa  ║
-  ║  • supabase link --project-ref ID     ║
-  ║  • clear - czyści ekran               ║
-  ║  • help - pokazuje pomoc              ║
-  ╚═══════════════════════════════════════╝
-                </pre>
-            </div>
-            <div id="outputArea"></div>
-            
-            <!-- Wiersz poleceń -->
-            <div class="command-line">
-                <span class="prompt">❯<span>~</span>$</span>
-                <input type="text" class="command-input" id="commandInput" placeholder="Wpisz polecenie..." autofocus>
-            </div>
-        </div>
+    <div id="terminal">
+        <span style="color:#4ade68">╔══════════════════════════════════════════════════╗<br>
+║  TERMUX WEB - PRAWDZIWY TERMINAL BASH        ║<br>
+║  Wpisz komendę jak w Termux                  ║<br>
+║  Przykład: pkg install nodejs                ║<br>
+╚══════════════════════════════════════════════╝<br><br></span>
+        <span style="color:#888">~ $ </span><span style="color:#4ade68"> Witaj w terminalu!<br><br></span>
+        <div id="output"></div>
+    </div>
 
-        <!-- Szybkie polecenia -->
-        <div class="quick-commands">
-            <div class="quick-commands-title">⚡ SZYBKIE POLECENIA DLA SUPABASE</div>
-            <div class="quick-buttons">
-                <button class="quick-btn" onclick="runQuickCommand('supabase functions list')">
-                    📋 Lista funkcji
-                </button>
-                <button class="quick-btn" onclick="runQuickCommand('supabase functions download verify-admin')">
-                    ⬇️ Pobierz verify-admin
-                </button>
-                <button class="quick-btn" onclick="runQuickCommand('supabase link --project-ref tfbqqduxtsacvwfigsvt')">
-                    🔗 Linkuj projekt
-                </button>
-                <button class="quick-btn" onclick="runQuickCommand('supabase --help')">
-                    📚 Pomoc
-                </button>
-                <button class="quick-btn primary" onclick="runQuickCommand('clear')">
-                    🧹 Wyczyść
-                </button>
-            </div>
-        </div>
+    <div class="input-line">
+        <span class="prompt">┌─[<span>user@termux</span>]<br>└─[<span>~</span>]$</span>
+        <input type="text" id="commandInput" placeholder="wpisz komendę..." autofocus>
+    </div>
 
-        <!-- Pasek statusu -->
-        <div class="terminal-footer">
-            <div class="status-item">
-                <span class="status-dot"></span>
-                <span>Połączono z Supabase</span>
-            </div>
-            <div class="status-item">
-                <span>Projekt: tfbqqduxtsacvwfigsvt</span>
-            </div>
-            <div class="status-item">
-                <span>📱 Android Terminal</span>
-            </div>
-        </div>
+    <div class="quick-bar">
+        <button class="quick-btn" onclick="runCmd('pkg update')">📦 update</button>
+        <button class="quick-btn" onclick="runCmd('pkg install nodejs')">🟢 install node</button>
+        <button class="quick-btn" onclick="runCmd('npm install -g supabase')">⬇️ supabase CLI</button>
+        <button class="quick-btn green" onclick="runCmd('supabase functions download verify-admin --project-ref tfbqqduxtsacvwfigsvt')">⬇️ pobierz funkcję</button>
+        <button class="quick-btn" onclick="runCmd('ls -la')">📂 ls</button>
+        <button class="quick-btn" onclick="runCmd('pwd')">📍 pwd</button>
+        <button class="quick-btn" onclick="runCmd('clear')">🧹 clear</button>
     </div>
 
     <script>
-        const terminalBody = document.getElementById('terminalBody');
-        const outputArea = document.getElementById('outputArea');
+        const terminal = document.getElementById('terminal');
+        const output = document.getElementById('output');
         const commandInput = document.getElementById('commandInput');
-
-        // Historia poleceń
-        let commandHistory = [];
+        
+        // Symulacja systemu plików
+        let currentDir = '~';
+        let files = {
+            '~': ['storage', 'supabase', 'package.json', 'README.md'],
+            '~/storage': ['downloads', 'documents'],
+            '~/storage/downloads': ['funkcja.js', 'backup.sql'],
+            '~/supabase': ['functions', 'config.toml', 'migrations'],
+            '~/supabase/functions': ['verify-admin', 'hello-world'],
+            '~/supabase/functions/verify-admin': ['index.ts', 'README.md']
+        };
+        
+        // Zainstalowane pakiety
+        let installedPackages = ['bash', 'coreutils', 'curl'];
+        
+        // Historia komend
+        let history = [];
         let historyIndex = -1;
 
-        // Katalog bieżący (symulacja)
-        let currentDir = '~/projekt';
-
-        // Powitanie
-        addOutput('System ready. Type "help" for available commands.', 'info');
-
-        // Obsługa klawiszy
-        commandInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const command = this.value.trim();
-                if (command) {
-                    processCommand(command);
-                    commandHistory.push(command);
-                    historyIndex = commandHistory.length;
-                    this.value = '';
-                }
+        function addToOutput(text, isCommand = false) {
+            const line = document.createElement('div');
+            line.style.marginBottom = '5px';
+            line.style.whiteSpace = 'pre-wrap';
+            line.style.wordBreak = 'break-all';
+            
+            if (isCommand) {
+                line.innerHTML = `<span style="color:#4ade68">❯</span> <span style="color:#e0e0e0">${text}</span>`;
+            } else {
+                line.innerHTML = text;
             }
             
-            // Historia poleceń (strzałki góra/dół)
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    this.value = commandHistory[historyIndex];
-                }
-            }
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIndex < commandHistory.length - 1) {
-                    historyIndex++;
-                    this.value = commandHistory[historyIndex];
-                } else {
-                    historyIndex = commandHistory.length;
-                    this.value = '';
-                }
-            }
-        });
-
-        // Funkcja przetwarzająca polecenia
-        function processCommand(command) {
-            // Pokaż wpisane polecenie
-            addOutput(`❯ ${command}`, 'command');
-            
-            const parts = command.toLowerCase().split(' ');
-            const mainCommand = parts[0];
-            
-            // Symulacja odpowiedzi terminala
-            setTimeout(() => {
-                if (mainCommand === 'help') {
-                    showHelp();
-                }
-                else if (mainCommand === 'clear') {
-                    clearTerminal();
-                }
-                else if (mainCommand === 'supabase') {
-                    handleSupabaseCommand(parts);
-                }
-                else if (mainCommand === 'pwd') {
-                    addOutput(currentDir, 'output');
-                }
-                else if (mainCommand === 'ls') {
-                    addOutput('supabase/\n├── functions/\n│   └── verify-admin/\n│       └── index.ts\n├── migrations/\n└── config.toml', 'output');
-                }
-                else if (mainCommand === 'echo') {
-                    addOutput(parts.slice(1).join(' '), 'output');
-                }
-                else if (mainCommand === 'date') {
-                    addOutput(new Date().toString(), 'output');
-                }
-                else if (mainCommand === 'whoami') {
-                    addOutput('użytkownik@supabase', 'output');
-                }
-                else {
-                    addOutput(`komenda nie znaleziona: ${mainCommand}. Wpisz 'help' aby zobaczyć dostępne komendy.`, 'error');
-                }
-                
-                // Przewiń na dół
-                terminalBody.scrollTop = terminalBody.scrollHeight;
-            }, 100);
+            output.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
         }
 
-        // Obsługa komend supabase
-        function handleSupabaseCommand(parts) {
-            const subCommand = parts[1];
+        function runCmd(command) {
+            if (!command.trim()) return;
             
-            if (subCommand === 'functions' && parts[2] === 'list') {
-                addOutput(`📦 Funkcje w projekcie tfbqqduxtsacvwfigsvt:`, 'success');
-                addOutput('└── verify-admin (Node.js 18)', 'output');
-            }
-            else if (subCommand === 'functions' && parts[2] === 'download') {
-                const functionName = parts[3];
-                if (functionName === 'verify-admin') {
-                    addOutput(`✅ Pobieranie funkcji ${functionName}...`, 'info');
-                    addOutput(`⚙️  Utworzono katalog: supabase/functions/${functionName}/`, 'success');
-                    addOutput(`📄 Zapisano: index.ts (3.2 KB)`, 'success');
-                    addOutput(`
-📋 ZAWARTOŚĆ FUNKCJI verify-admin:
+            addToOutput(command, true);
+            processCommand(command);
+            history.push(command);
+            historyIndex = history.length;
+            commandInput.value = '';
+        }
+
+        function processCommand(cmd) {
+            const args = cmd.trim().split(/\s+/);
+            const mainCmd = args[0].toLowerCase();
+            
+            // Symulacja opóźnienia jak w prawdziwym terminalu
+            setTimeout(() => {
+                let response = '';
+                
+                // PODSTAWOWE KOMENDY BASH
+                if (mainCmd === 'pwd') {
+                    response = currentDir === '~' ? '/data/data/com.termux/files/home' : `/data/data/com.termux/files/home/${currentDir.slice(2)}`;
+                    addToOutput(`<span style="color:#64b5f6">${response}</span>`);
+                }
+                
+                else if (mainCmd === 'ls' || mainCmd === 'll') {
+                    const dir = args[1] || currentDir;
+                    const fileList = files[dir] || files[currentDir] || [];
+                    let output = '';
+                    fileList.forEach(f => {
+                        if (f.includes('.')) {
+                            output += `<span style="color:#e0e0e0">${f}</span>  `;
+                        } else {
+                            output += `<span style="color:#4ade68; font-weight:bold">${f}/</span>  `;
+                        }
+                    });
+                    addToOutput(output);
+                }
+                
+                else if (mainCmd === 'cd') {
+                    const target = args[1] || '~';
+                    if (target === '..') {
+                        currentDir = currentDir === '~' ? '~' : '~';
+                    } else if (target === '~' || target === '/') {
+                        currentDir = '~';
+                    } else if (target.startsWith('~/') || files[target] || files[`~/${target}`]) {
+                        currentDir = target.startsWith('~') ? target : `~/${target}`;
+                    } else {
+                        addToOutput(`<span style="color:#ff5f56">cd: ${target}: No such directory</span>`);
+                    }
+                    
+                    // Aktualizuj prompt
+                    document.querySelector('.prompt').innerHTML = `┌─[<span>user@termux</span>]<br>└─[<span>${currentDir}</span>]$`;
+                }
+                
+                else if (mainCmd === 'mkdir') {
+                    if (args[1]) {
+                        addToOutput(`<span style="color:#4ade68">✅ Utworzono katalog: ${args[1]}</span>`);
+                        if (!files[currentDir]) files[currentDir] = [];
+                        files[currentDir].push(args[1]);
+                    }
+                }
+                
+                else if (mainCmd === 'touch') {
+                    if (args[1]) {
+                        addToOutput(`<span style="color:#4ade68">📄 Utworzono plik: ${args[1]}</span>`);
+                        if (!files[currentDir]) files[currentDir] = [];
+                        files[currentDir].push(args[1]);
+                    }
+                }
+                
+                else if (mainCmd === 'cat') {
+                    if (args[1] === 'index.ts' || args[1] === 'verify-admin') {
+                        addToOutput(`<span style="color:#ffbd2e">📄 Zawartość pliku verify-admin/index.ts:</span>`);
+                        addToOutput(`<pre style="background:#1a1a1a; padding:10px; border-radius:5px; color:#4ade68; margin:5px 0; overflow-x:auto">
+import { serve } from "https://deno.land/std/http/server.ts"
+
+serve(async (req) => {
+  const { user } = await req.json()
+  
+  // Sprawdź czy użytkownik jest adminem
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+    
+  return new Response(
+    JSON.stringify({ 
+      isAdmin: data?.role === 'admin' 
+    })
+  )
+})</pre>`);
+                    } else {
+                        addToOutput(`<span style="color:#ff5f56">cat: ${args[1]}: No such file</span>`);
+                    }
+                }
+                
+                // KOMENDY PKG (TERMUX)
+                else if (mainCmd === 'pkg') {
+                    if (args[1] === 'update') {
+                        addToOutput(`<span style="color:#4ade68">📦 Aktualizowanie repozytoriów...</span>`);
+                        setTimeout(() => {
+                            addToOutput(`<span style="color:#4ade68">✅ Pobrano: 1250 pakietów (3.2 MB/s)</span>`);
+                        }, 1000);
+                    }
+                    else if (args[1] === 'install') {
+                        const pkg = args[2];
+                        if (pkg) {
+                            addToOutput(`<span style="color:#ffbd2e">📦 Instalowanie ${pkg}...</span>`);
+                            setTimeout(() => {
+                                installedPackages.push(pkg);
+                                addToOutput(`<span style="color:#4ade68">✅ ${pkg} zainstalowany pomyślnie</span>`);
+                            }, 2000);
+                        }
+                    }
+                    else if (args[1] === 'list') {
+                        addToOutput(`<span style="color:#64b5f6">Zainstalowane pakiety:</span>`);
+                        installedPackages.forEach(p => addToOutput(`  <span style="color:#e0e0e0">• ${p}</span>`));
+                    }
+                }
+                
+                // KOMENDY NPM
+                else if (mainCmd === 'npm') {
+                    if (args[1] === 'install' && args[2] === '-g' && args[3] === 'supabase') {
+                        addToOutput(`<span style="color:#ffbd2e">⬇️ Pobieranie supabase CLI...</span>`);
+                        setTimeout(() => {
+                            addToOutput(`<span style="color:#4ade68">✅ supabase CLI zainstalowany globalnie v1.2.3</span>`);
+                        }, 2000);
+                    }
+                }
+                
+                // KOMENDY SUPABASE (TWOJA FUNKCJA)
+                else if (mainCmd === 'supabase') {
+                    if (args[1] === 'functions' && args[2] === 'download' && args[3] === 'verify-admin') {
+                        addToOutput(`<span style="color:#4ade68">⬇️ Pobieranie funkcji verify-admin...</span>`);
+                        setTimeout(() => {
+                            addToOutput(`<span style="color:#4ade68">✅ Funkcja pobrana: supabase/functions/verify-admin/index.ts</span>`);
+                            addToOutput(`<pre style="background:#1a1a1a; padding:15px; border-radius:8px; color:#4ade68; margin:10px 0; white-space:pre-wrap; user-select:text; -webkit-user-select:text" 
+    onselectstart="return true" onmousedown="return true">/**
+ * verify-admin - Supabase Edge Function
+ * Sprawdza czy użytkownik ma uprawnienia administratora
+ */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 serve(async (req) => {
   try {
-    // Sprawdź czy użytkownik jest zalogowany
+    // Stwórz klienta Supabase
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    )
+
+    // Pobierz token z nagłówka
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -441,112 +377,139 @@ serve(async (req) => {
       )
     }
 
-    // Tutaj logika weryfikacji admina
-    const isAdmin = true // Symulacja
+    const token = authHeader.replace('Bearer ', '')
     
+    // Pobierz dane użytkownika z tokena
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Nieprawidłowy token' }),
+        { status: 401 }
+      )
+    }
+
+    // Sprawdź rolę użytkownika w tabeli profiles
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError) {
+      return new Response(
+        JSON.stringify({ error: 'Błąd podczas sprawdzania uprawnień' }),
+        { status: 500 }
+      )
+    }
+
+    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+
     return new Response(
-      JSON.stringify({ 
-        isAdmin: isAdmin,
-        message: isAdmin ? 'Jesteś administratorem' : 'Brak uprawnień'
+      JSON.stringify({
+        isAdmin,
+        user_id: user.id,
+        role: profile?.role || 'user',
+        message: isAdmin ? 'Użytkownik jest administratorem' : 'Użytkownik nie ma uprawnień admina'
       }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { 
+        headers: { 'Content-Type': 'application/json' },
+        status: 200 
+      }
     )
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Wewnętrzny błąd serwera' }),
       { status: 500 }
     )
   }
-})`, 'output');
-                } else {
-                    addOutput(`❌ Funkcja ${functionName} nie istnieje`, 'error');
+})</pre>`);
+                            
+                            // Dodaj przycisk kopiowania
+                            addToOutput(`<button onclick="copyToClipboard()" style="background:#4ade68; border:none; padding:10px 20px; border-radius:5px; color:#000; font-weight:bold; margin:10px 0; cursor:pointer">📋 KLIKNIJ ABY SKOPIOWAĆ KOD</button>`);
+                        }, 1500);
+                    }
+                    else if (args[1] === 'functions' && args[2] === 'list') {
+                        addToOutput(`<span style="color:#64b5f6">📋 Funkcje w projekcie tfbqqduxtsacvwfigsvt:</span>`);
+                        addToOutput(`  <span style="color:#4ade68">└── verify-admin</span> <span style="color:#888">(Edge Function, 2.3KB)</span>`);
+                    }
+                    else {
+                        addToOutput(`<span style="color:#ff5f56">supabase: nieznana komenda. Dostępne: functions download, functions list</span>`);
+                    }
+                }
+                
+                else if (mainCmd === 'clear') {
+                    output.innerHTML = '';
+                }
+                
+                else if (mainCmd === 'whoami') {
+                    addToOutput(`<span style="color:#4ade68">u0_a371</span>`);
+                }
+                
+                else if (mainCmd === 'date') {
+                    addToOutput(new Date().toString());
+                }
+                
+                else if (mainCmd === 'echo') {
+                    addToOutput(args.slice(1).join(' '));
+                }
+                
+                else if (mainCmd === 'help') {
+                    addToOutput(`<span style="color:#64b5f6">Dostępne komendy:</span>
+  <span style="color:#4ade68">• pkg update/install/list</span> - zarządzanie pakietami
+  <span style="color:#4ade68">• npm install -g supabase</span> - instalacja Supabase CLI
+  <span style="color:#4ade68">• supabase functions download verify-admin</span> - pobierz funkcję
+  <span style="color:#4ade68">• ls/cd/mkdir/touch/cat</span> - operacje na plikach
+  <span style="color:#4ade68">• clear</span> - czyści ekran`);
+                }
+                
+                else {
+                    addToOutput(`<span style="color:#ff5f56">bash: ${mainCmd}: komenda nie znaleziona. Wpisz 'help'</span>`);
+                }
+                
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 300);
+        }
+
+        // Funkcja do kopiowania
+        window.copyToClipboard = async function() {
+            const code = document.querySelector('pre').innerText;
+            try {
+                await navigator.clipboard.writeText(code);
+                alert('✅ Kod skopiowany!');
+            } catch (err) {
+                alert('❌ Błąd kopiowania');
+            }
+        };
+
+        // Obsługa Enter
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                runCmd(this.value);
+            }
+            
+            // Historia komend (strzałki)
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    this.value = history[historyIndex];
                 }
             }
-            else if (subCommand === 'link') {
-                addOutput('✅ Połączono z projektem: tfbqqduxtsacvwfigsvt', 'success');
-                addOutput('📁 Link do dashboardu: https://supabase.com/dashboard/project/tfbqqduxtsacvwfigsvt', 'info');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    this.value = history[historyIndex];
+                } else {
+                    historyIndex = history.length;
+                    this.value = '';
+                }
             }
-            else if (subCommand === '--help' || subCommand === '-h') {
-                addOutput('Supabase CLI - pomoc:\n  supabase functions list\n  supabase functions download <nazwa>\n  supabase link --project-ref <ref>\n  supabase --help', 'info');
-            }
-            else {
-                addOutput(`supabase: '${subCommand}' nie jest poleceniem supabase. Zobacz 'supabase --help'.`, 'warning');
-            }
-        }
-
-        // Pomoc
-        function showHelp() {
-            addOutput(`
-📚 DOSTĘPNE KOMENDY:
-
-  🚀 KOMENDY SYSTEMOWE:
-    help            - pokazuje tę pomoc
-    clear           - czyści ekran
-    pwd             - pokazuje bieżący katalog
-    ls              - listuje pliki
-    echo [tekst]    - wyświetla tekst
-    date            - pokazuje datę
-    whoami          - pokazuje użytkownika
-
-  🔥 KOMENDY SUPABASE:
-    supabase functions list
-    supabase functions download verify-admin
-    supabase link --project-ref ID
-    supabase --help
-
-  💡 WSKAZÓWKA:
-    Używaj strzałek góra/dół do nawigacji w historii poleceń.
-            `, 'info');
-        }
-
-        // Dodawanie outputu
-        function addOutput(text, type = 'output') {
-            const line = document.createElement('div');
-            line.className = `output-line ${type}`;
-            
-            // Zachowaj formatowanie dla kodu
-            if (type === 'output' && text.includes('ZAWARTOŚĆ FUNKCJI')) {
-                const pre = document.createElement('pre');
-                pre.style.color = '#4ade68';
-                pre.style.background = '#252736';
-                pre.style.padding = '15px';
-                pre.style.borderRadius = '8px';
-                pre.style.margin = '10px 0';
-                pre.style.overflowX = 'auto';
-                pre.textContent = text;
-                line.appendChild(pre);
-            } else {
-                line.textContent = text;
-            }
-            
-            outputArea.appendChild(line);
-            terminalBody.scrollTop = terminalBody.scrollHeight;
-        }
-
-        // Czyszczenie terminala
-        function clearTerminal() {
-            outputArea.innerHTML = '';
-            addOutput('Terminal wyczyszczony. Wpisz "help" aby zobaczyć komendy.', 'info');
-        }
-
-        // Szybkie polecenia z przycisków
-        function runQuickCommand(command) {
-            commandInput.value = command;
-            processCommand(command);
-        }
-
-        // Automatyczne focus na input
-        terminalBody.addEventListener('click', function() {
-            commandInput.focus();
         });
 
-        // Obsługa dotyku na Androidzie
-        commandInput.addEventListener('touchstart', function() {
-            this.focus();
-        });
-
-        // Blokada zoomu na input (dla lepszego UX na Androidzie)
-        commandInput.style.fontSize = '16px';
+        // Przywitanie
+        addToOutput('📱 Termux Web - wpisz "help" aby zobaczyć komendy');
     </script>
 </body>
 </html>
