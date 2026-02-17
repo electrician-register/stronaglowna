@@ -134,6 +134,24 @@
       max-height: 300px;
       overflow-y: auto;
     }
+
+    /* Loading indicator dla listy województw */
+    .select-loading {
+      opacity: 0.6;
+      pointer-events: none;
+      position: relative;
+    }
+    .select-loading::after {
+      content: "⏳ Ładowanie...";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: #666;
+      background: white;
+      padding: 0 5px;
+    }
   </style>
 </head>
 
@@ -233,6 +251,12 @@ const fields = ['imie','nazwisko','miasto','wojewodztwo','nrE','nrEPomiary','nrD
 
 // ========== QUILL EDITOR INITIALIZATION ==========
 let quill = null;
+
+// Cache dla województw i miast
+let wojewodztwaCache = null;
+let miastaCache = new Map();
+
+// Inicjalizacja Quill po załadowaniu DOM
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Quill editor
   quill = new Quill('#zajmujeSie-editor-container', {
@@ -279,98 +303,191 @@ bindValidity('nrE', 'nrEValidLabel', 'nrEValidTo')
 bindValidity('nrEPomiary', 'nrEPomiaryValidLabel', 'nrEPomiaryValidTo')
 bindValidity('nrD', 'nrDValidLabel', 'nrDValidTo')
 
+// Zoptymalizowana funkcja ładowania województw z cache
 async function loadWojewodztwa(selectedWoj = null) {
-  const { data, error } = await supabase.from('wojewodztwa').select('id, nazwa').order('nazwa')
-  if (error) return
-  const wojSelect = document.getElementById('wojewodztwo')
-  wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>'
-  data.forEach(w => {
-    const o = document.createElement('option')
-    o.value = w.id
-    o.textContent = w.nazwa
-    wojSelect.appendChild(o)
-  })
-  if (selectedWoj) {
-    wojSelect.value = selectedWoj
-    wojSelect.dispatchEvent(new Event('change'))
+  const wojSelect = document.getElementById('wojewodztwo');
+  
+  // Pokaż stan ładowania
+  wojSelect.classList.add('select-loading');
+  wojSelect.disabled = true;
+  
+  try {
+    let data;
+    if (wojewodztwaCache) {
+      // Użyj cache jeśli dostępne
+      data = wojewodztwaCache;
+    } else {
+      const { data: fetchedData, error } = await supabase
+        .from('wojewodztwa')
+        .select('id, nazwa')
+        .order('nazwa');
+      
+      if (error) throw error;
+      
+      // Zapisz w cache
+      wojewodztwaCache = fetchedData;
+      data = fetchedData;
+    }
+    
+    wojSelect.innerHTML = '<option value="">— wybierz województwo —</option>';
+    data.forEach(w => {
+      const o = document.createElement('option');
+      o.value = w.id;
+      o.textContent = w.nazwa;
+      wojSelect.appendChild(o);
+    });
+    
+    if (selectedWoj) {
+      wojSelect.value = selectedWoj;
+      wojSelect.dispatchEvent(new Event('change'));
+    }
+  } catch (error) {
+    console.error('Błąd ładowania województw:', error);
+    wojSelect.innerHTML = '<option value="">— błąd ładowania —</option>';
+  } finally {
+    // Ukryj stan ładowania
+    wojSelect.classList.remove('select-loading');
+    wojSelect.disabled = false;
+  }
+}
+
+// Zoptymalizowana funkcja ładowania miast z cache
+async function loadMiasta(wojId) {
+  const miastoSelect = document.getElementById('miasto');
+  
+  if (!wojId) {
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>';
+    miastoSelect.disabled = true;
+    return;
+  }
+  
+  // Pokaż stan ładowania
+  miastoSelect.classList.add('select-loading');
+  miastoSelect.disabled = true;
+  
+  try {
+    let data;
+    if (miastaCache.has(wojId)) {
+      // Użyj cache jeśli dostępne
+      data = miastaCache.get(wojId);
+    } else {
+      const { data: fetchedData, error } = await supabase
+        .from('miasta')
+        .select('id,nazwa')
+        .eq('wojewodztwo_id', wojId)
+        .order('nazwa');
+      
+      if (error) throw error;
+      
+      // Zapisz w cache
+      miastaCache.set(wojId, fetchedData);
+      data = fetchedData;
+    }
+    
+    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>';
+    data.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.id;
+      o.textContent = m.nazwa;
+      miastoSelect.appendChild(o);
+    });
+    
+    miastoSelect.disabled = false;
+  } catch (error) {
+    console.error('Błąd ładowania miast:', error);
+    miastoSelect.innerHTML = '<option value="">— błąd ładowania —</option>';
+  } finally {
+    // Ukryj stan ładowania
+    miastoSelect.classList.remove('select-loading');
   }
 }
 
 document.getElementById('wojewodztwo').addEventListener('change', async function() {
-  const wojId = this.value
-  const miastoSelect = document.getElementById('miasto')
-  if (!wojId) {
-    miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-    miastoSelect.disabled = true
-    return
-  }
-  const { data, error } = await supabase.from('miasta').select('id,nazwa').eq('wojewodztwo_id', wojId).order('nazwa')
-  if (error) return
-  miastoSelect.innerHTML = '<option value="">— wybierz miasto —</option>'
-  data.forEach(m => {
-    const o = document.createElement('option')
-    o.value = m.id
-    o.textContent = m.nazwa
-    miastoSelect.appendChild(o)
-  })
-  miastoSelect.disabled = false
-})
+  await loadMiasta(this.value);
+});
 
 document.getElementById('close-btn').addEventListener('click', () => {
   window.location.href = 'https://orep.pl/'
 })
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return window.location.href = '/logowanie'
-
-  currentUser = user
-  email.value = user.email
-
-  const { data } = await supabase.from('tabela_elektrykow')
-    .select('*')
-    .eq('email', user.email)
-    .single()
-
-  if (data) {
-    document.getElementById('form-title').textContent = 'Aktualizacja danych'
-    document.getElementById('submit-btn').textContent = 'Zapisz zmiany'
-    fields.forEach(f => {
-      if (data[f] && document.getElementById(f)) {
-        document.getElementById(f).value = data[f]
-      }
-    })
-
-    // Load Quill editor content if exists
-    if (data.zajmujeSie && quill) {
-      quill.root.innerHTML = data.zajmujeSie;
-      document.getElementById('zajmujeSie').value = data.zajmujeSie;
-    }
-
-    if (data.wojewodztwo) await loadWojewodztwa(data.wojewodztwo)
-    if (data.miasto) document.getElementById('miasto').value = data.miasto
-
-    // daty ważności
-    if (data.nrE) {
-      nrEValidLabel.style.display = 'block'
-      nrEValidTo.style.display = 'block'
-      nrEValidTo.value = data.nrE_valid_to || ''
-    }
-    if (data.nrEPomiary) {
-      nrEPomiaryValidLabel.style.display = 'block'
-      nrEPomiaryValidTo.style.display = 'block'
-      nrEPomiaryValidTo.value = data.nrEPomiary_valid_to || ''
-    }
-    if (data.nrD) {
-      nrDValidLabel.style.display = 'block'
-      nrDValidTo.style.display = 'block'
-      nrDValidTo.value = data.nrD_valid_to || ''
-    }
-
-  } else {
-    loadWojewodztwa()
+// Główna funkcja inicjalizująca
+async function initializeForm() {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    window.location.href = '/logowanie';
+    return;
   }
-})
+  
+  currentUser = user;
+  document.getElementById('email').value = user.email;
+
+  // Rozpocznij ładowanie województw od razu
+  const wojLoadPromise = loadWojewodztwa();
+
+  try {
+    const { data } = await supabase
+      .from('tabela_elektrykow')
+      .select('*')
+      .eq('email', user.email)
+      .single();
+
+    if (data) {
+      document.getElementById('form-title').textContent = 'Aktualizacja danych';
+      document.getElementById('submit-btn').textContent = 'Zapisz zmiany';
+      
+      // Wypełnij podstawowe pola
+      fields.forEach(f => {
+        if (data[f] && document.getElementById(f)) {
+          document.getElementById(f).value = data[f];
+        }
+      });
+
+      // Wypełnij Quill editor
+      if (data.zajmujeSie && quill) {
+        quill.root.innerHTML = data.zajmujeSie;
+        document.getElementById('zajmujeSie').value = data.zajmujeSie;
+      }
+
+      // Poczekaj na załadowanie województw jeśli potrzebne
+      await wojLoadPromise;
+      
+      if (data.wojewodztwo) {
+        document.getElementById('wojewodztwo').value = data.wojewodztwo;
+        await loadMiasta(data.wojewodztwo);
+        if (data.miasto) {
+          document.getElementById('miasto').value = data.miasto;
+        }
+      }
+
+      // Daty ważności
+      if (data.nrE) {
+        nrEValidLabel.style.display = 'block';
+        nrEValidTo.style.display = 'block';
+        nrEValidTo.value = data.nrE_valid_to || '';
+      }
+      if (data.nrEPomiary) {
+        nrEPomiaryValidLabel.style.display = 'block';
+        nrEPomiaryValidTo.style.display = 'block';
+        nrEPomiaryValidTo.value = data.nrEPomiary_valid_to || '';
+      }
+      if (data.nrD) {
+        nrDValidLabel.style.display = 'block';
+        nrDValidTo.style.display = 'block';
+        nrDValidTo.value = data.nrD_valid_to || '';
+      }
+    } else {
+      // Po prostu poczekaj na załadowanie województw
+      await wojLoadPromise;
+    }
+  } catch (error) {
+    console.error('Błąd inicjalizacji formularza:', error);
+    await wojLoadPromise; // Upewnij się że województwa się załadują nawet przy błędzie
+  }
+}
+
+// Uruchom inicjalizację po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', initializeForm);
 
 document.getElementById('register-form').addEventListener('submit', async e => {
   e.preventDefault()
@@ -486,7 +603,6 @@ document.getElementById('register-form').addEventListener('submit', async e => {
 })
 
 /* === BLOKADA EMAILA I TELEFONU W QUILL EDITOR === */
-
 // Listen for input in Quill editor to block emails and phone numbers
 if (quill) {
   quill.on('text-change', () => {
