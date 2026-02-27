@@ -5,76 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Viewer</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: white;
-            font-family: 'Courier New', monospace;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .address-bar {
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-        }
-        
-        .address-bar input {
-            width: 100%;
-            padding: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            outline: none;
-        }
-        
-        .address-bar input:focus {
-            border-color: #0066cc;
-        }
-        
-        .code-container {
-            flex: 1;
-            overflow: auto;
-            background: white;
-            padding: 15px;
-        }
-        
-        pre {
-            margin: 0;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        
-        .tag { color: #0000cc; }
-        .attr { color: #0066cc; }
-        .value { color: #cc6600; }
-        .comment { color: #006600; }
-        .text { color: black; }
-        .doctype { color: #666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: black; font-family: 'Courier New', monospace; height: 100vh; display: flex; flex-direction: column; }
+        .address-bar { padding: 10px; border-bottom: 1px solid #333; background: #111; }
+        .address-bar input { width: 100%; padding: 8px; font-family: 'Courier New', monospace; font-size: 14px; background: #222; color: white; border: 1px solid #444; outline: none; }
+        .address-bar input:focus { border-color: #0066cc; }
+        .code-container { flex: 1; overflow: auto; background: black; padding: 15px; }
+        pre { margin: 0; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; color: white; }
+        .tag { color: #569cd6; } .attr { color: #9cdcfe; } .value { color: #ce9178; } .comment { color: #6a9955; } .text { color: #d4d4d4; } .doctype { color: #808080; }
     </style>
 </head>
 <body>
     <div class="address-bar">
-        <input type="text" id="urlInput" 
-               placeholder="Wpisz adres strony i naciśnij Enter" 
-               value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne"
-               onkeypress="if(event.key==='Enter') fetchHTML()">
+        <input type="text" id="urlInput" placeholder="Wpisz adres strony i naciśnij Enter" value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne" onkeypress="if(event.key==='Enter') fetchHTML()">
     </div>
-    
     <div class="code-container">
         <pre id="codeOutput"></pre>
     </div>
-
     <script>
-        const PROXY = 'https://api.allorigins.win/raw?url=';
+        const PROXIES = [
+            'https://api.allorigins.win/raw?url=',
+            'https://cors-anywhere.herokuapp.com/',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://api.codetabs.com/v1/proxy?quest='
+        ];
+        
         const urlInput = document.getElementById('urlInput');
         const codeOutput = document.getElementById('codeOutput');
         
@@ -84,55 +39,38 @@
             
             codeOutput.innerHTML = 'Pobieranie...';
             
-            try {
-                const response = await fetch(PROXY + encodeURIComponent(url));
-                const html = await response.text();
-                colorizeHTML(html);
-            } catch (error) {
-                codeOutput.innerHTML = 'Błąd: ' + error.message;
+            for (let i = 0; i < PROXIES.length; i++) {
+                try {
+                    const response = await fetch(PROXIES[i] + encodeURIComponent(url), {
+                        headers: { 'User-Agent': 'Mozilla/5.0' }
+                    });
+                    const html = await response.text();
+                    if (html && html.includes('<')) {
+                        colorizeHTML(html);
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Proxy ' + i + ' failed');
+                }
             }
+            
+            codeOutput.innerHTML = 'Nie można pobrać strony - spróbuj inny adres';
         }
         
         function colorizeHTML(html) {
-            let escaped = html
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-            
-            escaped = escaped.replace(/&lt;!DOCTYPE.*?&gt;/gi, match => {
-                return `<span class="doctype">${match}</span>`;
+            let escaped = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            escaped = escaped.replace(/&lt;!DOCTYPE.*?&gt;/gi, m => `<span class="doctype">${m}</span>`);
+            escaped = escaped.replace(/&lt;!--.*?--&gt;/g, m => `<span class="comment">${m}</span>`);
+            escaped = escaped.replace(/&lt;(\/?)(\w+)(.*?)(\/?)&gt;/g, (m, s, t, a, sc) => {
+                let ca = a.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, sp, at, eq, v) => `${sp}<span class="attr">${at}</span>${eq}<span class="value">${v}</span>`);
+                ca = ca.replace(/(\s+)(\w+)(?!\s*=)/g, (m, sp, at) => `${sp}<span class="attr">${at}</span>`);
+                return `&lt;${s}<span class="tag">${t}</span>${ca}${sc}&gt;`;
             });
-            
-            escaped = escaped.replace(/&lt;!--.*?--&gt;/g, match => {
-                return `<span class="comment">${match}</span>`;
-            });
-            
-            escaped = escaped.replace(/&lt;(\/?)(\w+)(.*?)(\/?)&gt;/g, (match, slash, tagName, attrs, selfClose) => {
-                let coloredAttrs = attrs.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, space, attr, eq, value) => {
-                    return `${space}<span class="attr">${attr}</span>${eq}<span class="value">${value}</span>`;
-                });
-                
-                coloredAttrs = coloredAttrs.replace(/(\s+)(\w+)(?!\s*=)/g, (m, space, attr) => {
-                    return `${space}<span class="attr">${attr}</span>`;
-                });
-                
-                return `&lt;${slash}<span class="tag">${tagName}</span>${coloredAttrs}${selfClose}&gt;`;
-            });
-            
-            escaped = escaped.replace(/(&gt;)(.*?)(&lt;)/g, (m, close, text, open) => {
-                if (text.trim()) {
-                    return close + '<span class="text">' + text + '</span>' + open;
-                }
-                return m;
-            });
-            
+            escaped = escaped.replace(/(&gt;)(.*?)(&lt;)/g, (m, c, t, o) => t.trim() ? c + '<span class="text">' + t + '</span>' + o : m);
             codeOutput.innerHTML = escaped;
         }
         
-        // Auto-pobierz przy starcie
-        window.onload = function() {
-            setTimeout(fetchHTML, 100);
-        };
+        urlInput.focus();
     </script>
 </body>
 </html>
