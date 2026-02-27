@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Viewer</title>
+    <title>HTML Viewer - Pełna składnia</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: black; font-family: 'Courier New', monospace; height: 100vh; display: flex; flex-direction: column; }
@@ -12,7 +12,55 @@
         .address-bar input:focus { border-color: #0066cc; }
         .code-container { flex: 1; overflow: auto; background: black; padding: 15px; }
         pre { margin: 0; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; color: white; }
-        .tag { color: #569cd6; } .attr { color: #9cdcfe; } .value { color: #ce9178; } .comment { color: #6a9955; } .text { color: #d4d4d4; } .doctype { color: #808080; }
+        
+        /* Znaczniki */
+        .tag { color: #569cd6; }
+        .script-tag { color: #ff6b6b; }
+        .style-tag { color: #f0a500; }
+        .link-tag { color: #6c5ce7; }
+        .meta-tag { color: #00b894; }
+        .self-closing { color: #fd79a8; }
+        
+        /* Atrybuty */
+        .attr { color: #9cdcfe; }
+        .event-attr { color: #e17055; }
+        .data-attr { color: #74b9ff; }
+        .aria-attr { color: #55efc4; }
+        
+        /* Wartości */
+        .value { color: #ce9178; }
+        
+        /* Komentarze */
+        .comment { color: #6a9955; }
+        .js-comment { color: #6c5ce7; }
+        
+        /* Tekst */
+        .text { color: #d4d4d4; }
+        
+        /* DOCTYPE */
+        .doctype { color: #808080; }
+        
+        /* Encje */
+        .entity { color: #a29bfe; }
+        
+        /* CSS */
+        .css-selector { color: #e84393; }
+        .css-property { color: #00cec9; }
+        .css-value { color: #fdcb6e; }
+        
+        /* JavaScript */
+        .js-keyword { color: #0984e3; }
+        .js-string { color: #00b894; }
+        .js-number { color: #fdcb6e; }
+        .js-func { color: #e17055; }
+        .js-var { color: #74b9ff; }
+        .js-operator { color: #dfe6e9; }
+        
+        /* Linie */
+        .line-numbers { color: #636e72; }
+        
+        /* Błędy */
+        .error { color: #d63031; }
     </style>
 </head>
 <body>
@@ -58,16 +106,128 @@
         }
         
         function colorizeHTML(html) {
-            let escaped = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            escaped = escaped.replace(/&lt;!DOCTYPE.*?&gt;/gi, m => `<span class="doctype">${m}</span>`);
-            escaped = escaped.replace(/&lt;!--.*?--&gt;/g, m => `<span class="comment">${m}</span>`);
-            escaped = escaped.replace(/&lt;(\/?)(\w+)(.*?)(\/?)&gt;/g, (m, s, t, a, sc) => {
-                let ca = a.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, sp, at, eq, v) => `${sp}<span class="attr">${at}</span>${eq}<span class="value">${v}</span>`);
-                ca = ca.replace(/(\s+)(\w+)(?!\s*=)/g, (m, sp, at) => `${sp}<span class="attr">${at}</span>`);
-                return `&lt;${s}<span class="tag">${t}</span>${ca}${sc}&gt;`;
+            let escaped = html
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            // DOCTYPE
+            escaped = escaped.replace(/&lt;!DOCTYPE.*?&gt;/gi, m => 
+                `<span class="doctype">${m}</span>`);
+            
+            // Komentarze HTML
+            escaped = escaped.replace(/&lt;!--.*?--&gt;/g, m => 
+                `<span class="comment">${m}</span>`);
+            
+            // Komentarze JS (w przybliżeniu)
+            escaped = escaped.replace(/\/\/.*?(?=&lt;)/g, m => 
+                `<span class="js-comment">${m}</span>`);
+            
+            // Encje HTML
+            escaped = escaped.replace(/&amp;\w+;/g, m => 
+                `<span class="entity">${m}</span>`);
+            
+            // Znaczniki specjalne
+            escaped = escaped.replace(/&lt;(script)(.*?)&gt;/gi, (m, tag, attrs) => {
+                let coloredAttrs = colorizeAttributes(attrs);
+                return `&lt;<span class="script-tag">${tag}</span>${coloredAttrs}&gt;`;
             });
-            escaped = escaped.replace(/(&gt;)(.*?)(&lt;)/g, (m, c, t, o) => t.trim() ? c + '<span class="text">' + t + '</span>' + o : m);
+            
+            escaped = escaped.replace(/&lt;(\/script)&gt;/gi, m => 
+                `&lt;<span class="script-tag">/script</span>&gt;`);
+            
+            escaped = escaped.replace(/&lt;(style)(.*?)&gt;/gi, (m, tag, attrs) => {
+                let coloredAttrs = colorizeAttributes(attrs);
+                return `&lt;<span class="style-tag">${tag}</span>${coloredAttrs}&gt;`;
+            });
+            
+            escaped = escaped.replace(/&lt;(\/style)&gt;/gi, m => 
+                `&lt;<span class="style-tag">/style</span>&gt;`);
+            
+            escaped = escaped.replace(/&lt;(link)(.*?)&gt;/gi, (m, tag, attrs) => {
+                let coloredAttrs = colorizeAttributes(attrs);
+                return `&lt;<span class="link-tag">${tag}</span>${coloredAttrs}&gt;`;
+            });
+            
+            escaped = escaped.replace(/&lt;(meta)(.*?)&gt;/gi, (m, tag, attrs) => {
+                let coloredAttrs = colorizeAttributes(attrs);
+                return `&lt;<span class="meta-tag">${tag}</span>${coloredAttrs}&gt;`;
+            });
+            
+            // Znaczniki samozamykające
+            escaped = escaped.replace(/&lt;(input|br|hr|img|area|base|col|embed|param|source|track|wbr)(.*?)(\/?)&gt;/gi, (m, tag, attrs, close) => {
+                let coloredAttrs = colorizeAttributes(attrs);
+                return `&lt;<span class="self-closing">${tag}</span>${coloredAttrs}${close}&gt;`;
+            });
+            
+            // Zwykłe znaczniki
+            escaped = escaped.replace(/&lt;(\/?)(\w+)(.*?)(\/?)&gt;/g, (m, slash, tag, attrs, selfClose) => {
+                let coloredAttrs = colorizeAttributes(attrs);
+                return `&lt;${slash}<span class="tag">${tag}</span>${coloredAttrs}${selfClose}&gt;`;
+            });
+            
+            // CSS wewnątrz <style>
+            escaped = escaped.replace(/(&lt;style.*?&gt;)([\s\S]*?)(&lt;\/style&gt;)/gi, (m, open, css, close) => {
+                let coloredCSS = css
+                    .replace(/(\.[\w-]+|\#[\w-]+|[\w-]+)(?=\s*\{)/g, m => `<span class="css-selector">${m}</span>`)
+                    .replace(/(\{|\})/g, m => `<span class="css-property">${m}</span>`)
+                    .replace(/([\w-]+)(?=\s*:)/g, m => `<span class="css-property">${m}</span>`)
+                    .replace(/:(.*?);/g, m => `:<span class="css-value">${m.substring(1, m.length-1)}</span>;`);
+                return open + coloredCSS + close;
+            });
+            
+            // JavaScript wewnątrz <script>
+            escaped = escaped.replace(/(&lt;script.*?&gt;)([\s\S]*?)(&lt;\/script&gt;)/gi, (m, open, js, close) => {
+                let coloredJS = js
+                    .replace(/\b(function|if|else|for|while|return|let|const|var|new|this|class|import|export|try|catch|finally)\b/g, m => `<span class="js-keyword">${m}</span>`)
+                    .replace(/\b(true|false|null|undefined)\b/g, m => `<span class="js-keyword">${m}</span>`)
+                    .replace(/\b(\d+)\b/g, m => `<span class="js-number">${m}</span>`)
+                    .replace(/"([^"]*)"/g, m => `<span class="js-string">${m}</span>`)
+                    .replace(/'([^']*)'/g, m => `<span class="js-string">${m}</span>`)
+                    .replace(/(\+|\-|\*|\/|\=|\=\=|\=\=\=|\!|\!\=|\!\=\=|\&lt;|\&gt;|\&lt;\=|\&gt;\=)/g, m => `<span class="js-operator">${m}</span>`)
+                    .replace(/\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, m => `<span class="js-func">${m}</span>`)
+                    .replace(/\b([a-zA-Z_$][\w$]*)\b(?!\()/g, m => `<span class="js-var">${m}</span>`);
+                return open + coloredJS + close;
+            });
+            
+            // Tekst między znacznikami
+            escaped = escaped.replace(/(&gt;)(.*?)(&lt;)/g, (m, close, text, open) => {
+                if (text.trim()) {
+                    return close + '<span class="text">' + text + '</span>' + open;
+                }
+                return m;
+            });
+            
             codeOutput.innerHTML = escaped;
+        }
+        
+        function colorizeAttributes(attrs) {
+            // Atrybuty zdarzeń
+            attrs = attrs.replace(/(\s+)(on\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, space, attr, eq, value) => {
+                return `${space}<span class="event-attr">${attr}</span>${eq}<span class="value">${value}</span>`;
+            });
+            
+            // Atrybuty data-*
+            attrs = attrs.replace(/(\s+)(data-\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, space, attr, eq, value) => {
+                return `${space}<span class="data-attr">${attr}</span>${eq}<span class="value">${value}</span>`;
+            });
+            
+            // Atrybuty aria-*
+            attrs = attrs.replace(/(\s+)(aria-\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, space, attr, eq, value) => {
+                return `${space}<span class="aria-attr">${attr}</span>${eq}<span class="value">${value}</span>`;
+            });
+            
+            // Zwykłe atrybuty z wartościami
+            attrs = attrs.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, space, attr, eq, value) => {
+                return `${space}<span class="attr">${attr}</span>${eq}<span class="value">${value}</span>`;
+            });
+            
+            // Atrybuty bez wartości
+            attrs = attrs.replace(/(\s+)(\w+)(?!\s*=)/g, (m, space, attr) => {
+                return `${space}<span class="attr">${attr}</span>`;
+            });
+            
+            return attrs;
         }
         
         urlInput.focus();
