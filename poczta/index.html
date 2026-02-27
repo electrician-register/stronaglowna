@@ -3,379 +3,707 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administratora</title>
+    <title>🌐 Pobieracz Kodów HTML</title>
     <style>
+        /* 🎨 STYLE - kolorowa wersja */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         
         .container {
-            max-width: 800px;
-            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
         
+        /* 🟦 NAGŁÓWEK */
         .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
         
         .header h1 {
-            font-size: 28px;
+            font-size: 2.5em;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
         
-        .content {
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        /* 🟩 SEKCJA WEJŚCIOWA */
+        .input-section {
             padding: 30px;
-        }
-        
-        .login-section {
             background: #f8f9fa;
-            border-radius: 10px;
-            padding: 30px;
-            border: 2px solid #e9ecef;
+            border-bottom: 3px solid #e9ecef;
         }
         
-        .form-group {
+        .url-input-group {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
         }
         
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
+        .url-input-group input {
+            flex: 1;
+            padding: 15px 20px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
         }
         
-        .form-group input:focus {
+        .url-input-group input:focus {
             outline: none;
-            border-color: #2a5298;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
         }
         
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: #2a5298;
-            color: white;
+        /* 🟨 PRZYCISKI */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        .btn-login:hover {
-            background: #1e3c72;
-        }
-        
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .admin-panel {
-            display: none;
-        }
-        
-        .admin-header {
-            background: #e8f0fe;
-            border-radius: 10px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
+            transition: all 0.3s;
+            display: inline-flex;
             align-items: center;
+            gap: 8px;
         }
         
-        .btn-logout {
-            background: #e74c3c;
+        .btn-primary {
+            background: #667eea;
             color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
         }
         
-        .btn-send {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        
+        .btn-success {
+            background: #48bb78;
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 20px 0;
         }
         
-        .logs-container {
-            background: #1e3c72;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
         }
         
-        .logs-content {
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
-            color: #ecf0f1;
+        .btn-warning {
+            background: #f6ad55;
+            color: white;
         }
         
-        .log-entry {
-            padding: 5px 8px;
-            border-bottom: 1px solid #2a5298;
+        .btn-warning:hover {
+            background: #ed8936;
+            transform: translateY(-2px);
         }
         
-        .log-success { color: #98fb98; }
-        .log-error { color: #ffa07a; }
-        .log-info { color: #87cefa; }
-        
-        .loading {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
+        .btn-secondary {
+            background: #cbd5e0;
+            color: #2d3748;
         }
         
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-secondary:hover {
+            background: #a0aec0;
+        }
         
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 10px;
+        /* 🟧 SEKCJA WYNIKÓW */
+        .results-section {
+            padding: 30px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
             text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-card.green { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .stat-card.orange { background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%); }
+        .stat-card.purple { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); }
+        
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        /* 🟪 ZAKŁADKI */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: #667eea;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+        
+        /* 🟦 OBSZARY WYŚWIETLANIA */
+        .code-area {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        .html-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        
+        .preview-area {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .headers-area {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        /* 🟥 STATUS */
+        .status {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border-left: 4px solid #3182ce;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #38a169;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #e53e3e;
+        }
+        
+        .status.warning {
+            background: #feebc8;
+            color: #744210;
+            border-left: 4px solid #dd6b20;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 🟦 NAGŁÓWEK -->
         <div class="header">
-            <h1>👑 Panel Administratora</h1>
-            <p>Bezpieczne logowanie - hasło w bazie danych</p>
+            <h1>🌐 Pobieracz Kodów HTML</h1>
+            <p>Wpisz adres URL strony, a ja pobiorę i wyświetlę jej kod źródłowy</p>
         </div>
         
-        <div class="content">
-            <!-- Sekcja logowania -->
-            <div id="loginSection" class="login-section">
-                <h3 style="margin-bottom: 20px; color: #1e3c72;">🔐 Logowanie administratora</h3>
-                
-                <div class="form-group">
-                    <label>📧 Email</label>
-                    <input type="email" id="email" value="piotr8040@gmail.com">
-                </div>
-                
-                <div class="form-group">
-                    <label>🔑 Hasło (z bazy danych)</label>
-                    <input type="password" id="password" placeholder="Wpisz hasło administratora">
-                </div>
-                
-                <button class="btn-login" id="loginBtn" onclick="login()">
-                    Zaloguj się
+        <!-- 🟩 SEKCJA WEJŚCIOWA -->
+        <div class="input-section">
+            <div class="url-input-group">
+                <input type="url" id="urlInput" 
+                       placeholder="https://example.com" 
+                       value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne">
+                <button class="btn btn-primary" onclick="fetchWebsite()">
+                    <span>⬇️</span> Pobierz stronę
                 </button>
-                
-                <div id="loginStatus" class="error-message"></div>
             </div>
             
-            <!-- Panel administratora -->
-            <div id="adminPanel" class="admin-panel">
-                <div class="admin-header">
-                    <div>
-                        <strong>Zalogowany jako:</strong> <span id="adminName"></span>
-                    </div>
-                    <button class="btn-logout" onclick="logout()">Wyloguj</button>
+            <!-- 🟨 PRZYCISKI DODATKOWE -->
+            <div class="button-group">
+                <button class="btn btn-success" onclick="fetchWithProxy()">
+                    <span>🔄</span> Pobierz przez proxy (CORS)
+                </button>
+                <button class="btn btn-warning" onclick="fetchWithCorsAnywhere()">
+                    <span>🌍</span> cors-anywhere (demo)
+                </button>
+                <button class="btn btn-secondary" onclick="clearAll()">
+                    <span>🗑️</span> Wyczyść wszystko
+                </button>
+            </div>
+        </div>
+        
+        <!-- 🟧 SEKCJA STATUSU -->
+        <div id="statusMessage" class="status info">
+            ⏳ Gotowy do pracy. Wpisz URL i kliknij "Pobierz stronę"
+        </div>
+        
+        <!-- 🟪 SEKCJA WYNIKÓW -->
+        <div class="results-section">
+            <!-- 📊 STATYSTYKI -->
+            <div class="stats" id="stats" style="display: none;">
+                <div class="stat-card blue">
+                    <div class="number" id="statSize">0</div>
+                    <div class="label">Rozmiar (bajty)</div>
                 </div>
-                
-                <form id="emailForm">
-                    <div class="form-group">
-                        <label>📧 Email klienta</label>
-                        <input type="email" id="to" value="piotr8040@gmail.com" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>📝 Temat</label>
-                        <input type="text" id="subject" value="Odpowiedź na zapytanie" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>✍️ Treść</label>
-                        <textarea id="html" rows="10" required>
-&lt;h1&gt;Odpowiedź od administratora&lt;/h1&gt;
-&lt;p&gt;Dziękujemy za kontakt...&lt;/p&gt;
-                        </textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-send" id="sendBtn">
-                        <span id="btnText">📤 Wyślij wiadomość</span>
-                    </button>
-                </form>
-                
-                <div class="logs-container">
-                    <div class="logs-content" id="logs">
-                        <div class="log-entry log-info">🟢 System gotowy</div>
-                    </div>
+                <div class="stat-card green">
+                    <div class="number" id="statLines">0</div>
+                    <div class="label">Linie kodu</div>
                 </div>
+                <div class="stat-card orange">
+                    <div class="number" id="statElements">0</div>
+                    <div class="label">Znaczniki HTML</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="number" id="statTime">0</div>
+                    <div class="label">Czas (ms)</div>
+                </div>
+            </div>
+            
+            <!-- 📌 ZAKŁADKI -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('html')">📄 Kod HTML</button>
+                <button class="tab" onclick="switchTab('preview')">👁️ Podgląd strony</button>
+                <button class="tab" onclick="switchTab('headers')">📋 Nagłówki HTTP</button>
+                <button class="tab" onclick="switchTab('raw')">🔧 Surowe dane</button>
+            </div>
+            
+            <!-- 🟦 ZAKŁADKA: KOD HTML -->
+            <div id="tabHtml" class="tab-content">
+                <div class="code-area html-output" id="htmlOutput">
+                    Kliknij "Pobierz stronę", aby zobaczyć kod HTML...
+                </div>
+            </div>
+            
+            <!-- 🟩 ZAKŁADKA: PODGLĄD -->
+            <div id="tabPreview" class="tab-content hidden">
+                <div class="preview-area" id="previewOutput">
+                    <iframe id="previewFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+            
+            <!-- 🟨 ZAKŁADKA: NAGŁÓWKI -->
+            <div id="tabHeaders" class="tab-content hidden">
+                <div class="headers-area" id="headersOutput"></div>
+            </div>
+            
+            <!-- 🟧 ZAKŁADKA: SUROWE DANE -->
+            <div id="tabRaw" class="tab-content hidden">
+                <div class="code-area" id="rawOutput"></div>
             </div>
         </div>
     </div>
-
+    
     <script>
-        // Te dane są bezpieczne - to tylko URL i klucz anonimowy (publiczny)
-        const SUPABASE_URL = 'https://tfbqqduxtsacvwfigsvt.supabase.co'
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYnFxZHV4dHNhY3Z3Zmlnc3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2OTE4NzcsImV4cCI6MjA4MjI2Nzg3N30.PhuNnwzQ8cZW_UyUjCxXaYAj7xCCiTnOJVd4fUtQRD8'
+        // ============================================
+        // 🟦 GŁÓWNE ZMIENNE
+        // ============================================
+        let currentHtml = '';
+        let currentHeaders = {};
+        let startTime = 0;
         
-        let adminData = null
-        
-        async function login() {
-            const email = document.getElementById('email').value
-            const password = document.getElementById('password').value
-            const loginBtn = document.getElementById('loginBtn')
-            const statusDiv = document.getElementById('loginStatus')
+        // ============================================
+        // 🟩 GŁÓWNA FUNKCJA POBIRAJĄCA
+        // ============================================
+        async function fetchWebsite() {
+            const url = document.getElementById('urlInput').value.trim();
             
-            if (!password) {
-                statusDiv.innerHTML = '❌ Wpisz hasło'
-                return
+            if (!url) {
+                showStatus('error', '❌ Wpisz adres URL strony!');
+                return;
             }
-            
-            loginBtn.disabled = true
-            loginBtn.innerHTML = 'Logowanie... <span class="loading"></span>'
-            statusDiv.innerHTML = ''
             
             try {
-                // Wywołaj naszą bezpieczną funkcję Supabase
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-admin`, {
-                    method: 'POST',
+                startTime = performance.now();
+                showStatus('info', `⏳ Pobieranie strony: ${url}...`);
+                
+                // 🟨 Pobieranie danych
+                const response = await fetch(url, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
-                    },
-                    body: JSON.stringify({ email, password })
-                })
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Language': 'pl,en-US;q=0.7,en;q=0.3'
+                    }
+                });
                 
-                const data = await response.json()
+                // 🟧 Konwersja nagłówków
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                currentHeaders = headers;
                 
-                if (data.success) {
-                    // Sukces - hasło poprawne
-                    adminData = data.admin
-                    document.getElementById('loginSection').style.display = 'none'
-                    document.getElementById('adminPanel').style.display = 'block'
-                    document.getElementById('adminName').textContent = `${adminData.imie} ${adminData.nazwisko}`
-                    dodajLog('success', `✅ Zalogowano jako ${adminData.imie} ${adminData.nazwisko}`)
-                } else {
-                    // Błąd logowania
-                    statusDiv.innerHTML = '❌ ' + (data.error || 'Błąd logowania')
-                    dodajLog('error', '❌ Błąd logowania')
-                }
+                // 🟪 Pobranie treści
+                const html = await response.text();
+                currentHtml = html;
+                
+                // 📊 Aktualizacja statystyk
+                updateStats(html, headers, response.status);
+                
+                // 🟦 Wyświetlenie w zakładkach
+                displayHtml(html);
+                displayHeaders(headers, response.status);
+                displayRaw(html, response);
+                
+                // 🟩 Przygotowanie podglądu
+                setupPreview(html);
+                
+                // ✅ Status sukcesu
+                showStatus('success', `✅ Pobrano pomyślnie! Status: ${response.status} ${response.statusText}`);
+                
             } catch (error) {
-                statusDiv.innerHTML = '❌ Błąd połączenia: ' + error.message
-                dodajLog('error', '❌ Błąd: ' + error.message)
-            } finally {
-                loginBtn.disabled = false
-                loginBtn.innerHTML = 'Zaloguj się'
+                console.error('Błąd:', error);
+                showStatus('error', `❌ Błąd: ${error.message}`);
+                currentHtml = '';
+                
+                // ❌ Informacja o CORS
+                if (error.message.includes('CORS')) {
+                    showStatus('error', '🌐 Błąd CORS! Użyj przycisku "Pobierz przez proxy"');
+                }
             }
         }
         
-        function logout() {
-            adminData = null
-            document.getElementById('loginSection').style.display = 'block'
-            document.getElementById('adminPanel').style.display = 'none'
-            document.getElementById('password').value = ''
-            document.getElementById('loginStatus').innerHTML = ''
-            dodajLog('info', '🟢 Wylogowano')
-        }
-        
-        function dodajLog(typ, msg) {
-            const logs = document.getElementById('logs')
-            const czas = new Date().toLocaleTimeString()
-            const klasa = typ === 'success' ? 'log-success' : typ === 'error' ? 'log-error' : 'log-info'
-            const emoji = typ === 'success' ? '✅' : typ === 'error' ? '❌' : '🟢'
-            
-            const log = document.createElement('div')
-            log.className = `log-entry ${klasa}`
-            log.innerHTML = `${emoji} [${czas}] ${msg}`
-            logs.appendChild(log)
-            logs.scrollTop = logs.scrollHeight
-        }
-        
-        // Wysyłka maila
-        document.getElementById('emailForm').addEventListener('submit', async (e) => {
-            e.preventDefault()
-            
-            if (!adminData) {
-                dodajLog('error', '❌ Nie jesteś zalogowany')
-                return
+        // ============================================
+        // 🟨 FUNKCJA Z PROXY (obejście CORS)
+        // ============================================
+        async function fetchWithProxy() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                showStatus('error', '❌ Wpisz adres URL!');
+                return;
             }
-            
-            const dane = {
-                to: document.getElementById('to').value,
-                subject: document.getElementById('subject').value,
-                html: document.getElementById('html').value
-            }
-            
-            dodajLog('info', '📧 Wysyłanie do: ' + dane.to)
-            
-            document.getElementById('sendBtn').disabled = true
-            document.getElementById('btnText').innerHTML = 'Wysyłanie... <span class="loading"></span>'
             
             try {
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-                    method: 'POST',
+                showStatus('info', '⏳ Pobieranie przez proxy (cors.sh)...');
+                
+                // Użycie serwisu proxy cors.sh
+                const proxyUrl = `https://api.cors.sh/${url}`;
+                
+                const response = await fetch(proxyUrl, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
-                    },
-                    body: JSON.stringify(dane)
-                })
+                        'x-cors-api-key': 'temp_123456', // W rzeczywistości trzeba by mieć klucz
+                        'Origin': window.location.origin
+                    }
+                });
                 
-                const text = await response.text()
+                const html = await response.text();
+                currentHtml = html;
                 
-                if (response.ok) {
-                    dodajLog('success', '✅ Wysłano!')
-                } else {
-                    dodajLog('error', '❌ Błąd ' + response.status + ': ' + text)
-                }
+                displayHtml(html);
+                showStatus('success', '✅ Pobrano przez proxy!');
+                
             } catch (error) {
-                dodajLog('error', '❌ Błąd: ' + error.message)
-            } finally {
-                document.getElementById('sendBtn').disabled = false
-                document.getElementById('btnText').innerHTML = '📤 Wyślij wiadomość'
+                showStatus('error', `❌ Błąd proxy: ${error.message}`);
             }
-        })
+        }
         
-        document.getElementById('password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login()
-        })
+        // ============================================
+        // 🟪 FUNKCJA Z CORS-ANYWHERE (demo)
+        // ============================================
+        async function fetchWithCorsAnywhere() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                showStatus('error', '❌ Wpisz adres URL!');
+                return;
+            }
+            
+            try {
+                showStatus('info', '⏳ Próbuję cors-anywhere (publiczne demo)...');
+                
+                // Publiczne demo cors-anywhere (może być wolne)
+                const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+                
+                const response = await fetch(proxyUrl);
+                const html = await response.text();
+                
+                currentHtml = html;
+                displayHtml(html);
+                showStatus('success', '✅ Pobrano przez cors-anywhere!');
+                
+            } catch (error) {
+                showStatus('error', `❌ Błąd cors-anywhere: ${error.message}`);
+            }
+        }
+        
+        // ============================================
+        // 🟦 FUNKCJE WYŚWIETLAJĄCE
+        // ============================================
+        
+        // 📄 Wyświetlenie HTML z kolorowaniem składni
+        function displayHtml(html) {
+            const output = document.getElementById('htmlOutput');
+            
+            // Proste kolorowanie składni (dla czytelności)
+            let coloredHtml = html
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/&lt;(\/?\w+)(.*?)&gt;/g, (match, tag, attrs) => {
+                    return `<span style="color: #569cd6;">&lt;${tag}${attrs}&gt;</span>`;
+                })
+                .replace(/"([^"]*)"/g, '<span style="color: #ce9178;">"$1"</span>');
+            
+            output.innerHTML = coloredHtml || '<span style="color: #808080;">(pusty HTML)</span>';
+        }
+        
+        // 📋 Wyświetlenie nagłówków
+        function displayHeaders(headers, status) {
+            const output = document.getElementById('headersOutput');
+            let html = `<span style="color: #ffd700;">HTTP/1.1 ${status}</span>\n\n`;
+            
+            for (const [key, value] of Object.entries(headers)) {
+                html += `<span style="color: #9cdcfe;">${key}:</span> <span style="color: #ce9178;">${value}</span>\n`;
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        // 🔧 Wyświetlenie surowych danych
+        function displayRaw(html, response) {
+            const output = document.getElementById('rawOutput');
+            output.textContent = `URL: ${response.url}\nStatus: ${response.status}\nType: ${response.headers.get('content-type')}\n\n${html.substring(0, 5000)}${html.length > 5000 ? '... (przycięto)' : ''}`;
+        }
+        
+        // 👁️ Przygotowanie podglądu
+        function setupPreview(html) {
+            const iframe = document.getElementById('previewFrame');
+            iframe.srcdoc = html;
+        }
+        
+        // ============================================
+        // 📊 FUNKCJE STATYSTYK
+        // ============================================
+        function updateStats(html, headers, status) {
+            document.getElementById('stats').style.display = 'flex';
+            
+            const size = new Blob([html]).size;
+            const lines = html.split('\n').length;
+            const tags = (html.match(/<\/?\w+/g) || []).length;
+            const time = Math.round(performance.now() - startTime);
+            
+            document.getElementById('statSize').textContent = formatBytes(size);
+            document.getElementById('statLines').textContent = lines;
+            document.getElementById('statElements').textContent = tags;
+            document.getElementById('statTime').textContent = time + 'ms';
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+            return (bytes/(1024*1024)).toFixed(1) + ' MB';
+        }
+        
+        // ============================================
+        // 🟨 FUNKCJE POMOCNICZE
+        // ============================================
+        
+        // 🔄 Przełączanie zakładek
+        function switchTab(tab) {
+            // Ukryj wszystkie zakładki
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Pokaż wybraną
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
+            
+            // Aktualizacja aktywnych przycisków
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // 📢 Wyświetlenie statusu
+        function showStatus(type, message) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = message;
+        }
+        
+        // 🗑️ Czyszczenie wszystkiego
+        function clearAll() {
+            currentHtml = '';
+            currentHeaders = {};
+            
+            document.getElementById('htmlOutput').innerHTML = 'Kod HTML został wyczyszczony...';
+            document.getElementById('headersOutput').innerHTML = '';
+            document.getElementById('rawOutput').innerHTML = '';
+            document.getElementById('previewFrame').srcdoc = '';
+            document.getElementById('stats').style.display = 'none';
+            
+            showStatus('info', '🔄 Wszystko wyczyszczone. Gotowy do nowego pobierania.');
+        }
+        
+        // ============================================
+        // 🟪 DODATKOWA FUNKCJA - PARSOWANIE OFERT TAURON
+        // ============================================
+        function parseTauronOffers() {
+            if (!currentHtml) {
+                showStatus('warning', '⚠️ Najpierw pobierz stronę Tauron!');
+                return;
+            }
+            
+            try {
+                showStatus('info', '🔍 Parsowanie ofert Tauron...');
+                
+                // 🟨 Szukanie tabeli z ofertami
+                const tableRegex = /<table[^>]*>([\s\S]*?)<\/table>/i;
+                const tableMatch = currentHtml.match(tableRegex);
+                
+                if (!tableMatch) {
+                    showStatus('warning', '⚠️ Nie znaleziono tabeli z ofertami!');
+                    return;
+                }
+                
+                // 🟧 Dzielenie na wiersze
+                const tableContent = tableMatch[1];
+                const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+                const rows = tableContent.match(rowRegex) || [];
+                
+                // 🟪 Przetwarzanie ofert
+                const offers = [];
+                
+                for (const row of rows) {
+                    // Pomiń nagłówek
+                    if (row.includes('<th')) continue;
+                    
+                    // Wyciągnij komórki
+                    const cellRegex = /<t[d|h][^>]*>([\s\S]*?)<\/t[d|h]>/gi;
+                    const cells = row.match(cellRegex) || [];
+                    
+                    if (cells.length >= 7) {
+                        // Wyczyść tekst z HTML
+                        const cleanText = (text) => {
+                            return text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+                        };
+                        
+                        const cleaned = cells.map(cell => cleanText(cell));
+                        
+                        offers.push({
+                            stanowisko: cleaned[0] || '',
+                            poziom: cleaned[1] || '',
+                            miejsce: cleaned[2] || '',
+                            spolka: cleaned[3] || '',
+                            forma: cleaned[4] || '',
+                            waznosc: cleaned[5] || '',
+                            ref: cleaned[6] || ''
+                        });
+                    }
+                }
+                
+                // ✅ Wyświetl wyniki
+                if (offers.length > 0) {
+                    let result = `🔍 Znaleziono ${offers.length} ofert:\n\n`;
+                    offers.forEach((offer, i) => {
+                        result += `${i+1}. ${offer.stanowisko} (${offer.ref})\n`;
+                        result += `   📍 ${offer.miejsce} | 📅 ${offer.waznosc}\n\n`;
+                    });
+                    
+                    alert(result);
+                    showStatus('success', `✅ Znaleziono ${offers.length} ofert!`);
+                } else {
+                    showStatus('warning', '⚠️ Nie znaleziono żadnych ofert!');
+                }
+                
+            } catch (error) {
+                showStatus('error', `❌ Błąd parsowania: ${error.message}`);
+            }
+        }
     </script>
+    
+    <!-- 🟦 DODATKOWY PANEL NARZĘDZIOWY (na dole) -->
+    <div style="margin-top: 20px; text-align: center;">
+        <button class="btn btn-primary" onclick="parseTauronOffers()" style="background: #9f7aea;">
+            🔍 Parsuj oferty Tauron
+        </button>
+        <button class="btn btn-secondary" onclick="fetch('https://api.github.com/repos/tauron-praca')">
+            🌟 Test API
+        </button>
+    </div>
 </body>
 </html>
