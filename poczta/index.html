@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌈 Kolorowy Podgląd HTML</title>
+    <title>🌈 Kolorowy HTML - z proxy</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
             flex-direction: column;
         }
         
-        /* 🟦 Pasek adresu - jak w przeglądarce */
+        /* 🟦 Pasek adresu */
         .address-bar {
             background: #2d2d2d;
             padding: 15px 20px;
@@ -27,6 +27,14 @@
             gap: 10px;
             align-items: center;
             border-bottom: 2px solid #3d3d3d;
+            flex-wrap: wrap;
+        }
+        
+        .url-container {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+            min-width: 300px;
         }
         
         .address-bar input {
@@ -55,13 +63,69 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
+            white-space: nowrap;
         }
         
         .address-bar button:hover {
             background: #005a9e;
         }
         
-        /* 🟩 Główny obszar kodu */
+        .address-bar button.secondary {
+            background: #6c757d;
+        }
+        
+        .address-bar button.secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* 🟪 Wybór proxy */
+        .proxy-selector {
+            display: flex;
+            gap: 10px;
+            background: #3d3d3d;
+            padding: 5px;
+            border-radius: 25px;
+        }
+        
+        .proxy-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .proxy-btn.active {
+            background: #007acc;
+            color: white;
+        }
+        
+        /* 📊 Pasek informacyjny */
+        .info-bar {
+            background: #252526;
+            color: #969696;
+            padding: 5px 20px;
+            font-size: 12px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #3d3d3d;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .info-item span {
+            color: #4ec9b0;
+        }
+        
+        /* 🟩 Obszar kodu */
         .code-container {
             flex: 1;
             overflow: auto;
@@ -69,7 +133,6 @@
             padding: 20px;
         }
         
-        /* 📝 Styl dla kolorowanego kodu */
         pre {
             margin: 0;
             font-family: 'Courier New', monospace;
@@ -77,13 +140,13 @@
             line-height: 1.6;
         }
         
-        /* 🎨 KOLORY SKŁADNI - jak w Visual Studio Code */
-        .tag { color: #569cd6; }           /* Niebieski - znaczniki */
-        .attr { color: #9cdcfe; }           /* Jasnoniebieski - atrybuty */
-        .value { color: #ce9178; }          /* Pomarańczowy - wartości */
-        .comment { color: #6a9955; }        /* Zielony - komentarze */
-        .text { color: #d4d4d4; }            /* Szary - zwykły tekst */
-        .doctype { color: #808080; }         /* Szary - doctype */
+        /* 🎨 KOLORY SKŁADNI */
+        .tag { color: #569cd6; }
+        .attr { color: #9cdcfe; }
+        .value { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .text { color: #d4d4d4; }
+        .doctype { color: #808080; }
         
         /* 🟪 Status */
         .status {
@@ -105,35 +168,62 @@
             color: #6bff6b;
         }
         
-        /* 📊 Pasek informacyjny */
-        .info-bar {
-            background: #252526;
-            color: #969696;
-            padding: 5px 20px;
-            font-size: 12px;
-            display: flex;
-            gap: 20px;
+        .status.warning {
+            background: #665c1e;
+            color: #ffd966;
+        }
+        
+        /* 📋 Lista proxy */
+        .proxy-list {
+            background: #2d2d2d;
+            padding: 10px 20px;
             border-bottom: 1px solid #3d3d3d;
-        }
-        
-        .info-item {
             display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 5px;
         }
         
-        .info-item span {
-            color: #4ec9b0;
+        .proxy-tag {
+            background: #3d3d3d;
+            color: #aaa;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .proxy-tag:hover {
+            background: #4d4d4d;
+            color: white;
+        }
+        
+        .proxy-tag.active {
+            background: #007acc;
+            color: white;
         }
     </style>
 </head>
 <body>
     <!-- 🟦 PASEK ADRESU -->
     <div class="address-bar">
-        <input type="text" id="urlInput" placeholder="Wpisz adres URL (np. https://example.com)" 
-               value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne"
-               onkeypress="if(event.key==='Enter') fetchHTML()">
-        <button onclick="fetchHTML()">Pobierz HTML</button>
+        <div class="url-container">
+            <input type="text" id="urlInput" placeholder="https://example.com" 
+                   value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne"
+                   onkeypress="if(event.key==='Enter') fetchWithCurrentProxy()">
+            <button onclick="fetchWithCurrentProxy()">Pobierz HTML</button>
+            <button class="secondary" onclick="useTestHTML()">🔧 Test HTML</button>
+        </div>
+    </div>
+    
+    <!-- 🟪 WYBÓR PROXY -->
+    <div class="proxy-list">
+        <span style="color:#aaa;">🌐 Proxy:</span>
+        <span class="proxy-tag active" onclick="setProxy('cors')" id="proxy-cors">CORS Anywhere</span>
+        <span class="proxy-tag" onclick="setProxy('all')" id="proxy-all">cors-anywhere.herokuapp.com</span>
+        <span class="proxy-tag" onclick="setProxy('thing')" id="proxy-thing">cors-proxy.thingproxy.io</span>
+        <span class="proxy-tag" onclick="setProxy('nobots')" id="proxy-nobots">crossorigin.me</span>
+        <span class="proxy-tag" onclick="setProxy('none')" id="proxy-none">🚫 Bez proxy</span>
     </div>
     
     <!-- 📊 PASEK INFORMACYJNY -->
@@ -142,17 +232,39 @@
         <div class="info-item">📊 Linie: <span id="linesInfo">0</span></div>
         <div class="info-item">🏷️ Znaczniki: <span id="tagsInfo">0</span></div>
         <div class="info-item">⏱️ Czas: <span id="timeInfo">0ms</span></div>
+        <div class="info-item">🌍 Proxy: <span id="proxyInfo">CORS Anywhere</span></div>
     </div>
     
-    <!-- 🟩 OBSZAR KODU Z KOLOROWANIEM -->
+    <!-- 🟩 OBSZAR KODU -->
     <div class="code-container">
-        <pre id="codeOutput"><span class="comment">&lt;!-- Wpisz adres URL i naciśnij Enter --&gt;</span></pre>
+        <pre id="codeOutput"><span class="comment">&lt;!-- 
+    Witaj w kolorowym podglądzie HTML!
+    
+    ✅ Wpisz adres URL i naciśnij Enter
+    ✅ Wybierz proxy (jeśli strona blokuje CORS)
+    ✅ Kod pokoloruje się automatycznie
+    
+    Przykłady:
+    • https://www.tauron.pl/...
+    • https://example.com
+    • https://github.com
+--&gt;</span></pre>
     </div>
     
     <!-- 🟪 STATUS -->
-    <div class="status" id="status">✅ Gotowy</div>
+    <div class="status" id="status">✅ Gotowy. Wybierz proxy i wpisz URL.</div>
     
     <script>
+        // Konfiguracja
+        let currentProxy = 'cors';
+        const proxyList = {
+            'cors': 'https://cors-anywhere.herokuapp.com/',
+            'all': 'https://cors-anywhere.herokuapp.com/',
+            'thing': 'https://thingproxy.freeboard.io/fetch/',
+            'nobots': 'https://crossorigin.me/',
+            'none': ''
+        };
+        
         const urlInput = document.getElementById('urlInput');
         const codeOutput = document.getElementById('codeOutput');
         const statusDiv = document.getElementById('status');
@@ -160,8 +272,33 @@
         const linesSpan = document.getElementById('linesInfo');
         const tagsSpan = document.getElementById('tagsInfo');
         const timeSpan = document.getElementById('timeInfo');
+        const proxySpan = document.getElementById('proxyInfo');
         
-        async function fetchHTML() {
+        // Ustaw proxy
+        function setProxy(type) {
+            currentProxy = type;
+            
+            // Aktualizuj przyciski
+            document.querySelectorAll('.proxy-tag').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(`proxy-${type}`).classList.add('active');
+            
+            // Aktualizuj informację
+            const proxyNames = {
+                'cors': 'CORS Anywhere',
+                'all': 'cors-anywhere.herokuapp.com',
+                'thing': 'thingproxy.freeboard.io',
+                'nobots': 'crossorigin.me',
+                'none': 'Bez proxy (bezpośrednio)'
+            };
+            proxySpan.textContent = proxyNames[type];
+            
+            showStatus('info', `🌐 Wybrano proxy: ${proxyNames[type]}`);
+        }
+        
+        // Pobierz z obecnym proxy
+        async function fetchWithCurrentProxy() {
             const url = urlInput.value.trim();
             
             if (!url) {
@@ -174,9 +311,17 @@
             try {
                 showStatus('info', '⏳ Pobieranie strony...');
                 
-                const response = await fetch(url, {
+                // Dodaj proxy do URL
+                let fetchUrl = url;
+                if (currentProxy !== 'none') {
+                    fetchUrl = proxyList[currentProxy] + url;
+                }
+                
+                const response = await fetch(fetchUrl, {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Origin': window.location.origin,
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
                 
@@ -187,7 +332,7 @@
                 const html = await response.text();
                 const time = Math.round(performance.now() - startTime);
                 
-                // 📊 Aktualizacja informacji
+                // Aktualizacja informacji
                 const size = new Blob([html]).size;
                 const lines = html.split('\n').length;
                 const tags = (html.match(/<\/?\w+/g) || []).length;
@@ -197,7 +342,7 @@
                 tagsSpan.textContent = tags;
                 timeSpan.textContent = time + 'ms';
                 
-                // 🎨 Kolorowanie składni
+                // Kolorowanie
                 colorizeHTML(html);
                 
                 showStatus('success', `✅ Pobrano pomyślnie (${response.status})`);
@@ -205,36 +350,87 @@
             } catch (error) {
                 console.error(error);
                 showStatus('error', `❌ Błąd: ${error.message}`);
-                codeOutput.innerHTML = `<span class="comment">&lt;!-- BŁĄD: ${error.message} --&gt;</span>`;
+                
+                // Podpowiedź dla CORS
+                if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                    codeOutput.innerHTML = `<span class="comment">&lt;!-- 
+    ❌ BŁĄD CORS!
+    
+    Serwer ${url} blokuje pobieranie z innej domeny.
+    
+    ✅ ROZWIĄZANIA:
+    1. Wybierz inne proxy z listy powyżej
+    2. Użyj przycisku "Test HTML" (przykładowy kod)
+    3. Zainstaluj rozszerzenie "CORS Unblock" w przeglądarce
+    4. Uruchom przez lokalny serwer (Live Server)
+    
+    Obecne proxy: ${proxySpan.textContent}
+    --&gt;</span>`;
+                } else {
+                    codeOutput.innerHTML = `<span class="comment">&lt;!-- BŁĄD: ${error.message} --&gt;</span>`;
+                }
             }
         }
         
-        // 🎨 GŁÓWNA FUNKCJA KOLORUJĄCA
+        // Funkcja testowa - pokazuje przykład kolorowania
+        function useTestHTML() {
+            const testHTML = `<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Przykładowa strona</title>
+    <style>
+        body { font-family: Arial; }
+        .container { max-width: 1200px; }
+    </style>
+</head>
+<body>
+    <!-- To jest komentarz -->
+    <div class="container">
+        <h1>Witaj świecie!</h1>
+        <p>To jest <strong>przykładowy</strong> tekst HTML.</p>
+        <a href="https://example.com">Link</a>
+    </div>
+</body>
+</html>`;
+            
+            colorizeHTML(testHTML);
+            
+            const size = new Blob([testHTML]).size;
+            const lines = testHTML.split('\n').length;
+            const tags = (testHTML.match(/<\/?\w+/g) || []).length;
+            
+            sizeSpan.textContent = formatBytes(size);
+            linesSpan.textContent = lines;
+            tagsSpan.textContent = tags;
+            timeSpan.textContent = '0ms';
+            
+            showStatus('success', '✅ Załadowano przykładowy HTML');
+        }
+        
+        // 🎨 Kolorowanie HTML
         function colorizeHTML(html) {
-            // Najpierw escape'ujemy znaki specjalne
             let escaped = html
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
             
-            // Kolorowanie DOCTYPE
+            // DOCTYPE
             escaped = escaped.replace(/&lt;!DOCTYPE.*?&gt;/gi, match => {
                 return `<span class="doctype">${match}</span>`;
             });
             
-            // Kolorowanie komentarzy
+            // Komentarze
             escaped = escaped.replace(/&lt;!--.*?--&gt;/g, match => {
                 return `<span class="comment">${match}</span>`;
             });
             
-            // Kolorowanie znaczników i atrybutów
+            // Znaczniki i atrybuty
             escaped = escaped.replace(/&lt;(\/?)(\w+)(.*?)(\/?)&gt;/g, (match, slash, tagName, attrs, selfClose) => {
-                // Kolorowanie atrybutów wewnątrz znacznika
-                let coloredAttrs = attrs.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;)/g, (m, space, attr, eq, value) => {
+                let coloredAttrs = attrs.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;|'.*?')/g, (m, space, attr, eq, value) => {
                     return `${space}<span class="attr">${attr}</span>${eq}<span class="value">${value}</span>`;
                 });
                 
-                // Kolorowanie atrybutów bez wartości
                 coloredAttrs = coloredAttrs.replace(/(\s+)(\w+)(?!\s*=)/g, (m, space, attr) => {
                     return `${space}<span class="attr">${attr}</span>`;
                 });
@@ -242,7 +438,7 @@
                 return `&lt;${slash}<span class="tag">${tagName}</span>${coloredAttrs}${selfClose}&gt;`;
             });
             
-            // Kolorowanie tekstu między znacznikami
+            // Tekst między znacznikami
             escaped = escaped.replace(/(&gt;)(.*?)(&lt;)/g, (m, close, text, open) => {
                 if (text.trim()) {
                     return close + '<span class="text">' + text + '</span>' + open;
