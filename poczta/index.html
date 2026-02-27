@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌈 Auto Pobieracz HTML</title>
+    <title>🌈 Kolorowy HTML - białe tło</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
         
         body {
-            background: #1e1e1e;
+            background: #f5f5f5;  /* 🟢 ZMIENIONE: jasnoszare tło strony */
             font-family: 'Segoe UI', 'Courier New', monospace;
             height: 100vh;
             display: flex;
@@ -76,11 +76,11 @@
             margin-left: 5px;
         }
         
-        /* Obszar kodu */
+        /* 🟢 OBSZAR KODU - BIAŁE TŁO */
         .code-container {
             flex: 1;
             overflow: auto;
-            background: #1e1e1e;
+            background: #ffffff;  /* 🟢 ZMIENIONE: białe tło dla kodu */
             padding: 20px;
         }
         
@@ -91,14 +91,14 @@
             line-height: 1.6;
         }
         
-        /* Kolory składni */
-        .tag { color: #569cd6; }
-        .attr { color: #9cdcfe; }
-        .value { color: #ce9178; }
-        .comment { color: #6a9955; }
-        .text { color: #d4d4d4; }
-        .doctype { color: #808080; }
-        .error-text { color: #f48771; }
+        /* Kolory składni - dostosowane do białego tła */
+        .tag { color: #0000cc; }        /* Ciemnoniebieski */
+        .attr { color: #0066cc; }       /* Niebieski */
+        .value { color: #cc6600; }      /* Pomarańczowy */
+        .comment { color: #006600; }    /* Ciemnozielony */
+        .text { color: #000000; }       /* Czarny */
+        .doctype { color: #666666; }    /* Szary */
+        .error-text { color: #cc0000; } /* Czerwony */
         
         /* Status */
         .status {
@@ -131,6 +131,7 @@
         <div>🔧 Status: <span id="statusInfo">OK</span></div>
     </div>
     
+    <!-- 🟢 OBSZAR KODU - TERAZ Z BIAŁYM TŁEM -->
     <div class="code-container">
         <pre id="codeOutput"><span class="comment">&lt;!-- 
     👆 Wpisz adres strony i naciśnij Enter
