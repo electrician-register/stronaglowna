@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 Kolorowy Pobieracz HTML</title>
+    <title>🌈 Kolorowy Podgląd HTML</title>
     <style>
-        /* 🎨 STYLE - WSZYSTKIE KOLORY ŚWIATA */
         * {
             margin: 0;
             padding: 0;
@@ -13,480 +12,257 @@
         }
         
         body {
-            <span style="color: #FF6B6B; font-weight: bold;">background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</span>
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
+            background: #1e1e1e;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 🟦 Pasek adresu - jak w przeglądarce */
+        .address-bar {
+            background: #2d2d2d;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 2px solid #3d3d3d;
+        }
+        
+        .address-bar input {
+            flex: 1;
+            background: #3d3d3d;
+            border: none;
+            padding: 12px 20px;
+            color: #ffffff;
+            font-size: 14px;
+            border-radius: 25px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .address-bar input:focus {
+            background: #4d4d4d;
+            box-shadow: 0 0 0 2px #007acc;
+        }
+        
+        .address-bar button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .address-bar button:hover {
+            background: #005a9e;
+        }
+        
+        /* 🟩 Główny obszar kodu */
+        .code-container {
+            flex: 1;
+            overflow: auto;
+            background: #1e1e1e;
             padding: 20px;
         }
         
-        /* 🟦 KONTENER GŁÓWNY - NIEBIESKI */
-        .container {
-            <span style="color: #4A90E2; font-weight: bold;">max-width: 1200px;</span>
-            <span style="color: #4A90E2; font-weight: bold;">margin: 0 auto;</span>
-            <span style="color: #4A90E2; font-weight: bold;">background: white;</span>
-            <span style="color: #4A90E2; font-weight: bold;">border-radius: 20px;</span>
-            <span style="color: #4A90E2; font-weight: bold;">box-shadow: 0 20px 60px rgba(0,0,0,0.3);</span>
-            <span style="color: #4A90E2; font-weight: bold;">overflow: hidden;</span>
+        /* 📝 Styl dla kolorowanego kodu */
+        pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
         }
         
-        /* 🟩 NAGŁÓWEK - ZIELONY */
-        .header {
-            <span style="color: #2ECC71; font-weight: bold;">background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</span>
-            <span style="color: #2ECC71; font-weight: bold;">color: white;</span>
-            <span style="color: #2ECC71; font-weight: bold;">padding: 30px;</span>
-            <span style="color: #2ECC71; font-weight: bold;">text-align: center;</span>
-        }
+        /* 🎨 KOLORY SKŁADNI - jak w Visual Studio Code */
+        .tag { color: #569cd6; }           /* Niebieski - znaczniki */
+        .attr { color: #9cdcfe; }           /* Jasnoniebieski - atrybuty */
+        .value { color: #ce9178; }          /* Pomarańczowy - wartości */
+        .comment { color: #6a9955; }        /* Zielony - komentarze */
+        .text { color: #d4d4d4; }            /* Szary - zwykły tekst */
+        .doctype { color: #808080; }         /* Szary - doctype */
         
-        .header h1 {
-            <span style="color: #F1C40F; font-weight: bold;">font-size: 2.5em;</span>
-            <span style="color: #F1C40F; font-weight: bold;">margin-bottom: 10px;</span>
-            <span style="color: #F1C40F; font-weight: bold;">text-shadow: 2px 2px 4px rgba(0,0,0,0.2);</span>
-        }
-        
-        /* 🟨 SEKCJA WEJŚCIOWA - ŻÓŁTA */
-        .input-section {
-            <span style="color: #F1C40F; font-weight: bold;">padding: 30px;</span>
-            <span style="color: #F1C40F; font-weight: bold;">background: #f8f9fa;</span>
-            <span style="color: #F1C40F; font-weight: bold;">border-bottom: 3px solid #e9ecef;</span>
-        }
-        
-        .url-input-group {
-            <span style="color: #E67E22; font-weight: bold;">display: flex;</span>
-            <span style="color: #E67E22; font-weight: bold;">gap: 10px;</span>
-            <span style="color: #E67E22; font-weight: bold;">margin-bottom: 20px;</span>
-        }
-        
-        .url-input-group input {
-            <span style="color: #3498DB; font-weight: bold;">flex: 1;</span>
-            <span style="color: #3498DB; font-weight: bold;">padding: 15px 20px;</span>
-            <span style="color: #3498DB; font-weight: bold;">border: 2px solid #e0e0e0;</span>
-            <span style="color: #3498DB; font-weight: bold;">border-radius: 10px;</span>
-            <span style="color: #3498DB; font-weight: bold;">font-size: 16px;</span>
-        }
-        
-        /* 🟪 PRZYCISKI - FIOLETOWE */
-        .btn {
-            <span style="color: #9B59B6; font-weight: bold;">padding: 12px 25px;</span>
-            <span style="color: #9B59B6; font-weight: bold;">border: none;</span>
-            <span style="color: #9B59B6; font-weight: bold;">border-radius: 8px;</span>
-            <span style="color: #9B59B6; font-weight: bold;">font-size: 16px;</span>
-            <span style="color: #9B59B6; font-weight: bold;">font-weight: 600;</span>
-            <span style="color: #9B59B6; font-weight: bold;">cursor: pointer;</span>
-            <span style="color: #9B59B6; font-weight: bold;">transition: all 0.3s;</span>
-        }
-        
-        .btn-primary {
-            <span style="color: #3498DB; font-weight: bold;">background: #667eea;</span>
-            <span style="color: #3498DB; font-weight: bold;">color: white;</span>
-        }
-        
-        .btn-success {
-            <span style="color: #27AE60; font-weight: bold;">background: #48bb78;</span>
-            <span style="color: #27AE60; font-weight: bold;">color: white;</span>
-        }
-        
-        .btn-warning {
-            <span style="color: #F39C12; font-weight: bold;">background: #f6ad55;</span>
-            <span style="color: #F39C12; font-weight: bold;">color: white;</span>
-        }
-        
-        /* 🟧 SEKCJA WYNIKÓW - POMARAŃCZOWA */
-        .results-section {
-            <span style="color: #E67E22; font-weight: bold;">padding: 30px;</span>
-        }
-        
-        /* 📊 STATYSTYKI - KOLOROWE KARTY */
-        .stats {
-            <span style="color: #2C3E50; font-weight: bold;">display: flex;</span>
-            <span style="color: #2C3E50; font-weight: bold;">gap: 20px;</span>
-            <span style="color: #2C3E50; font-weight: bold;">margin-bottom: 20px;</span>
-        }
-        
-        .stat-card {
-            <span style="color: #16A085; font-weight: bold;">flex: 1;</span>
-            <span style="color: #16A085; font-weight: bold;">padding: 20px;</span>
-            <span style="color: #16A085; font-weight: bold;">border-radius: 10px;</span>
-            <span style="color: #16A085; font-weight: bold;">color: white;</span>
-            <span style="color: #16A085; font-weight: bold;">text-align: center;</span>
-        }
-        
-        .stat-card.blue { <span style="color: #3498DB;">background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</span> }
-        .stat-card.green { <span style="color: #2ECC71;">background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);</span> }
-        .stat-card.orange { <span style="color: #E67E22;">background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);</span> }
-        .stat-card.purple { <span style="color: #9B59B6;">background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);</span> }
-        
-        /* 🟦 ZAKŁADKI - NIEBIESKIE */
-        .tabs {
-            <span style="color: #2980B9; font-weight: bold;">display: flex;</span>
-            <span style="color: #2980B9; font-weight: bold;">gap: 5px;</span>
-            <span style="color: #2980B9; font-weight: bold;">margin-bottom: 20px;</span>
-            <span style="color: #2980B9; font-weight: bold;">border-bottom: 2px solid #e9ecef;</span>
-        }
-        
-        .tab {
-            <span style="color: #7F8C8D; font-weight: bold;">padding: 12px 25px;</span>
-            <span style="color: #7F8C8D; font-weight: bold;">background: none;</span>
-            <span style="color: #7F8C8D; font-weight: bold;">border: none;</span>
-            <span style="color: #7F8C8D; font-weight: bold;">font-size: 16px;</span>
-            <span style="color: #7F8C8D; font-weight: bold;">cursor: pointer;</span>
-        }
-        
-        .tab.active {
-            <span style="color: #3498DB; font-weight: bold;">color: #667eea;</span>
-            <span style="color: #3498DB; font-weight: bold;">border-bottom: 2px solid #667eea;</span>
-        }
-        
-        /* 🟩 OBSZAR KODU - ZIELONY */
-        .code-area {
-            <span style="color: #27AE60; font-weight: bold;">background: #1a202c;</span>
-            <span style="color: #27AE60; font-weight: bold;">color: #e2e8f0;</span>
-            <span style="color: #27AE60; font-weight: bold;">padding: 20px;</span>
-            <span style="color: #27AE60; font-weight: bold;">border-radius: 10px;</span>
-            <span style="color: #27AE60; font-weight: bold;">font-family: 'Courier New', monospace;</span>
-            <span style="color: #27AE60; font-weight: bold;">max-height: 500px;</span>
-            <span style="color: #27AE60; font-weight: bold;">overflow-y: auto;</span>
-        }
-        
-        /* 🟨 STATUS - ŻÓŁTY */
+        /* 🟪 Status */
         .status {
-            <span style="color: #F39C12; font-weight: bold;">padding: 15px 20px;</span>
-            <span style="color: #F39C12; font-weight: bold;">border-radius: 8px;</span>
-            <span style="color: #F39C12; font-weight: bold;">margin-bottom: 20px;</span>
-        }
-        
-        .status.info {
-            <span style="color: #3498DB; font-weight: bold;">background: #bee3f8;</span>
-            <span style="color: #3498DB; font-weight: bold;">color: #2c5282;</span>
-        }
-        
-        .status.success {
-            <span style="color: #27AE60; font-weight: bold;">background: #c6f6d5;</span>
-            <span style="color: #27AE60; font-weight: bold;">color: #22543d;</span>
+            background: #2d2d2d;
+            color: #d4d4d4;
+            padding: 8px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border-top: 1px solid #3d3d3d;
         }
         
         .status.error {
-            <span style="color: #E74C3C; font-weight: bold;">background: #fed7d7;</span>
-            <span style="color: #E74C3C; font-weight: bold;">color: #742a2a;</span>
+            background: #5a1e1e;
+            color: #ff6b6b;
         }
         
-        .hidden {
-            <span style="color: #95A5A6; font-weight: bold;">display: none;</span>
+        .status.success {
+            background: #1e3a1e;
+            color: #6bff6b;
+        }
+        
+        /* 📊 Pasek informacyjny */
+        .info-bar {
+            background: #252526;
+            color: #969696;
+            padding: 5px 20px;
+            font-size: 12px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #3d3d3d;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .info-item span {
+            color: #4ec9b0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 🟦 NAGŁÓWEK - NIEBIESKI -->
-        <header class="header">
-            <h1>🌐 <span style="color: #F1C40F;">Kolorowy</span> Pobieracz HTML</h1>
-            <p style="color: #ECF0F1;">Wpisz URL, a ja pokażę Ci <span style="color: #F1C40F;">kolorowy kod</span> strony!</p>
-        </header>
-        
-        <!-- 🟩 SEKCJA WEJŚCIOWA - ZIELONA -->
-        <section class="input-section">
-            <div class="url-input-group">
-                <input type="url" id="urlInput" 
-                       placeholder="https://example.com" 
-                       value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne"
-                       style="border-left: 5px solid #3498DB;">
-                <button class="btn btn-primary" onclick="fetchWebsite()">
-                    <span style="color: #F1C40F;">⬇️</span> Pobierz stronę
-                </button>
-            </div>
-            
-            <!-- 🟨 PRZYCISKI DODATKOWE - ŻÓŁTE -->
-            <div class="button-group" style="display: flex; gap: 10px;">
-                <button class="btn btn-success" onclick="fetchWithProxy()">
-                    <span style="color: #F1C40F;">🔄</span> Pobierz przez proxy
-                </button>
-                <button class="btn btn-warning" onclick="clearAll()">
-                    <span style="color: #E74C3C;">🗑️</span> Wyczyść
-                </button>
-            </div>
-        </section>
-        
-        <!-- 🟪 STATUS - FIOLETOWY -->
-        <div id="statusMessage" class="status info">
-            <span style="color: #3498DB;">⏳</span> Gotowy do pracy
-        </div>
-        
-        <!-- 🟧 SEKCJA WYNIKÓW - POMARAŃCZOWA -->
-        <section class="results-section">
-            <!-- 📊 STATYSTYKI - KOLOROWE KARTY -->
-            <div class="stats" id="stats" style="display: none;">
-                <div class="stat-card blue">
-                    <div class="number" id="statSize">0</div>
-                    <div class="label">Rozmiar</div>
-                </div>
-                <div class="stat-card green">
-                    <div class="number" id="statLines">0</div>
-                    <div class="label">Linie</div>
-                </div>
-                <div class="stat-card orange">
-                    <div class="number" id="statElements">0</div>
-                    <div class="label">Znaczniki</div>
-                </div>
-                <div class="stat-card purple">
-                    <div class="number" id="statTime">0</div>
-                    <div class="label">Czas (ms)</div>
-                </div>
-            </div>
-            
-            <!-- 📌 ZAKŁADKI - NIEBIESKIE -->
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('html')">
-                    <span style="color: #E74C3C;">📄</span> Kod HTML
-                </button>
-                <button class="tab" onclick="switchTab('preview')">
-                    <span style="color: #2ECC71;">👁️</span> Podgląd
-                </button>
-                <button class="tab" onclick="switchTab('headers')">
-                    <span style="color: #F39C12;">📋</span> Nagłówki
-                </button>
-                <button class="tab" onclick="switchTab('raw')">
-                    <span style="color: #9B59B6;">🔧</span> Surowe
-                </button>
-            </div>
-            
-            <!-- 🟦 ZAKŁADKA: KOD HTML - KOLOROWANY -->
-            <div id="tabHtml" class="tab-content">
-                <div class="code-area" id="htmlOutput">
-                    <span style="color: #808080;">⏳ Kliknij "Pobierz stronę"...</span>
-                </div>
-            </div>
-            
-            <!-- 🟩 ZAKŁADKA: PODGLĄD -->
-            <div id="tabPreview" class="tab-content hidden">
-                <div class="preview-area" style="background: white; padding: 20px; border-radius: 10px;">
-                    <iframe id="previewFrame" style="width: 100%; height: 400px; border: 2px solid #2ECC71;"></iframe>
-                </div>
-            </div>
-            
-            <!-- 🟨 ZAKŁADKA: NAGŁÓWKI -->
-            <div id="tabHeaders" class="tab-content hidden">
-                <div class="code-area" id="headersOutput" style="background: #2C3E50;"></div>
-            </div>
-            
-            <!-- 🟧 ZAKŁADKA: SUROWE DANE -->
-            <div id="tabRaw" class="tab-content hidden">
-                <div class="code-area" id="rawOutput" style="background: #34495E;"></div>
-            </div>
-        </section>
+    <!-- 🟦 PASEK ADRESU -->
+    <div class="address-bar">
+        <input type="text" id="urlInput" placeholder="Wpisz adres URL (np. https://example.com)" 
+               value="https://www.tauron.pl/tauron/o-tauronie/kariera/oferty-pracy?psize=15&workplace=krak%C3%B3w&career_level=stanowisko%20fizyczne"
+               onkeypress="if(event.key==='Enter') fetchHTML()">
+        <button onclick="fetchHTML()">Pobierz HTML</button>
     </div>
     
-    <!-- 🟪 DODATKOWY PANEL - FIOLETOWY -->
-    <div style="margin-top: 20px; text-align: center;">
-        <button class="btn btn-primary" onclick="parseTauronOffers()" 
-                style="background: #9B59B6; border: 2px solid #8E44AD;">
-            <span style="color: #F1C40F;">🔍</span> Parsuj oferty Tauron
-        </button>
+    <!-- 📊 PASEK INFORMACYJNY -->
+    <div class="info-bar" id="infoBar">
+        <div class="info-item">📄 Rozmiar: <span id="sizeInfo">0 B</span></div>
+        <div class="info-item">📊 Linie: <span id="linesInfo">0</span></div>
+        <div class="info-item">🏷️ Znaczniki: <span id="tagsInfo">0</span></div>
+        <div class="info-item">⏱️ Czas: <span id="timeInfo">0ms</span></div>
     </div>
+    
+    <!-- 🟩 OBSZAR KODU Z KOLOROWANIEM -->
+    <div class="code-container">
+        <pre id="codeOutput"><span class="comment">&lt;!-- Wpisz adres URL i naciśnij Enter --&gt;</span></pre>
+    </div>
+    
+    <!-- 🟪 STATUS -->
+    <div class="status" id="status">✅ Gotowy</div>
     
     <script>
-        // ============================================
-        // 🟦 GŁÓWNE ZMIENNE - NIEBIESKIE
-        // ============================================
-        <span style="color: #3498DB; font-weight: bold;">let currentHtml = '';</span>
-        <span style="color: #3498DB; font-weight: bold;">let currentHeaders = {};</span>
-        <span style="color: #3498DB; font-weight: bold;">let startTime = 0;</span>
+        const urlInput = document.getElementById('urlInput');
+        const codeOutput = document.getElementById('codeOutput');
+        const statusDiv = document.getElementById('status');
+        const sizeSpan = document.getElementById('sizeInfo');
+        const linesSpan = document.getElementById('linesInfo');
+        const tagsSpan = document.getElementById('tagsInfo');
+        const timeSpan = document.getElementById('timeInfo');
         
-        // ============================================
-        // 🟩 GŁÓWNA FUNKCJA - ZIELONA
-        // ============================================
-        <span style="color: #27AE60; font-weight: bold;">async function fetchWebsite() {</span>
-            <span style="color: #808080;">const url = document.getElementById('urlInput').value.trim();</span>
+        async function fetchHTML() {
+            const url = urlInput.value.trim();
             
-            <span style="color: #E67E22;">if (!url) {</span>
-                <span style="color: #E74C3C;">showStatus('error', '❌ Wpisz URL!');</span>
-                <span style="color: #E67E22;">return;</span>
-            <span style="color: #E67E22;">}</span>
+            if (!url) {
+                showStatus('error', '❌ Wpisz adres URL!');
+                return;
+            }
             
-            <span style="color: #3498DB;">try {</span>
-                <span style="color: #9B59B6;">startTime = performance.now();</span>
-                <span style="color: #F39C12;">showStatus('info', `⏳ Pobieranie: ${url}...`);</span>
+            const startTime = performance.now();
+            
+            try {
+                showStatus('info', '⏳ Pobieranie strony...');
                 
-                <span style="color: #27AE60;">// 🟨 Pobieranie danych</span>
-                <span style="color: #E67E22;">const response = await fetch(url, {</span>
-                    <span style="color: #3498DB;">headers: {</span>
-                        <span style="color: #2ECC71;">'User-Agent': 'Mozilla/5.0...',</span>
-                        <span style="color: #2ECC71;">'Accept': 'text/html',</span>
-                    <span style="color: #3498DB;">}</span>
-                <span style="color: #E67E22;">});</span>
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
                 
-                <span style="color: #9B59B6;">// 🟪 Konwersja nagłówków</span>
-                <span style="color: #E67E22;">const headers = {};</span>
-                <span style="color: #F39C12;">response.headers.forEach((value, key) => {</span>
-                    <span style="color: #3498DB;">headers[key] = value;</span>
-                <span style="color: #F39C12;">});</span>
-                <span style="color: #27AE60;">currentHeaders = headers;</span>
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 
-                <span style="color: #2ECC71;">// 📥 Pobranie treści</span>
-                <span style="color: #E67E22;">const html = await response.text();</span>
-                <span style="color: #3498DB;">currentHtml = html;</span>
+                const html = await response.text();
+                const time = Math.round(performance.now() - startTime);
                 
-                <span style="color: #9B59B6;">// 📊 Aktualizacja statystyk</span>
-                <span style="color: #F39C12;">updateStats(html, headers, response.status);</span>
+                // 📊 Aktualizacja informacji
+                const size = new Blob([html]).size;
+                const lines = html.split('\n').length;
+                const tags = (html.match(/<\/?\w+/g) || []).length;
                 
-                <span style="color: #27AE60;">// 🟦 Wyświetlenie w zakładkach</span>
-                <span style="color: #3498DB;">displayHtml(html);</span>
-                <span style="color: #2ECC71;">displayHeaders(headers, response.status);</span>
-                <span style="color: #E67E22;">displayRaw(html, response);</span>
-                <span style="color: #9B59B6;">setupPreview(html);</span>
+                sizeSpan.textContent = formatBytes(size);
+                linesSpan.textContent = lines;
+                tagsSpan.textContent = tags;
+                timeSpan.textContent = time + 'ms';
                 
-                <span style="color: #27AE60;">// ✅ Status sukcesu</span>
-                <span style="color: #2ECC71;">showStatus('success', `✅ Pobrano! Status: ${response.status}`);</span>
+                // 🎨 Kolorowanie składni
+                colorizeHTML(html);
                 
-            <span style="color: #3498DB;">} catch (error) {</span>
-                <span style="color: #E74C3C;">console.error('Błąd:', error);</span>
-                <span style="color: #E74C3C;">showStatus('error', `❌ Błąd: ${error.message}`);</span>
-            <span style="color: #3498DB;">}</span>
-        <span style="color: #27AE60; font-weight: bold;">}</span>
+                showStatus('success', `✅ Pobrano pomyślnie (${response.status})`);
+                
+            } catch (error) {
+                console.error(error);
+                showStatus('error', `❌ Błąd: ${error.message}`);
+                codeOutput.innerHTML = `<span class="comment">&lt;!-- BŁĄD: ${error.message} --&gt;</span>`;
+            }
+        }
         
-        // ============================================
-        // 🟨 FUNKCJA WYŚWIETLANIA HTML - KOLOROWANIE
-        // ============================================
-        <span style="color: #F1C40F; font-weight: bold;">function displayHtml(html) {</span>
-            <span style="color: #808080;">const output = document.getElementById('htmlOutput');</span>
+        // 🎨 GŁÓWNA FUNKCJA KOLORUJĄCA
+        function colorizeHTML(html) {
+            // Najpierw escape'ujemy znaki specjalne
+            let escaped = html
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
             
-            <span style="color: #E67E22;">// 🎨 KOLOROWANIE SKŁADNI HTML</span>
-            <span style="color: #3498DB;">let coloredHtml = html</span>
-                <span style="color: #9B59B6;">.replace(/&/g, '&amp;')</span>
-                <span style="color: #2ECC71;">.replace(/</g, '&lt;')</span>
-                <span style="color: #E74C3C;">.replace(/>/g, '&gt;')</span>
-                <span style="color: #F39C12;">.replace(/&lt;(\/?\w+)(.*?)&gt;/g, (match, tag, attrs) => {</span>
-                    <span style="color: #3498DB;">return `<span style="color: #569cd6;">&lt;${tag}${attrs}&gt;</span>`;</span>
-                <span style="color: #F39C12;">})</span>
-                <span style="color: #E67E22;">.replace(/"([^"]*)"/g, '<span style="color: #ce9178;">"$1"</span>');</span>
+            // Kolorowanie DOCTYPE
+            escaped = escaped.replace(/&lt;!DOCTYPE.*?&gt;/gi, match => {
+                return `<span class="doctype">${match}</span>`;
+            });
             
-            <span style="color: #27AE60;">output.innerHTML = coloredHtml;</span>
-        <span style="color: #F1C40F; font-weight: bold;">}</span>
-        
-        // ============================================
-        // 🟪 WYŚWIETLANIE NAGŁÓWKÓW
-        // ============================================
-        <span style="color: #9B59B6; font-weight: bold;">function displayHeaders(headers, status) {</span>
-            <span style="color: #808080;">const output = document.getElementById('headersOutput');</span>
-            <span style="color: #F39C12;">let html = `<span style="color: #ffd700;">HTTP/1.1 ${status}</span>\n\n`;</span>
+            // Kolorowanie komentarzy
+            escaped = escaped.replace(/&lt;!--.*?--&gt;/g, match => {
+                return `<span class="comment">${match}</span>`;
+            });
             
-            <span style="color: #3498DB;">for (const [key, value] of Object.entries(headers)) {</span>
-                <span style="color: #27AE60;">html += `<span style="color: #9cdcfe;">${key}:</span> <span style="color: #ce9178;">${value}</span>\n`;</span>
-            <span style="color: #3498DB;">}</span>
-            
-            <span style="color: #E67E22;">output.innerHTML = html;</span>
-        <span style="color: #9B59B6; font-weight: bold;">}</span>
-        
-        // ============================================
-        // 📊 STATYSTYKI
-        // ============================================
-        <span style="color: #F39C12; font-weight: bold;">function updateStats(html, headers, status) {</span>
-            <span style="color: #808080;">document.getElementById('stats').style.display = 'flex';</span>
-            
-            <span style="color: #3498DB;">const size = new Blob([html]).size;</span>
-            <span style="color: #27AE60;">const lines = html.split('\n').length;</span>
-            <span style="color: #E67E22;">const tags = (html.match(/<\/?\w+/g) || []).length;</span>
-            <span style="color: #9B59B6;">const time = Math.round(performance.now() - startTime);</span>
-            
-            <span style="color: #2ECC71;">document.getElementById('statSize').textContent = formatBytes(size);</span>
-            <span style="color: #F1C40F;">document.getElementById('statLines').textContent = lines;</span>
-            <span style="color: #E74C3C;">document.getElementById('statElements').textContent = tags;</span>
-            <span style="color: #3498DB;">document.getElementById('statTime').textContent = time + 'ms';</span>
-        <span style="color: #F39C12; font-weight: bold;">}</span>
-        
-        // ============================================
-        // 🔍 PARSOWANIE OFERT TAURON - KOLOROWE
-        // ============================================
-        <span style="color: #E74C3C; font-weight: bold;">function parseTauronOffers() {</span>
-            <span style="color: #3498DB;">if (!currentHtml) {</span>
-                <span style="color: #F39C12;">showStatus('warning', '⚠️ Najpierw pobierz stronę!');</span>
-                <span style="color: #E67E22;">return;</span>
-            <span style="color: #3498DB;">}</span>
-            
-            <span style="color: #9B59B6;">try {</span>
-                <span style="color: #27AE60;">// 🟨 Szukanie tabeli</span>
-                <span style="color: #F1C40F;">const tableRegex = /<table[^>]*>([\s\S]*?)<\/table>/i;</span>
-                <span style="color: #2ECC71;">const tableMatch = currentHtml.match(tableRegex);</span>
+            // Kolorowanie znaczników i atrybutów
+            escaped = escaped.replace(/&lt;(\/?)(\w+)(.*?)(\/?)&gt;/g, (match, slash, tagName, attrs, selfClose) => {
+                // Kolorowanie atrybutów wewnątrz znacznika
+                let coloredAttrs = attrs.replace(/(\s+)(\w+)(\s*=\s*)(&quot;.*?&quot;)/g, (m, space, attr, eq, value) => {
+                    return `${space}<span class="attr">${attr}</span>${eq}<span class="value">${value}</span>`;
+                });
                 
-                <span style="color: #E67E22;">if (!tableMatch) {</span>
-                    <span style="color: #E74C3C;">showStatus('warning', '⚠️ Nie znaleziono tabeli!');</span>
-                    <span style="color: #E67E22;">return;</span>
-                <span style="color: #E67E22;">}</span>
+                // Kolorowanie atrybutów bez wartości
+                coloredAttrs = coloredAttrs.replace(/(\s+)(\w+)(?!\s*=)/g, (m, space, attr) => {
+                    return `${space}<span class="attr">${attr}</span>`;
+                });
                 
-                <span style="color: #3498DB;">// 🟧 Dzielenie na wiersze</span>
-                <span style="color: #F39C12;">const tableContent = tableMatch[1];</span>
-                <span style="color: #9B59B6;">const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;</span>
-                <span style="color: #27AE60;">const rows = tableContent.match(rowRegex) || [];</span>
-                
-                <span style="color: #2ECC71;">// 🟪 Przetwarzanie ofert</span>
-                <span style="color: #3498DB;">const offers = [];</span>
-                
-                <span style="color: #E67E22;">for (const row of rows) {</span>
-                    <span style="color: #F1C40F;">if (row.includes('<th')) continue;</span>
-                    
-                    <span style="color: #9B59B6;">const cellRegex = /<t[d|h][^>]*>([\s\S]*?)<\/t[d|h]>/gi;</span>
-                    <span style="color: #2ECC71;">const cells = row.match(cellRegex) || [];</span>
-                    
-                    <span style="color: #27AE60;">if (cells.length >= 7) {</span>
-                        <span style="color: #E74C3C;">const cleanText = (text) => {</span>
-                            <span style="color: #3498DB;">return text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();</span>
-                        <span style="color: #E74C3C;">};</span>
-                        
-                        <span style="color: #F39C12;">const cleaned = cells.map(cell => cleanText(cell));</span>
-                        
-                        <span style="color: #9B59B6;">offers.push({</span>
-                            <span style="color: #2ECC71;">stanowisko: cleaned[0] || '',</span>
-                            <span style="color: #3498DB;">poziom: cleaned[1] || '',</span>
-                            <span style="color: #E67E22;">miejsce: cleaned[2] || '',</span>
-                            <span style="color: #F1C40F;">spolka: cleaned[3] || '',</span>
-                            <span style="color: #E74C3C;">forma: cleaned[4] || '',</span>
-                            <span style="color: #9B59B6;">waznosc: cleaned[5] || '',</span>
-                            <span style="color: #27AE60;">ref: cleaned[6] || ''</span>
-                        <span style="color: #9B59B6;">});</span>
-                    <span style="color: #27AE60;">}</span>
-                <span style="color: #E67E22;">}</span>
-                
-                <span style="color: #3498DB;">if (offers.length > 0) {</span>
-                    <span style="color: #2ECC71;">let result = `🔍 Znaleziono ${offers.length} ofert:\n\n`;</span>
-                    <span style="color: #F39C12;">offers.forEach((offer, i) => {</span>
-                        <span style="color: #9B59B6;">result += `${i+1}. ${offer.stanowisko} (${offer.ref})\n`;</span>
-                        <span style="color: #E67E22;">result += `   📍 ${offer.miejsce} | 📅 ${offer.waznosc}\n\n`;</span>
-                    <span style="color: #F39C12;">});</span>
-                    
-                    <span style="color: #E74C3C;">alert(result);</span>
-                    <span style="color: #27AE60;">showStatus('success', `✅ Znaleziono ${offers.length} ofert!`);</span>
-                <span style="color: #3498DB;">}</span>
-                
-            <span style="color: #9B59B6;">} catch (error) {</span>
-                <span style="color: #E74C3C;">showStatus('error', `❌ Błąd: ${error.message}`);</span>
-            <span style="color: #9B59B6;">}</span>
-        <span style="color: #E74C3C; font-weight: bold;">}</span>
-        
-        // ============================================
-        // 🟦 FUNKCJE POMOCNICZE
-        // ============================================
-        <span style="color: #3498DB; font-weight: bold;">function showStatus(type, message) {</span>
-            <span style="color: #808080;">const statusEl = document.getElementById('statusMessage');</span>
-            <span style="color: #27AE60;">statusEl.className = `status ${type}`;</span>
-            <span style="color: #E67E22;">statusEl.innerHTML = message;</span>
-        <span style="color: #3498DB; font-weight: bold;">}</span>
-        
-        <span style="color: #2ECC71; font-weight: bold;">function switchTab(tab) {</span>
-            <span style="color: #808080;">document.querySelectorAll('.tab-content').forEach(el => {</span>
-                <span style="color: #F39C12;">el.classList.add('hidden');</span>
-            <span style="color: #808080;">});</span>
+                return `&lt;${slash}<span class="tag">${tagName}</span>${coloredAttrs}${selfClose}&gt;`;
+            });
             
-            <span style="color: #9B59B6;">document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');</span>
+            // Kolorowanie tekstu między znacznikami
+            escaped = escaped.replace(/(&gt;)(.*?)(&lt;)/g, (m, close, text, open) => {
+                if (text.trim()) {
+                    return close + '<span class="text">' + text + '</span>' + open;
+                }
+                return m;
+            });
             
-            <span style="color: #E67E22;">document.querySelectorAll('.tab').forEach(btn => {</span>
-                <span style="color: #3498DB;">btn.classList.remove('active');</span>
-            <span style="color: #E67E22;">});</span>
-            <span style="color: #E74C3C;">event.target.classList.add('active');</span>
-        <span style="color: #2ECC71; font-weight: bold;">}</span>
+            codeOutput.innerHTML = escaped;
+        }
         
-        <span style="color: #F39C12; font-weight: bold;">function formatBytes(bytes) {</span>
-            <span style="color: #3498DB;">if (bytes < 1024) return bytes + ' B';</span>
-            <span style="color: #27AE60;">if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';</span>
-            <span style="color: #E67E22;">return (bytes/(1024*1024)).toFixed(1) + ' MB';</span>
-        <span style="color: #F39C12; font-weight: bold;">}</span>
+        function showStatus(type, message) {
+            statusDiv.className = 'status ' + type;
+            statusDiv.textContent = message;
+        }
         
-        <span style="color: #E74C3C; font-weight: bold;">function clearAll() {</span>
-            <span style="color: #3498DB;">currentHtml = '';</span
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+            return (bytes/(1024*1024)).toFixed(1) + ' MB';
+        }
+    </script>
+</body>
+</html>
