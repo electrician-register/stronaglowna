@@ -49,6 +49,8 @@
             font-family: 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         
         .tag { color: #0000cc; }
@@ -127,8 +129,10 @@
             codeOutput.innerHTML = escaped;
         }
         
-        // Auto-pobierz przykładowy URL
-        setTimeout(fetchHTML, 100);
+        // Auto-pobierz przy starcie
+        window.onload = function() {
+            setTimeout(fetchHTML, 100);
+        };
     </script>
 </body>
 </html>
