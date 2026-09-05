@@ -12,8 +12,8 @@
             --kolor-tla: #ffffff;
             --kolor-granatowy: #12274d;
             --kolor-zolty: #f3b10c;
-            --kolor-tekstu: #333333;
             
+            /* Poprawione ścieżki do plików */
             --zdjecie-portret: url('portret.png');
             --logo-firma: url('logo.png');
         }
@@ -26,25 +26,26 @@
         }
 
         body {
-            background-color: #f4f4f4; /* Szare tło strony, aby karta się wyróżniała */
+            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Zmienione z center, żeby nie ucinało na małych ekranach */
+            align-items: center; /* Wycentrowanie w pionie na dużym ekranie */
             min-height: 100vh;
             padding: 20px;
         }
 
-        /* Główna karta (banner) */
+        /* Główna karta */
         .banner {
             display: flex;
             flex-wrap: wrap;
-            max-width: 1000px;
+            max-width: 1100px; /* Trochę szersze, aby lepiej pomieścić wszystko */
             width: 100%;
             background-color: var(--kolor-tla);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border-radius: 12px;
             overflow: hidden;
-            position: relative;
+            /* WAŻNE: Ustawienie sztywnej wysokości dla wersji desktop, aby zdjęcie idealnie pasowało */
+            min-height: 650px; 
         }
 
         /* ==========================================
@@ -59,7 +60,6 @@
             z-index: 2;
         }
 
-        /* Nagłówek i Logo */
         .naglowek {
             display: flex;
             align-items: center;
@@ -68,8 +68,8 @@
         }
 
         .logo {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             background-image: var(--logo-firma);
             background-size: contain;
             background-repeat: no-repeat;
@@ -77,27 +77,22 @@
             flex-shrink: 0;
         }
 
-        .tytul-box {
-            line-height: 1.1;
-        }
+        .tytul-box { line-height: 1.1; }
 
         .tytul-maly {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: var(--kolor-granatowy);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .tytul-duzy {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 800;
             color: var(--kolor-zolty);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        /* Podtytuł */
         .podtytul {
             font-size: 1rem;
             text-transform: uppercase;
@@ -109,7 +104,6 @@
             color: var(--kolor-granatowy);
         }
 
-        /* Lista usług */
         .uslugi-lista {
             display: flex;
             flex-direction: column;
@@ -119,12 +113,12 @@
 
         .usluga-item {
             display: flex;
-            align-items: flex-start; /* Zmienione na start, żeby tekst nie rozjeżdżał się przy łamaniu */
+            align-items: flex-start;
         }
 
         .ikona-box {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             background-color: var(--kolor-granatowy);
             color: var(--kolor-zolty);
             border-radius: 50%;
@@ -133,26 +127,23 @@
             align-items: center;
             margin-right: 20px;
             flex-shrink: 0;
-            font-size: 24px;
+            font-size: 26px;
         }
 
-        .usluga-tekst {
-            min-width: 0; /* Kluczowe: pozwala na poprawne łamanie tekstu w flexboxie */
-        }
+        .usluga-tekst { min-width: 0; }
 
         .usluga-tekst h3 {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: var(--kolor-granatowy);
             margin-bottom: 5px;
             text-transform: uppercase;
         }
 
         .usluga-tekst p {
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #555;
             margin-bottom: 8px;
             position: relative;
-            word-break: break-word;
         }
 
         .usluga-tekst p::after {
@@ -174,29 +165,28 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            min-height: 500px;
+            /* Wysokość kolumny jest teraz kontrolowana przez .banner (min-height: 650px) */
         }
 
-        /* Tło ze zdjęciem */
+        /* Tło ze zdjęciem - DOPRACOWANE */
         .zdjecie-tlo {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 70%; 
+            height: 80%; /* Więcej miejsca na zdjęcie */
             background-image: var(--zdjecie-portret);
-            background-size: cover;
-            background-position: top center;
-            /* Delikatny gradient, aby połączyć zdjęcie z niebieskim tłem */
-            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            background-size: cover; /* Dopasowuje zdjęcie */
+            background-position: top center; 
+            /* Gradient idealnie wtapiający zdjęcie w granat */
+            -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
         }
 
-        /* Menu kontaktowe */
         .kontakt-box {
             position: relative;
             z-index: 3;
-            background-color: var(--kolor-granatowy);
+            background-color: var(--kolor-granatowy); /* Tło pod spodem */
             padding: 25px 30px;
             color: white;
             margin-top: auto; 
@@ -206,13 +196,13 @@
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .kontakt-ikona {
             margin-right: 15px;
             color: var(--kolor-zolty);
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             width: 25px;
             text-align: center;
             flex-shrink: 0;
@@ -221,13 +211,10 @@
         .kontakt-item a {
             color: white;
             text-decoration: none;
-            word-break: break-all; /* Ważne dla długiego emaila na mobile */
             transition: color 0.3s;
         }
 
-        .kontakt-item a:hover {
-            color: var(--kolor-zolty);
-        }
+        .kontakt-item a:hover { color: var(--kolor-zolty); }
 
         .wezwanie {
             display: flex;
@@ -244,64 +231,43 @@
         /* ==========================================
            RESPONSYWNOŚĆ (TELEFON)
            ========================================== */
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             body {
                 padding: 10px;
+                align-items: flex-start;
             }
 
             .banner {
                 flex-direction: column;
                 border-radius: 8px;
+                min-height: auto; /* Usuwamy sztywną wysokość na mobile */
             }
 
-            /* Obie kolumny na 100% szerokości */
             .lewa-kolumna, .prawa-kolumna {
                 flex: 1 1 100%;
                 width: 100%;
             }
 
-            /* Dostosowanie lewej kolumny */
-            .lewa-kolumna {
-                padding: 25px;
-            }
+            .lewa-kolumna { padding: 25px; }
+            .naglowek { margin-bottom: 20px; }
+            .logo { width: 60px; height: 60px; }
+            .tytul-maly { font-size: 1.5rem; }
+            .tytul-duzy { font-size: 1.8rem; }
+            .podtytul { margin-bottom: 25px; font-size: 0.9rem; }
+            .uslugi-lista { gap: 20px; }
 
-            .naglowek {
-                margin-bottom: 20px;
-                flex-wrap: wrap; /* Pozwala logo zejść niżej jeśli tekst jest za długi */
-            }
-
-            .logo {
-                width: 50px; /* Mniejsze logo na telefon */
-                height: 50px;
-            }
-
-            .tytul-maly { font-size: 1.3rem; }
-            .tytul-duzy { font-size: 1.6rem; }
-
-            .podtytul {
-                margin-bottom: 25px;
-                font-size: 0.9rem;
-            }
-
-            .uslugi-lista {
-                gap: 20px;
-            }
-
-            .usluga-tekst h3 {
-                font-size: 1rem;
-            }
-
-            /* Dostosowanie prawej kolumny */
+            /* Dostosowanie prawej kolumny pod telefon */
             .prawa-kolumna {
-                min-height: auto; /* Pozwala jej rosnąć wraz z zawartością */
+                min-height: auto;
+                background-color: var(--kolor-granatowy); 
             }
 
             .zdjecie-tlo {
-                height: 300px; /* Stała wysokość zdjęcia na telefonie */
-                position: relative;
-                -webkit-mask-image: none;
+                position: relative; /* Zmiana z absolute na relative */
+                height: 350px; /* Wysokość zdjęcia na telefonie */
+                width: 100%;
+                -webkit-mask-image: none; /* Usuwamy gradient */
                 mask-image: none;
-                opacity: 1;
             }
 
             .kontakt-box {
@@ -317,9 +283,7 @@
         
         <!-- LEWA KOLUMNA: TREŚĆ -->
         <div class="lewa-kolumna">
-            
             <div class="naglowek">
-                <!-- Logo z pliku logo1.png -->
                 <div class="logo"></div>
                 <div class="tytul-box">
                     <div class="tytul-maly">Usługi</div>
@@ -356,13 +320,11 @@
                 </div>
 
             </div>
-
         </div>
 
         <!-- PRAWA KOLUMNA: ZDJĘCIE + KONTAKT -->
         <div class="prawa-kolumna">
             
-            <!-- Portret z pliku portret.png -->
             <div class="zdjecie-tlo"></div>
 
             <div class="kontakt-box">
