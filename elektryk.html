@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usługi Elektryczne - Twoja Elektryka</title>
+    <title>Usługi Elektryczne</title>
     <style>
         /* ==========================================
-           ZMIENNE GLOBALNE (TU ZMIENIASZ KOLORY I ZDJĘCIA)
+           ZMIENNE GLOBALNE (TU ZMIENIASZ KOLORY I ŚCIEŻKI DO ZDJĘĆ)
            ========================================== */
         :root {
             /* Kolory */
@@ -15,11 +15,11 @@
             --kolor-zolty: #f3b10c;
             --kolor-tekstu: #333333;
             
-            /* Zdjęcia - tutaj wklej linki do swoich plików */
-            --zdjecie-portret: url('https://via.placeholder.com/600x800/12274d/ffffff?text=Twoje+Zdjecie');
-            --logo-firma: url('https://via.placeholder.com/80x80/f3b10c/12274d?text=LOGO');
+            /* *** ZMIENIONE ŚCIEŻKI DO OBRAZKÓW *** */
+            --zdjecie-portret: url('portret.png');
+            --logo-firma: url('logo1.png');
             
-            /* Tło sekcji prawa (niebieskie) - opcjonalne */
+            /* Tło sekcji prawej (niebieskie) */
             --tlo-prawe: #12274d;
         }
 
@@ -75,8 +75,8 @@
         }
 
         .logo {
-            width: 60px;
-            height: 60px;
+            width: 80px; /* Zwiększyłem trochę, aby lepiej pasowało do grafiki */
+            height: 80px;
             background-image: var(--logo-firma);
             background-size: contain;
             background-repeat: no-repeat;
@@ -178,17 +178,16 @@
             justify-content: flex-end;
         }
 
-        /* Tło ze zdjęciem (z delikatnym gradientem i schematem) */
+        /* Tło ze zdjęciem */
         .zdjecie-tlo {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 80%; /* Zostawiamy miejsce na dane kontaktowe */
+            height: 80%; 
             background-image: var(--zdjecie-portret);
             background-size: cover;
             background-position: top center;
-            /* Efekt nakładki, aby dane kontaktowe były czytelne */
             -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
         }
@@ -200,7 +199,7 @@
             background-color: var(--kolor-granatowy);
             padding: 30px;
             color: white;
-            margin-top: auto; /* Dopycha na dół */
+            margin-top: auto; 
         }
 
         .kontakt-item {
@@ -258,10 +257,10 @@
             }
 
             .zdjecie-tlo {
-                height: 100%; /* Na mobile zdjęcie wypełnia całą górę */
+                height: 100%;
                 -webkit-mask-image: none;
                 mask-image: none;
-                opacity: 0.8; /* Delikatne przyciemnienie */
+                opacity: 0.8; 
             }
 
             .kontakt-box {
@@ -281,7 +280,7 @@
         <div class="lewa-kolumna">
             
             <div class="naglowek">
-                <!-- TU ZMIENIASZ LOGO (poprzez CSS :root) -->
+                <!-- Logo pobierane z pliku logo1.png -->
                 <div class="logo"></div>
                 <div class="tytul-box">
                     <div class="tytul-maly">Usługi</div>
@@ -324,26 +323,23 @@
         <!-- PRAWA KOLUMNA: ZDJĘCIE + KONTAKT -->
         <div class="prawa-kolumna">
             
-            <!-- TU ZMIENIASZ ZDJĘCIE (poprzez CSS :root) -->
+            <!-- Portret pobierany z pliku portret.png -->
             <div class="zdjecie-tlo"></div>
 
             <div class="kontakt-box">
                 
                 <div class="kontakt-item">
                     <div class="kontakt-ikona">📞</div>
-                    <!-- TU ZMIENIASZ NUMER TELEFONU -->
                     <a href="tel:+48123123456">+48 123 456 789</a>
                 </div>
 
                 <div class="kontakt-item">
                     <div class="kontakt-ikona">✉️</div>
-                    <!-- TU ZMIENIASZ E-MAIL -->
                     <a href="mailto:kontakt@twojaelektryka.pl">kontakt@twojaelektryka.pl</a>
                 </div>
 
                 <div class="kontakt-item">
                     <div class="kontakt-ikona">📍</div>
-                    <!-- TU ZMIENIASZ LOKALIZACJĘ -->
                     <div>Kraków i okolice</div>
                 </div>
 
@@ -359,3 +355,8 @@
 
 </body>
 </html>
+            
+          
+            
+            
+            
