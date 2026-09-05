@@ -1,1 +1,361 @@
-ala
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usługi Elektryczne - Twoja Elektryka</title>
+    <style>
+        /* ==========================================
+           ZMIENNE GLOBALNE (TU ZMIENIASZ KOLORY I ZDJĘCIA)
+           ========================================== */
+        :root {
+            /* Kolory */
+            --kolor-tla: #ffffff;
+            --kolor-granatowy: #12274d;
+            --kolor-zolty: #f3b10c;
+            --kolor-tekstu: #333333;
+            
+            /* Zdjęcia - tutaj wklej linki do swoich plików */
+            --zdjecie-portret: url('https://via.placeholder.com/600x800/12274d/ffffff?text=Twoje+Zdjecie');
+            --logo-firma: url('https://via.placeholder.com/80x80/f3b10c/12274d?text=LOGO');
+            
+            /* Tło sekcji prawa (niebieskie) - opcjonalne */
+            --tlo-prawe: #12274d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--kolor-tla);
+            color: var(--kolor-tekstu);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Główna karta (banner) */
+        .banner {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            width: 100%;
+            min-height: 600px;
+            background-color: var(--kolor-tla);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ==========================================
+           LEWA KOLUMNA (TEKST)
+           ========================================== */
+        .lewa-kolumna {
+            flex: 1 1 50%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--kolor-tla);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Nagłówek i Logo */
+        .naglowek {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background-image: var(--logo-firma);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .tytul-box {
+            line-height: 1.1;
+        }
+
+        .tytul-maly {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--kolor-granatowy);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tytul-duzy {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--kolor-zolty);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Podtytuł */
+        .podtytul {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--kolor-granatowy);
+            display: inline-block;
+        }
+
+        /* Lista usług */
+        .uslugi-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .usluga-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .ikona-box {
+            width: 50px;
+            height: 50px;
+            background-color: var(--kolor-granatowy);
+            color: var(--kolor-zolty);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            font-size: 24px;
+        }
+
+        .usluga-tekst h3 {
+            font-size: 1.2rem;
+            color: var(--kolor-granatowy);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .usluga-tekst p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .usluga-tekst p::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background-color: var(--kolor-zolty);
+            margin-top: 5px;
+        }
+
+        /* ==========================================
+           PRAWA KOLUMNA (ZDJĘCIE + KONTAKT)
+           ========================================== */
+        .prawa-kolumna {
+            flex: 1 1 50%;
+            position: relative;
+            background-color: var(--tlo-prawe);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        /* Tło ze zdjęciem (z delikatnym gradientem i schematem) */
+        .zdjecie-tlo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80%; /* Zostawiamy miejsce na dane kontaktowe */
+            background-image: var(--zdjecie-portret);
+            background-size: cover;
+            background-position: top center;
+            /* Efekt nakładki, aby dane kontaktowe były czytelne */
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+
+        /* Menu kontaktowe */
+        .kontakt-box {
+            position: relative;
+            z-index: 3;
+            background-color: var(--kolor-granatowy);
+            padding: 30px;
+            color: white;
+            margin-top: auto; /* Dopycha na dół */
+        }
+
+        .kontakt-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .kontakt-ikona {
+            margin-right: 15px;
+            color: var(--kolor-zolty);
+            font-size: 1.5rem;
+            width: 25px;
+            text-align: center;
+        }
+
+        .kontakt-item a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .kontakt-item a:hover {
+            color: var(--kolor-zolty);
+        }
+
+        .wezwanie {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--kolor-zolty);
+        }
+
+        /* ==========================================
+           RESPONSYWNOŚĆ (MOBILNE)
+           ========================================== */
+        @media (max-width: 768px) {
+            .banner {
+                flex-direction: column;
+            }
+
+            .lewa-kolumna, .prawa-kolumna {
+                flex: 1 1 100%;
+            }
+
+            .prawa-kolumna {
+                min-height: 450px;
+                background-color: var(--kolor-granatowy);
+            }
+
+            .zdjecie-tlo {
+                height: 100%; /* Na mobile zdjęcie wypełnia całą górę */
+                -webkit-mask-image: none;
+                mask-image: none;
+                opacity: 0.8; /* Delikatne przyciemnienie */
+            }
+
+            .kontakt-box {
+                margin-top: auto;
+            }
+
+            .tytul-maly { font-size: 1.5rem; }
+            .tytul-duzy { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="banner">
+        
+        <!-- LEWA KOLUMNA: TREŚĆ -->
+        <div class="lewa-kolumna">
+            
+            <div class="naglowek">
+                <!-- TU ZMIENIASZ LOGO (poprzez CSS :root) -->
+                <div class="logo"></div>
+                <div class="tytul-box">
+                    <div class="tytul-maly">Usługi</div>
+                    <div class="tytul-duzy">Elektryczne</div>
+                </div>
+            </div>
+
+            <div class="podtytul">Bezpieczne. Profesjonalne. Na czas.</div>
+
+            <div class="uslugi-lista">
+                
+                <div class="usluga-item">
+                    <div class="ikona-box">🏠</div>
+                    <div class="usluga-tekst">
+                        <h3>Instalacje elektryczne</h3>
+                        <p>domy, mieszkania, obiekty</p>
+                    </div>
+                </div>
+
+                <div class="usluga-item">
+                    <div class="ikona-box">🔌</div>
+                    <div class="usluga-tekst">
+                        <h3>Pomiary i przeglądy</h3>
+                        <p>okresowe, odbiory, protokoły</p>
+                    </div>
+                </div>
+
+                <div class="usluga-item">
+                    <div class="ikona-box">💡</div>
+                    <div class="usluga-tekst">
+                        <h3>Modernizacje i awarie</h3>
+                        <p>szybko, solidnie, z gwarancją</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- PRAWA KOLUMNA: ZDJĘCIE + KONTAKT -->
+        <div class="prawa-kolumna">
+            
+            <!-- TU ZMIENIASZ ZDJĘCIE (poprzez CSS :root) -->
+            <div class="zdjecie-tlo"></div>
+
+            <div class="kontakt-box">
+                
+                <div class="kontakt-item">
+                    <div class="kontakt-ikona">📞</div>
+                    <!-- TU ZMIENIASZ NUMER TELEFONU -->
+                    <a href="tel:+48123123456">+48 123 456 789</a>
+                </div>
+
+                <div class="kontakt-item">
+                    <div class="kontakt-ikona">✉️</div>
+                    <!-- TU ZMIENIASZ E-MAIL -->
+                    <a href="mailto:kontakt@twojaelektryka.pl">kontakt@twojaelektryka.pl</a>
+                </div>
+
+                <div class="kontakt-item">
+                    <div class="kontakt-ikona">📍</div>
+                    <!-- TU ZMIENIASZ LOKALIZACJĘ -->
+                    <div>Kraków i okolice</div>
+                </div>
+
+                <div class="wezwanie">
+                    <div class="kontakt-ikona">⚡</div>
+                    <div>Zadzwoń – doradzimy!</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
